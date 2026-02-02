@@ -3,7 +3,7 @@ Goldstone County Launcher 🇱🇰
 
 
 
-<p><b>The Official All-in-One Launcher for Goldstone County RP.</b>
+<p><b>The All-in-One Launcher for Goldstone County RP.</b>
 
 
 Simplify your connection. Fix common crashes. Get in the game faster.</p> </div>
