@@ -7,7 +7,6 @@ Welcome to the repository for the **Goldstone County Sri Lanka** launcher.
 
 ## 🚀 Features
 * **One-Click Connect:** Automatically launches TeamSpeak and RedM in the correct order.
-* **Auto-Updates:** Always stay on the latest version without re-downloading manually.
 * **Sri Lanka Identity:** Custom branded for our community.
 ---
 *All Rights Reserved by Nimnabro.*
