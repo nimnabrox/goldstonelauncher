@@ -1,14 +1,17 @@
-[<div align="center">
+<div align="center">
   <img src="https://www.dropbox.com/scl/fi/j4v9i8nrb6lyn8gxd34h2/goldstoneLogo.png?rlkey=6hj883ygj0pg1dl2gg4laickj&st=9j7hpxvx&dl=0&raw=1" alt="Goldstone Logo" width="200">
 
   # Goldstone County Launcher 🇱🇰
 
   [![Download Latest](https://img.shields.io/github/v/release/nimnabrox/goldstonelauncher?label=Download%20Latest&style=for-the-badge&color=ffaa00)](https://github.com/nimnabrox/goldstonelauncher/releases/latest)
+  [![Official Guide](https://img.shields.io/badge/Official_Guide-Website-ffaa00?style=for-the-badge&logo=googlechrome&logoColor=black)](https://guidegoldstonerplauncher.netlify.app/)
   [![Status](https://img.shields.io/badge/Server-Online-2ecc71?style=for-the-badge)](https://www.goldstonerp.com)
   [![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge)](https://microsoft.com)
 
   <p><b>All-in-One Launcher for Goldstone County RP.</b><br>
   Simplify your connection. Fix common crashes. Get in the game faster.</p>
+  
+  <p>Need help? Visit the <a href="https://guidegoldstonerplauncher.netlify.app/"><b>Official Web Guide</b></a> for visual instructions.</p>
 </div>
 
 ---
@@ -57,6 +60,7 @@ You might see a *"Unknown Publisher"* or *"Malicious.moderate.ml"* warning.
 2.  **Run** the installer.
 3.  If Windows SmartScreen appears, click **"More Info"** → **"Run Anyway"**.
 4.  Enter your TeamSpeak name and click **ENTER GOLDSTONE (AUTO)**!
+5.  *Confused? View the [Web Guide](https://guidegoldstonerplauncher.netlify.app/) for help.*
 
 ---
 
@@ -69,4 +73,3 @@ You might see a *"Unknown Publisher"* or *"Malicious.moderate.ml"* warning.
 <br>
 
 > *Disclaimer: This software is a community tool and is not affiliated with Rockstar Games or RedM.*
-](https://guidegoldstonerplauncher.netlify.app/)
