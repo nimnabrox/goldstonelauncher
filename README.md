@@ -7,7 +7,7 @@
   [![Status](https://img.shields.io/badge/Server-Online-2ecc71?style=for-the-badge)](https://www.goldstonerp.com)
   [![Platform](https://img.shields.io/badge/Platform-Windows-blue?style=for-the-badge)](https://microsoft.com)
 
-  <p><b>The Official All-in-One Launcher for Goldstone County RP.</b><br>
+  <p><b>All-in-One Launcher for Goldstone County RP.</b><br>
   Simplify your connection. Fix common crashes. Get in the game faster.</p>
 </div>
 
