@@ -1,4 +1,4 @@
-<div align="center">
+[<div align="center">
   <img src="https://www.dropbox.com/scl/fi/j4v9i8nrb6lyn8gxd34h2/goldstoneLogo.png?rlkey=6hj883ygj0pg1dl2gg4laickj&st=9j7hpxvx&dl=0&raw=1" alt="Goldstone Logo" width="200">
 
   # Goldstone County Launcher 🇱🇰
@@ -69,3 +69,4 @@ You might see a *"Unknown Publisher"* or *"Malicious.moderate.ml"* warning.
 <br>
 
 > *Disclaimer: This software is a community tool and is not affiliated with Rockstar Games or RedM.*
+](https://guidegoldstonerplauncher.netlify.app/)
