@@ -1,11 +1,12 @@
 <div align="center">
   <img src="https://www.dropbox.com/scl/fi/j4v9i8nrb6lyn8gxd34h2/goldstoneLogo.png?rlkey=6hj883ygj0pg1dl2gg4laickj&st=op2b4bai&raw=1" alt="Goldstone County Logo" width="220" />
 
-  # 🤠 GOLDSTONE COUNTY ROLEPLAY
-  ### Official Community RedM & TeamSpeak 3 Launcher • The Living Frontier
+  # 🎙️ GOLDSTONE COUNTY ROLEPLAY • 1940s ERA
+  ### Official Community RedM & TeamSpeak 3 Launcher • 1940s Timeline Era
 
   <p>
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases/latest"><img src="https://img.shields.io/badge/Release-v0.3.0-amber?style=for-the-badge&logo=github" alt="Release v0.3.0" /></a>
+    <img src="https://img.shields.io/badge/Timeline-1940s%20Era%20Active-d97706?style=for-the-badge&logo=clock" alt="1940s Era Timeline" />
     <a href="https://www.virustotal.com/gui/file/c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c"><img src="https://img.shields.io/badge/VirusTotal-100%25%20Clean%20(0%20Flags)-emerald?style=for-the-badge&logo=shield" alt="VirusTotal 100% Clean" /></a>
     <a href="https://redm.net/"><img src="https://img.shields.io/badge/Platform-RedM%20%7C%20RDR2-red?style=for-the-badge" alt="RedM Compatible" /></a>
     <a href="https://www.teamspeak.com/"><img src="https://img.shields.io/badge/Voice-TeamSpeak%203%20SaltyChat-blue?style=for-the-badge" alt="TeamSpeak 3" /></a>
@@ -13,13 +14,20 @@
   </p>
 
   <p>
-    <a href="https://github.com/nimnabrox/goldstonelauncher/releases/latest/download/goldstone-launcher.exe">
-      <img src="https://img.shields.io/badge/⬇️_DOWNLOAD_STANDALONE_LAUNCHER_(v0.3.0)-d97706?style=for-the-badge&logoColor=white" alt="Download Standalone Launcher" />
+    <a href="https://gscl.nimnabro.com/">
+      <img src="https://img.shields.io/badge/🌐_OFFICIAL_LAUNCHER_WEBSITE-GSCL.NIMNABRO.COM-d97706?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Launcher Website" />
     </a>
   </p>
 
   <p>
-    <a href="https://www.goldstonerp.com/"><b>🌐 Official Website</b></a> •
+    <a href="https://github.com/nimnabrox/goldstonelauncher/releases/latest/download/goldstone-launcher.exe">
+      <img src="https://img.shields.io/badge/⬇️_DOWNLOAD_STANDALONE_LAUNCHER_(v0.3.0)-10b981?style=for-the-badge&logoColor=white" alt="Download Standalone Launcher" />
+    </a>
+  </p>
+
+  <p>
+    <a href="https://gscl.nimnabro.com/"><b>🌐 Official Launcher Portal (gscl.nimnabro.com)</b></a> •
+    <a href="https://www.goldstonerp.com/"><sub>🏛️ Community Server Hub (goldstonerp.com)</sub></a> •
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases"><b>📦 All Releases</b></a> •
     <a href="https://www.virustotal.com/gui/file/c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c"><b>🛡️ Security Report</b></a>
   </p>
@@ -27,19 +35,21 @@
 
 ---
 
-## 🌄 Welcome to the Frontier
+## 🏙️ Welcome to the 1940s Timeline
 
-> *"Step into 1899. Experience serious, cinematic Red Dead Redemption 2 roleplay in the heart of Sri Lanka."*
+> *"Step into the 1940s. Experience the golden age of deep, cinematic postwar vintage roleplay in the heart of Sri Lanka."*
 
-The **Goldstone County Launcher** is an ultra-fast, zero-dependency standalone application crafted specifically for our citizens and outlaws. Designed to eliminate connection headaches and technical hurdles, it synchronizes your RedM game engine and TeamSpeak 3 SaltyChat in one click, provides emergency one-click game repair tools, and plays atmospheric frontier music while you wait to enter the territory.
+Goldstone County is now live in the **1940s timeline era**. Classic automobiles, vintage radio airwaves, mobsters, private detectives, sheriffs, and authentic Americana come together in a living world.
 
-Everything is compiled into a **single, portable executable** (`goldstone-launcher.exe`) — no installers, no setup wizards, and no third-party runtimes required. Simply download and ride into the county!
+The **Goldstone County Launcher** is an ultra-fast, zero-dependency standalone application crafted specifically for our community. Designed to eliminate connection headaches and technical hurdles, it synchronizes your RedM game engine and TeamSpeak 3 SaltyChat in one click, provides emergency one-click game repair tools, and plays atmospheric queue music while you wait to enter the territory.
+
+Everything is compiled into a **single, portable executable** (`goldstone-launcher.exe`) — no installers, no setup wizards, and no third-party runtimes required. Simply download and enter the 1940s!
 
 ---
 
 ## ⚡ Everything You Need To Play
 
-Jump into Goldstone County quickly and easily with our built-in frontier recovery tools and synchronization suite:
+Jump into Goldstone County quickly and easily with our built-in recovery tools and synchronization suite:
 
 ### 🚀 1. One-Click Dual-Sync
 Opens **RedM** and **TeamSpeak 3** simultaneously, synchronizes your in-game RP voice callsign, routes your audio to the SaltyChat radio frequency, and connects you straight into Goldstone County (`cfx.re/join/qe3bl6`). Dedicated **Only RedM** and **Only TeamSpeak** modes are also available when you only need one client.
@@ -48,7 +58,7 @@ Opens **RedM** and **TeamSpeak 3** simultaneously, synchronizes your in-game RP 
 Solves the notorious RedM 67% loading screen freeze. Launches clean into the game engine first, prepares memory allocations, and auto-connects to the server the moment assets are ready to prevent game crashes.
 
 ### 🎵 3. Streamer-Safe Queue Music *(Updated in v0.3.0)*
-Authentic frontier ambient tracks automatically play while waiting in queue or if RedM crashes, and seamlessly auto-pause the moment your game opens.
+Atmospheric ambient tracks automatically play while waiting in queue or if RedM crashes, and seamlessly auto-pause the moment your game opens.
 - **Continuous Full Album Loop**: By default, plays through your entire soundtrack in order and loops the album infinitely.
 - **Repeat Track Mode**: Toggle the repeat button to loop the current song over and over.
 - **Custom Music Directory**: Choose any local folder on your PC containing your favorite MP3s.
@@ -77,7 +87,7 @@ Getting started takes less than a minute:
    Double-click `goldstone-launcher.exe`.
 4. **Enter Your Voice Callsign**:
    Type your registered TeamSpeak character name into the **TeamSpeak Username** field.
-5. **Ride Into the County**:
+5. **Enter Goldstone County**:
    Click **ENTER GOLDSTONE (AUTO)**. The launcher will automatically boot TeamSpeak, connect to the voice server, and launch RedM directly into Goldstone County!
 
 ---
@@ -92,6 +102,7 @@ We hold player safety as our highest priority. Every official build is digitally
 | :--- | :--- |
 | **File Name** | `goldstone-launcher.exe` |
 | **Version** | `0.3.0` |
+| **Timeline Era** | 1940s Vintage Roleplay |
 | **Architecture** | Windows x64 (64-bit) |
 | **SHA-256 Checksum** | `c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c` |
 | **Digital Signature** | Authenticode (DigiCert RFC3161 Timestamped) |
@@ -104,7 +115,7 @@ Get-FileHash -Path ".\goldstone-launcher.exe" -Algorithm SHA256
 
 ---
 
-## 🖥️ Frontier Hardware Specifications
+## 🖥️ System Hardware Specifications
 
 | Component | Minimum Specification | Recommended Specification |
 | :--- | :--- | :--- |
@@ -116,9 +127,10 @@ Get-FileHash -Path ".\goldstone-launcher.exe" -Algorithm SHA256
 
 ---
 
-## 🗺️ Frontier Outposts & Links
+## 🌐 Official Outposts & Links
 
-- 🌐 **Official Website**: [goldstonerp.com](https://www.goldstonerp.com/)
+- 🌐 **Official Launcher Portal**: [gscl.nimnabro.com](https://gscl.nimnabro.com/)
+- 🏛️ **Official Community Website**: [goldstonerp.com](https://www.goldstonerp.com/)
 - 📦 **GitHub Releases**: [nimnabrox/goldstonelauncher](https://github.com/nimnabrox/goldstonelauncher/releases)
 - 🎮 **Server Direct Connect**: `cfx.re/join/qe3bl6`
 - 🎙️ **TeamSpeak Voice Server**: `play.goldstonerp.com`
@@ -127,5 +139,5 @@ Get-FileHash -Path ".\goldstone-launcher.exe" -Algorithm SHA256
 
 <div align="center">
   <sub>Copyright © 2026 Goldstone County Roleplay Community. All rights reserved.</sub><br />
-  <sub>Ready to enter the frontier? See you in Goldstone County.</sub>
+  <sub>Ready to enter the 1940s? See you in Goldstone County.</sub>
 </div>
