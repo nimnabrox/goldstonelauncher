@@ -7,7 +7,7 @@
   <p>
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases/latest"><img src="https://img.shields.io/badge/Release-v0.3.0-amber?style=for-the-badge&logo=github" alt="Release v0.3.0" /></a>
     <img src="https://img.shields.io/badge/Timeline-1940s%20Era%20Active-d97706?style=for-the-badge&logo=clock" alt="1940s Era Timeline" />
-    <a href="https://www.virustotal.com/gui/file/c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c"><img src="https://img.shields.io/badge/VirusTotal-100%25%20Clean%20(0%20Flags)-emerald?style=for-the-badge&logo=shield" alt="VirusTotal 100% Clean" /></a>
+    <a href="https://www.virustotal.com/gui/file/6de1fea13f56fb2e2bacadcb9437348565c15afd8e9c65b369af6d9fe0505d3e"><img src="https://img.shields.io/badge/VirusTotal-100%25%20Clean%20(0%20Flags)-emerald?style=for-the-badge&logo=shield" alt="VirusTotal 100% Clean" /></a>
     <a href="https://redm.net/"><img src="https://img.shields.io/badge/Platform-RedM%20%7C%20RDR2-red?style=for-the-badge" alt="RedM Compatible" /></a>
     <a href="https://www.teamspeak.com/"><img src="https://img.shields.io/badge/Voice-TeamSpeak%203%20SaltyChat-blue?style=for-the-badge" alt="TeamSpeak 3" /></a>
     <img src="https://img.shields.io/badge/OS-Windows%2010%20%2F%2011%20(64--bit)-0078d4?style=for-the-badge&logo=windows" alt="Windows Support" />
@@ -15,7 +15,10 @@
 
   <p>
     <a href="https://gscl.nimnabro.com/">
-      <img src="https://img.shields.io/badge/🌐_OFFICIAL_LAUNCHER_WEBSITE-GSCL.NIMNABRO.COM-d97706?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Launcher Website" />
+      <img src="https://img.shields.io/badge/🌐_OFFICIAL_LAUNCHER_PORTAL-d97706?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Launcher Portal" />
+    </a>
+    <a href="https://www.goldstonerp.com/">
+      <img src="https://img.shields.io/badge/🏛️_OFFICIAL_GOLDSTONE_WEBSITE-b45309?style=for-the-badge&logoColor=white" alt="Official Goldstone Website" />
     </a>
   </p>
 
@@ -26,10 +29,10 @@
   </p>
 
   <p>
-    <a href="https://gscl.nimnabro.com/"><b>🌐 Official Launcher Portal (gscl.nimnabro.com)</b></a> •
-    <a href="https://www.goldstonerp.com/"><sub>🏛️ Community Server Hub (goldstonerp.com)</sub></a> •
+    <a href="https://gscl.nimnabro.com/"><b>🌐 Official Launcher Portal</b></a> •
+    <a href="https://www.goldstonerp.com/"><b>🏛️ Official Goldstone Website</b></a> •
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases"><b>📦 All Releases</b></a> •
-    <a href="https://www.virustotal.com/gui/file/c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c"><b>🛡️ Security Report</b></a>
+    <a href="https://www.virustotal.com/gui/file/6de1fea13f56fb2e2bacadcb9437348565c15afd8e9c65b369af6d9fe0505d3e"><b>🛡️ Security Report</b></a>
   </p>
 </div>
 
@@ -104,9 +107,9 @@ We hold player safety as our highest priority. Every official build is digitally
 | **Version** | `0.3.0` |
 | **Timeline Era** | 1940s Vintage Roleplay |
 | **Architecture** | Windows x64 (64-bit) |
-| **SHA-256 Checksum** | `c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c` |
+| **SHA-256 Checksum** | `6de1fea13f56fb2e2bacadcb9437348565c15afd8e9c65b369af6d9fe0505d3e` |
 | **Digital Signature** | Authenticode (DigiCert RFC3161 Timestamped) |
-| **VirusTotal Status** | [100% Safe (0 Flags / 67 Engines)](https://www.virustotal.com/gui/file/c1aa95bd91e3c6b5d4594e729705f0851699f3f1af3364c77d335a48a7b2f15c) |
+| **VirusTotal Status** | [100% Safe (0 Flags / 69 Engines)](https://www.virustotal.com/gui/file/6de1fea13f56fb2e2bacadcb9437348565c15afd8e9c65b369af6d9fe0505d3e) |
 
 ### Verify Checksum via PowerShell:
 ```powershell
@@ -130,7 +133,7 @@ Get-FileHash -Path ".\goldstone-launcher.exe" -Algorithm SHA256
 ## 🌐 Official Outposts & Links
 
 - 🌐 **Official Launcher Portal**: [gscl.nimnabro.com](https://gscl.nimnabro.com/)
-- 🏛️ **Official Community Website**: [goldstonerp.com](https://www.goldstonerp.com/)
+- 🏛️ **Official Goldstone Website**: [goldstonerp.com](https://www.goldstonerp.com/)
 - 📦 **GitHub Releases**: [nimnabrox/goldstonelauncher](https://github.com/nimnabrox/goldstonelauncher/releases)
 - 🎮 **Server Direct Connect**: `cfx.re/join/qe3bl6`
 - 🎙️ **TeamSpeak Voice Server**: `play.goldstonerp.com`
