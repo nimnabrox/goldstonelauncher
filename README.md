@@ -7,7 +7,7 @@
   <p>
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases/latest"><img src="https://img.shields.io/badge/Release-v0.3.1-amber?style=for-the-badge&logo=github" alt="Release v0.3.1" /></a>
     <img src="https://img.shields.io/badge/Timeline-1940s%20Era%20Active-d97706?style=for-the-badge&logo=clock" alt="1940s Era Timeline" />
-    <a href="https://www.virustotal.com/gui/file/f01240b3578f038ad1d6bcbd2d349d2080a87b9c670e1d8192a32c84ca89d5d1"><img src="https://img.shields.io/badge/VirusTotal-100%25%20Clean%20(0%20Flags)-emerald?style=for-the-badge&logo=shield" alt="VirusTotal 100% Clean" /></a>
+    <a href="https://www.virustotal.com/gui/file/5fb4fd8106bc85bfb823d337bb30ee01ef229ceecf9040e630137cde0a997e47"><img src="https://img.shields.io/badge/VirusTotal-100%25%20Clean%20(0%20Flags)-emerald?style=for-the-badge&logo=shield" alt="VirusTotal 100% Clean" /></a>
     <a href="https://redm.net/"><img src="https://img.shields.io/badge/Platform-RedM%20%7C%20RDR2-red?style=for-the-badge" alt="RedM Compatible" /></a>
     <a href="https://www.teamspeak.com/"><img src="https://img.shields.io/badge/Voice-TeamSpeak%203%20SaltyChat-blue?style=for-the-badge" alt="TeamSpeak 3" /></a>
     <img src="https://img.shields.io/badge/OS-Windows%2010%20%2F%2011%20(64--bit)-0078d4?style=for-the-badge&logo=windows" alt="Windows Support" />
@@ -32,7 +32,7 @@
     <a href="https://gscl.nimnabro.com/"><b>🌐 Official Launcher Portal</b></a> •
     <a href="https://www.goldstonerp.com/"><b>🏛️ Official Goldstone Website</b></a> •
     <a href="https://github.com/nimnabrox/goldstonelauncher/releases"><b>📦 All Releases</b></a> •
-    <a href="https://www.virustotal.com/gui/file/f01240b3578f038ad1d6bcbd2d349d2080a87b9c670e1d8192a32c84ca89d5d1"><b>🛡️ Security Report</b></a>
+    <a href="https://www.virustotal.com/gui/file/5fb4fd8106bc85bfb823d337bb30ee01ef229ceecf9040e630137cde0a997e47"><b>🛡️ Security Report</b></a>
   </p>
 </div>
 
@@ -109,9 +109,9 @@ We hold player safety as our highest priority. Every official build is digitally
 | **Version** | `0.3.1` |
 | **Timeline Era** | 1940s Vintage Roleplay |
 | **Architecture** | Windows x64 (64-bit) |
-| **SHA-256 Checksum** | `f01240b3578f038ad1d6bcbd2d349d2080a87b9c670e1d8192a32c84ca89d5d1` |
+| **SHA-256 Checksum** | `5fb4fd8106bc85bfb823d337bb30ee01ef229ceecf9040e630137cde0a997e47` |
 | **Digital Signature** | Authenticode (DigiCert RFC3161 Timestamped) |
-| **VirusTotal Status** | [100% Safe (0 Flags / 70 Engines Clean)](https://www.virustotal.com/gui/file/f01240b3578f038ad1d6bcbd2d349d2080a87b9c670e1d8192a32c84ca89d5d1) |
+| **VirusTotal Status** | [100% Safe (0 Flags / 70 Engines Clean)](https://www.virustotal.com/gui/file/5fb4fd8106bc85bfb823d337bb30ee01ef229ceecf9040e630137cde0a997e47) |
 
 ### Verify Checksum via PowerShell:
 ```powershell

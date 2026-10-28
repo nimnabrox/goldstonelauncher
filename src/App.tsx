@@ -147,6 +147,10 @@ function App() {
   }, []);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const musicEnabledRef = useRef<boolean>(musicEnabled);
+  useEffect(() => {
+    musicEnabledRef.current = musicEnabled;
+  }, [musicEnabled]);
   const currentTrackIndexRef = useRef(currentTrackIndex);
   useEffect(() => {
     currentTrackIndexRef.current = currentTrackIndex;
@@ -716,9 +720,13 @@ function App() {
   };
 
   const safePlayMusic = (fadeDurationMs: number = 800) => {
+    // If background music is disabled by the user, strictly DO NOT play or force-enable
+    const isCurrentlyEnabled = localStorage.getItem("music_enabled") === "true" && musicEnabledRef.current;
+    if (!isCurrentlyEnabled) {
+      return;
+    }
+
     setTargetHit(false);
-    setMusicEnabled(true);
-    localStorage.setItem("music_enabled", "true");
     const audio = audioRef.current;
     if (!audio) return;
 
@@ -751,11 +759,15 @@ function App() {
       await invoke('kill_processes_backend'); 
       setStatus("GAME PROCESSES CLOSED"); 
       setTimeout(() => setStatus("READY TO CONNECT"), 2500);
-      safePlayMusic(800);
+      if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
+        safePlayMusic(800);
+      }
     } catch { 
       setStatus("GAME PROCESSES CLOSED"); 
       setTimeout(() => setStatus("READY TO CONNECT"), 2500);
-      safePlayMusic(800);
+      if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
+        safePlayMusic(800);
+      }
     }
   };
 
@@ -965,11 +977,13 @@ function App() {
     const unlistenReset = listen('reset-trigger', (event) => { 
       setTargetHit(false); 
       if (event.payload === "REDM CLOSED") {
-        // Auto-resume music when RedM crashes or closes (ideal for streamers)
-        if (safePlayMusicRef.current) {
-          safePlayMusicRef.current(1000);
-        } else {
-          safePlayMusic(1000);
+        // Auto-resume music when RedM crashes or closes (strictly only if music is enabled by user)
+        if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
+          if (safePlayMusicRef.current) {
+            safePlayMusicRef.current(1000);
+          } else {
+            safePlayMusic(1000);
+          }
         }
       }
     });
