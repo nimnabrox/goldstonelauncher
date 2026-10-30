@@ -6046,7 +6046,7 @@ body {
 
   height: 405px;
 
-  max-height: calc(100vh - 24px);
+  max-height: calc(100vh - 32px);
 
   background: rgba(10, 15, 24, 0.52) !important;
 
@@ -7192,15 +7192,15 @@ body {
 
 .ts3-win {
 
-  width: 760px;
+  width: 780px;
 
   max-width: 96vw;
 
   height: auto;
 
-  min-height: 385px;
+  min-height: 520px;
 
-  max-height: calc(100vh - 24px);
+  max-height: calc(100vh - 32px);
 
   background: rgba(10, 15, 24, 0.52) !important;
 
@@ -7340,42 +7340,29 @@ body {
 
 
 
+
 .ts3-body {
-
   flex: 1;
-
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 14px;
-
-  padding: 16px 18px 18px;
-
+  padding: 16px 18px 24px;
   min-height: 0;
-
   box-sizing: border-box;
-
-  overflow: hidden !important;
-
+  overflow-y: auto !important;
 }
 
-
-
 .ts3-col {
-
   display: flex;
-
   flex-direction: column;
-
-  gap: 12px;
-
+  gap: 10px;
   min-height: 0;
-
   box-sizing: border-box;
+  overflow: visible !important;
+}
 
-  overflow: hidden !important;
-
+.ts3-col.right {
+  padding-bottom: 8px;
 }
 
 
@@ -7989,7 +7976,8 @@ body {
 }
 
 .shortcuts-card.compact {
-  padding: 9px 13px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 2px;
 }
 
 .shortcut-compact-row {

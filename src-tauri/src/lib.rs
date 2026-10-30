@@ -1577,7 +1577,7 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
         let bind_text: Option<Sqlite3BindText16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_bind_text16\0".as_ptr()));
         let finalize: Option<Sqlite3Finalize> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_finalize\0".as_ptr()));
 
-        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(bind_text), Some(finalize)) = 
+        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(_bind_text), Some(finalize)) = 
             (open, close, prep, step, col_blob, col_bytes, bind_blob, bind_text, finalize) {
             let path_w = to_wide(&db_path.to_string_lossy());
             let mut db: *mut std::ffi::c_void = std::ptr::null_mut();
@@ -1625,13 +1625,11 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
                     finalize(stmt);
 
                     if modified {
-                        let sql_upd = to_wide("UPDATE ProtobufItems SET value = ? WHERE key = ?");
                         for (k, v) in &rows {
+                            let sql_upd = to_wide(&format!("UPDATE ProtobufItems SET value = ? WHERE key = '{}'", k));
                             let mut stmt_upd: *mut std::ffi::c_void = std::ptr::null_mut();
                             if prep(db, sql_upd.as_ptr(), -1, &mut stmt_upd, std::ptr::null_mut()) == 0 {
                                 bind_blob(stmt_upd, 1, v.as_ptr(), v.len() as i32, std::ptr::null_mut());
-                                let kw = to_wide(k);
-                                bind_text(stmt_upd, 2, kw.as_ptr(), -1, std::ptr::null_mut());
                                 step(stmt_upd);
                                 finalize(stmt_upd);
                             }
@@ -1697,6 +1695,12 @@ fn configure_teamspeak_profile() {
         "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerPlaybackProfile', 'Default')",
         "DELETE FROM Application WHERE key='HotkeyMode'",
         "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyMode', '2')",
+        "DELETE FROM Application WHERE key='HotkeyProfile'",
+        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
+        "DELETE FROM Connecting WHERE key='LastUsedServerHotkeyProfile'",
+        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
+        "DELETE FROM Profiles WHERE key='DefaultHotkeyProfile'",
+        "INSERT INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
         "UPDATE Profiles SET value = replace(replace(value, 'vad=true', 'vad=false'), 'continous_transmission=true', 'continous_transmission=false') WHERE key='Capture/Default/PreProcessing'",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultCaptureProfile', 'Default')",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultPlaybackProfile', 'Default')",
@@ -1948,32 +1952,67 @@ fn format_ts3_raw_key_to_display(raw: &str) -> String {
     }
 }
 
-fn map_display_key_to_ts3_raw(display_key: &str) -> String {
+fn map_display_key_to_ts3_raw(display_key: &str) -> (String, u32) {
     let trimmed = display_key.trim().to_uppercase();
     match trimmed.as_str() {
-        "MOUSE 4" => "Mouse:4".to_string(),
-        "MOUSE 5" => "Mouse:5".to_string(),
-        "MIDDLE CLICK" | "MOUSE 3" => "Mouse:3".to_string(),
-        "CAPS LOCK" | "CAPSLOCK" => "Key:Capital".to_string(),
-        "LEFT ALT" | "ALT" => "Key:Alt".to_string(),
-        "LEFT CTRL" | "CTRL" => "Key:Control".to_string(),
-        "LEFT SHIFT" | "SHIFT" => "Key:Shift".to_string(),
-        "PAGE DOWN" | "PAGEDOWN" => "Key:PageDown".to_string(),
-        "PAGE UP" | "PAGEUP" => "Key:PageUp".to_string(),
-        "END" => "Key:End".to_string(),
-        "INSERT" => "Key:Insert".to_string(),
-        letter if letter.len() == 1 => format!("Key:{}", letter),
+        "MOUSE 4" => ("Mouse:4".to_string(), 320),
+        "MOUSE 5" => ("Mouse:5".to_string(), 321),
+        "MIDDLE CLICK" | "MOUSE 3" => ("Mouse:3".to_string(), 319),
+        "CAPS LOCK" | "CAPSLOCK" => ("Key:Capital".to_string(), 20),
+        "LEFT ALT" | "ALT" => ("Key:Alt".to_string(), 18),
+        "LEFT CTRL" | "CTRL" => ("Key:Control".to_string(), 17),
+        "LEFT SHIFT" | "SHIFT" => ("Key:Shift".to_string(), 16),
+        "PAGE DOWN" | "PAGEDOWN" => ("Key:PageDown".to_string(), 34),
+        "PAGE UP" | "PAGEUP" => ("Key:PageUp".to_string(), 33),
+        "END" => ("Key:End".to_string(), 35),
+        "INSERT" => ("Key:Insert".to_string(), 45),
+        letter if letter.len() == 1 => {
+            let b = letter.as_bytes()[0];
+            (format!("Key:{}", letter), b as u32)
+        },
         other => {
-            if other.starts_with("KEY:") || other.starts_with("MOUSE:") {
-                other.to_string()
+            if other.starts_with("MOUSE:4") {
+                ("Mouse:4".to_string(), 320)
+            } else if other.starts_with("MOUSE:5") {
+                ("Mouse:5".to_string(), 321)
+            } else if other.starts_with("MOUSE:3") {
+                ("Mouse:3".to_string(), 319)
+            } else if let Some(stripped) = other.strip_prefix("KEY:") {
+                let code = if stripped.len() == 1 { stripped.as_bytes()[0] as u32 } else { 0 };
+                (other.to_string(), code)
             } else {
-                format!("Key:{}", other)
+                (format!("Key:{}", other), 0)
             }
         }
     }
 }
 
-fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str) -> Result<(), String> {
+fn make_hotkey_block(raw_key: &str, key_code: u32) -> Vec<u8> {
+    let k_bytes = raw_key.as_bytes();
+    let mut inner = Vec::with_capacity(2 + k_bytes.len());
+    inner.push(0x0a);
+    inner.push(k_bytes.len() as u8);
+    inner.extend_from_slice(k_bytes);
+
+    let mut tag7 = Vec::with_capacity(2 + inner.len());
+    tag7.push(0x3a);
+    tag7.push(inner.len() as u8);
+    tag7.extend_from_slice(&inner);
+
+    let mut tag8 = Vec::with_capacity(4);
+    tag8.push(0x40);
+    let mut val = key_code;
+    while val >= 0x80 {
+        tag8.push(((val & 0x7f) as u8) | 0x80);
+        val >>= 7;
+    }
+    tag8.push(val as u8);
+
+    tag7.extend_from_slice(&tag8);
+    tag7
+}
+
+fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32) -> Result<(), String> {
     if !db_path.exists() {
         return Ok(());
     }
@@ -1992,7 +2031,6 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str) -> Result<(), Str
         type Sqlite3ColumnBlob = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> *const u8;
         type Sqlite3ColumnBytes = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> i32;
         type Sqlite3BindBlob = unsafe extern "system" fn(*mut std::ffi::c_void, i32, *const u8, i32, *mut std::ffi::c_void) -> i32;
-        type Sqlite3BindText16 = unsafe extern "system" fn(*mut std::ffi::c_void, i32, *const u16, i32, *mut std::ffi::c_void) -> i32;
         type Sqlite3Finalize = unsafe extern "system" fn(*mut std::ffi::c_void) -> i32;
 
         let open: Option<Sqlite3Open16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_open16\0".as_ptr()));
@@ -2002,11 +2040,10 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str) -> Result<(), Str
         let col_blob: Option<Sqlite3ColumnBlob> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_blob\0".as_ptr()));
         let col_bytes: Option<Sqlite3ColumnBytes> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_bytes\0".as_ptr()));
         let bind_blob: Option<Sqlite3BindBlob> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_bind_blob\0".as_ptr()));
-        let bind_text: Option<Sqlite3BindText16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_bind_text16\0".as_ptr()));
         let finalize: Option<Sqlite3Finalize> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_finalize\0".as_ptr()));
 
-        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(bind_text), Some(finalize)) = 
-            (open, close, prep, step, col_blob, col_bytes, bind_blob, bind_text, finalize) {
+        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(finalize)) = 
+            (open, close, prep, step, col_blob, col_bytes, bind_blob, finalize) {
             let path_w = to_wide(&db_path.to_string_lossy());
             let mut db: *mut std::ffi::c_void = std::ptr::null_mut();
             if open(path_w.as_ptr(), &mut db) != 0 || db.is_null() {
@@ -2044,58 +2081,64 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str) -> Result<(), Str
             }
             finalize(stmt);
 
-            let mut target_idx = None;
-            let mut old_key_str = "Mouse:4".to_string();
+            let new_block = make_hotkey_block(new_raw_key, new_key_code);
             let prefixes: [&[u8]; 3] = [b"Mouse:", b"Key:", b"Button:"];
-            for (i, (_k, v)) in rows.iter().enumerate() {
-                if v.windows(12).any(|w| w == b"Push to Talk" || w == b"Push-to-Talk") {
-                    target_idx = Some(i);
-                    for prefix in prefixes {
-                        if let Some(pos) = v.windows(prefix.len()).position(|w| w == prefix) {
-                            let mut end = pos + prefix.len();
-                            while end < v.len() && v[end] >= 0x20 && v[end] < 0x7F && v[end] != b'@' {
-                                end += 1;
+            let targets: [&[u8]; 4] = [
+                b"Activate Push-to-Talk",
+                b"Deactivate Push-to-Talk",
+                b"Activate Push to Talk",
+                b"Deactivate Push to Talk",
+            ];
+
+            let mut target_idx = None;
+            for (i, (_k, v)) in rows.iter_mut().enumerate() {
+                let mut modified = false;
+                for ptt_target in &targets {
+                    let mut search_idx = 0;
+                    while let Some(rel_pos) = v[search_idx..].windows(ptt_target.len()).position(|w| w == *ptt_target) {
+                        let target_pos = search_idx + rel_pos;
+                        let search_start = target_pos.saturating_sub(60);
+                        let mut found_pos = None;
+                        for pref in &prefixes {
+                            if let Some(p) = v[search_start..target_pos].windows(pref.len()).position(|w| w == *pref) {
+                                found_pos = Some(search_start + p);
+                                break;
                             }
-                            old_key_str = String::from_utf8_lossy(&v[pos..end]).to_string();
-                            break;
                         }
+                        if let Some(f_pos) = found_pos {
+                            if f_pos >= 4 && v[f_pos - 4] == 0x3a {
+                                let tag7_start = f_pos - 4;
+                                let key_len = v[f_pos - 1] as usize;
+                                let tag8_start = f_pos + key_len;
+                                if tag8_start < v.len() && v[tag8_start] == 0x40 {
+                                    let mut tag8_end = tag8_start + 1;
+                                    while tag8_end < v.len() && (v[tag8_end] & 0x80) != 0 {
+                                        tag8_end += 1;
+                                    }
+                                    if tag8_end < v.len() {
+                                        tag8_end += 1;
+                                        v.splice(tag7_start..tag8_end, new_block.iter().cloned());
+                                        modified = true;
+                                        search_idx = tag7_start + new_block.len() + ptt_target.len();
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
+                        search_idx = target_pos + ptt_target.len();
                     }
-                    break;
+                }
+                if modified {
+                    target_idx = Some(i);
                 }
             }
 
             if let Some(idx) = target_idx {
-                let old_key_bytes = old_key_str.as_bytes();
-                let new_key_bytes = new_raw_key.as_bytes();
-
-                let mut old_pat = Vec::with_capacity(1 + old_key_bytes.len());
-                old_pat.push(old_key_bytes.len() as u8);
-                old_pat.extend_from_slice(old_key_bytes);
-
-                let mut new_pat = Vec::with_capacity(1 + new_key_bytes.len());
-                new_pat.push(new_key_bytes.len() as u8);
-                new_pat.extend_from_slice(new_key_bytes);
-
-                let blob = &rows[idx].1;
-                let mut updated_blob = Vec::new();
-                let mut pos = 0;
-                while pos < blob.len() {
-                    if pos + old_pat.len() <= blob.len() && &blob[pos..pos + old_pat.len()] == &old_pat[..] {
-                        updated_blob.extend_from_slice(&new_pat);
-                        pos += old_pat.len();
-                    } else {
-                        updated_blob.push(blob[pos]);
-                        pos += 1;
-                    }
-                }
-                rows[idx].1 = updated_blob.clone();
-
-                let sql_upd = to_wide("UPDATE ProtobufItems SET value = ? WHERE key = ?");
+                let key_inline = &rows[idx].0;
+                let sql_upd = to_wide(&format!("UPDATE ProtobufItems SET value = ? WHERE key = '{}'", key_inline));
                 let mut stmt_upd: *mut std::ffi::c_void = std::ptr::null_mut();
                 if prep(db, sql_upd.as_ptr(), -1, &mut stmt_upd, std::ptr::null_mut()) == 0 {
-                    bind_blob(stmt_upd, 1, updated_blob.as_ptr(), updated_blob.len() as i32, std::ptr::null_mut());
-                    let key_wide = to_wide(&rows[idx].0);
-                    bind_text(stmt_upd, 2, key_wide.as_ptr(), -1, std::ptr::null_mut());
+                    bind_blob(stmt_upd, 1, rows[idx].1.as_ptr(), rows[idx].1.len() as i32, std::ptr::null_mut());
                     step(stmt_upd);
                     finalize(stmt_upd);
                 }
@@ -2230,86 +2273,42 @@ pub struct AudioDevicesResponse {
     pub current_output_id: String,
 }
 
-#[repr(C)]
-#[derive(Clone, Copy)]
-struct WAVEINCAPSW {
-    mid: u16,
-    pid: u16,
-    driver_version: u32,
-    pname: [u16; 32],
-    formats: u32,
-    channels: u16,
-    reserved: u16,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy)]
-struct WAVEOUTCAPSW {
-    mid: u16,
-    pid: u16,
-    driver_version: u32,
-    pname: [u16; 32],
-    formats: u32,
-    channels: u16,
-    reserved: u16,
-    support: u32,
-}
-
-fn enumerate_audio_devices_winmm(is_input: bool) -> Vec<AudioDeviceItem> {
+fn enumerate_audio_devices_registry(is_input: bool) -> Vec<AudioDeviceItem> {
     let mut list = Vec::new();
-    unsafe {
-        let dll_name = to_wide("winmm.dll");
-        let h_winmm = LoadLibraryW(dll_name.as_ptr());
-        if h_winmm.is_null() {
-            return list;
-        }
+    let subkey_name = if is_input {
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Capture"
+    } else {
+        r"SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render"
+    };
+    let prefix = if is_input { "{0.0.1.00000000}" } else { "{0.0.0.00000000}" };
 
-        type WaveInGetNumDevs = unsafe extern "system" fn() -> u32;
-        type WaveInGetDevCapsW = unsafe extern "system" fn(usize, *mut WAVEINCAPSW, u32) -> u32;
-        type WaveOutGetNumDevs = unsafe extern "system" fn() -> u32;
-        type WaveOutGetDevCapsW = unsafe extern "system" fn(usize, *mut WAVEOUTCAPSW, u32) -> u32;
-
-        if is_input {
-            let fn_num: Option<WaveInGetNumDevs> = std::mem::transmute(GetProcAddress(h_winmm, b"waveInGetNumDevs\0".as_ptr()));
-            let fn_caps: Option<WaveInGetDevCapsW> = std::mem::transmute(GetProcAddress(h_winmm, b"waveInGetDevCapsW\0".as_ptr()));
-            if let (Some(num_devs), Some(get_caps)) = (fn_num, fn_caps) {
-                let count = num_devs();
-                for i in 0..count {
-                    let mut caps: WAVEINCAPSW = std::mem::zeroed();
-                    if get_caps(i as usize, &mut caps, std::mem::size_of::<WAVEINCAPSW>() as u32) == 0 {
-                        let len = caps.pname.iter().position(|&c| c == 0).unwrap_or(caps.pname.len());
-                        let name = String::from_utf16_lossy(&caps.pname[..len]).trim().to_string();
-                        if !name.is_empty() {
-                            list.push(AudioDeviceItem {
-                                id: name.clone(),
-                                name,
-                            });
-                        }
-                    }
-                }
-            }
-        } else {
-            let fn_num: Option<WaveOutGetNumDevs> = std::mem::transmute(GetProcAddress(h_winmm, b"waveOutGetNumDevs\0".as_ptr()));
-            let fn_caps: Option<WaveOutGetDevCapsW> = std::mem::transmute(GetProcAddress(h_winmm, b"waveOutGetDevCapsW\0".as_ptr()));
-            if let (Some(num_devs), Some(get_caps)) = (fn_num, fn_caps) {
-                let count = num_devs();
-                for i in 0..count {
-                    let mut caps: WAVEOUTCAPSW = std::mem::zeroed();
-                    if get_caps(i as usize, &mut caps, std::mem::size_of::<WAVEOUTCAPSW>() as u32) == 0 {
-                        let len = caps.pname.iter().position(|&c| c == 0).unwrap_or(caps.pname.len());
-                        let name = String::from_utf16_lossy(&caps.pname[..len]).trim().to_string();
-                        if !name.is_empty() {
-                            list.push(AudioDeviceItem {
-                                id: name.clone(),
-                                name,
-                            });
-                        }
+    let hklm = RegKey::predef(HKEY_LOCAL_MACHINE);
+    if let Ok(base_key) = hklm.open_subkey(subkey_name) {
+        for guid in base_key.enum_keys().filter_map(|k| k.ok()) {
+            if let Ok(dev_key) = base_key.open_subkey(&guid) {
+                let state: u32 = dev_key.get_value("DeviceState").unwrap_or(0);
+                if state == 1 {
+                    if let Ok(prop_key) = dev_key.open_subkey("Properties") {
+                        let interface_name: String = prop_key.get_value("{a45c254e-df1c-4efd-8020-67d146a850e0},2").unwrap_or_default();
+                        let endpoint_name: String = prop_key.get_value("{b3f8fa53-0004-438e-9003-51a46e139bfc},6").unwrap_or_default();
+                        let display_name = if !interface_name.is_empty() && !endpoint_name.is_empty() {
+                            format!("{} ({})", interface_name, endpoint_name)
+                        } else if !endpoint_name.is_empty() {
+                            endpoint_name
+                        } else if !interface_name.is_empty() {
+                            interface_name
+                        } else {
+                            continue;
+                        };
+                        let full_id = format!("{}.{}", prefix, guid);
+                        list.push(AudioDeviceItem {
+                            id: full_id,
+                            name: display_name,
+                        });
                     }
                 }
             }
         }
-
-        FreeLibrary(h_winmm);
     }
     list
 }
@@ -2408,7 +2407,7 @@ fn read_current_audio_devices_from_db() -> (String, String) {
                                 let v_str = String::from_utf8_lossy(std::slice::from_raw_parts(v_ptr, v_len));
                                 let mut dev_name = String::new();
                                 for line in v_str.lines() {
-                                    if let Some(stripped) = line.trim().strip_prefix("DeviceDisplayName=") {
+                                    if let Some(stripped) = line.trim().strip_prefix("Device=") {
                                         dev_name = stripped.to_string();
                                         break;
                                     }
@@ -2435,12 +2434,13 @@ fn read_current_audio_devices_from_db() -> (String, String) {
     (input_name, output_name)
 }
 
-fn update_ts3_audio_device_in_db(device_type: &str, device_name: &str) -> Result<bool, String> {
+fn update_ts3_audio_device_in_db(device_type: &str, device_name: &str, device_id: &str) -> Result<bool, String> {
     let safe_name = device_name.replace('\'', "''");
+    let safe_id = device_id.replace('\'', "''");
     let candidate_dbs = get_ts3_db_candidates();
 
     if device_type == "input" {
-        let cap_val = format!("DeviceDisplayName={}\nDevice=\nMode=", safe_name);
+        let cap_val = format!("DeviceDisplayName={}\nDevice={}\nMode=", safe_name, safe_id);
         let stmts = [
             "CREATE TABLE IF NOT EXISTS Profiles (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)",
             "CREATE TABLE IF NOT EXISTS Connecting (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)",
@@ -2455,7 +2455,7 @@ fn update_ts3_audio_device_in_db(device_type: &str, device_name: &str) -> Result
         ];
         execute_sqlite_statements_on_dbs(&candidate_dbs, &stmts);
     } else {
-        let play_val = format!("MonoSoundExpansion=2\nVolumeModifier=0\nDeviceDisplayName={}\nVolumeFactorWaveDb=0\nPlayMicClicksOnOwn=false\nPlaybackMonoOverCenterSpeaker=false\nPlayMicClicksOnOthers=false\nComfortNoiseVolume=-60\nDevice=\nComfortNoiseEnabled=false\nAGC=true\nMode=", safe_name);
+        let play_val = format!("MonoSoundExpansion=2\nVolumeModifier=0\nDeviceDisplayName={}\nVolumeFactorWaveDb=0\nPlayMicClicksOnOwn=false\nPlaybackMonoOverCenterSpeaker=false\nPlayMicClicksOnOthers=false\nComfortNoiseVolume=-60\nDevice={}\nComfortNoiseEnabled=false\nAGC=true\nMode=", safe_name, safe_id);
         let stmts = [
             "CREATE TABLE IF NOT EXISTS Profiles (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)",
             "CREATE TABLE IF NOT EXISTS Connecting (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)",
@@ -2479,13 +2479,13 @@ async fn get_ts3_audio_devices_backend() -> Result<AudioDevicesResponse, String>
             name: "Default (System Default Microphone)".to_string(),
             id: "".to_string(),
         }];
-        input_devices.extend(enumerate_audio_devices_winmm(true));
+        input_devices.extend(enumerate_audio_devices_registry(true));
 
         let mut output_devices = vec![AudioDeviceItem {
             name: "Default (System Default Speakers/Headset)".to_string(),
             id: "".to_string(),
         }];
-        output_devices.extend(enumerate_audio_devices_winmm(false));
+        output_devices.extend(enumerate_audio_devices_registry(false));
 
         let (current_input_id, current_output_id) = read_current_audio_devices_from_db();
 
@@ -2499,18 +2499,18 @@ async fn get_ts3_audio_devices_backend() -> Result<AudioDevicesResponse, String>
 }
 
 #[tauri::command]
-async fn set_ts3_audio_device_backend(device_type: String, device_name: String, _device_id: String) -> Result<bool, String> {
+async fn set_ts3_audio_device_backend(device_type: String, device_name: String, device_id: String) -> Result<bool, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        update_ts3_audio_device_in_db(&device_type, &device_name)
+        update_ts3_audio_device_in_db(&device_type, &device_name, &device_id)
     }).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
 async fn set_ts3_proximity_key_backend(key_name: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        let raw = map_display_key_to_ts3_raw(&key_name);
+        let (raw, code) = map_display_key_to_ts3_raw(&key_name);
         for db in get_ts3_db_candidates() {
-            let _ = update_ts3_ptt_key_in_db(&db, &raw);
+            let _ = update_ts3_ptt_key_in_db(&db, &raw, code);
         }
         Ok(key_name)
     }).await.map_err(|e| e.to_string())?
