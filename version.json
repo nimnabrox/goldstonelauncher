@@ -3,29 +3,5 @@
   "name": "Goldstone County Launcher v0.3.1",
   "mandatory": true,
   "downloadUrl": "https://launcher-update.goldstonecounty.com/goldstone-launcher.exe",
-  "checksum": "50d33bc93a83bd21f7b4304d1d3df20250619ea84db97d324a53ec8e2540605c",
-  "voice": {
-    "teamspeak": {
-      "version": "3.6.2",
-      "downloadUrl": "https://files.teamspeak-services.com/releases/client/3.6.2/TeamSpeak3-Client-win64-3.6.2.exe"
-    },
-    "saltychat": {
-      "version": "4.1.0",
-      "downloadUrl": "https://saltyhub.net/download/4.1.0"
-    }
-  },
-  "songs": [
-    {
-      "id": "gs01",
-      "title": "Goldstone Ambience 01",
-      "filename": "gs01.mp3",
-      "url": "https://www.dropbox.com/scl/fi/s4yitjmtdv4r8fewxxixb/gs01.mp3?rlkey=dth64zun910oef7r8lr494fgc&st=al1ibalv&dl=0"
-    },
-    {
-      "id": "gs02",
-      "title": "Goldstone Ambience 02",
-      "filename": "gs02.mp3",
-      "url": "https://www.dropbox.com/scl/fi/3pb2sdysjwnh5k8k0tfhl/gs02.mp3?rlkey=gomh5fn8wdy4hsylfornieups&st=m2abmr4r&dl=0"
-    }
-  ]
+  "checksum": "50d33bc93a83bd21f7b4304d1d3df20250619ea84db97d324a53ec8e2540605c"
 }
