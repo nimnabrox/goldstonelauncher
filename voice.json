@@ -1,0 +1,12 @@
+{
+  "teamspeak": {
+    "version": "3.6.2",
+    "name": "TeamSpeak 3 Client (64-bit)",
+    "downloadUrl": "https://files.teamspeak-services.com/releases/client/3.6.2/TeamSpeak3-Client-win64-3.6.2.exe"
+  },
+  "saltychat": {
+    "version": "4.1.0",
+    "name": "SaltyChat Plugin",
+    "downloadUrl": "https://saltyhub.net/download/4.1.0"
+  }
+}
