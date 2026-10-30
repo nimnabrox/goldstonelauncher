@@ -1894,26 +1894,31 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
                 let sql = to_wide("SELECT value FROM ProtobufItems WHERE key != 'Checksum' ORDER BY CAST(key AS INTEGER)");
                 let mut stmt: *mut std::ffi::c_void = std::ptr::null_mut();
                 if prep(db, sql.as_ptr(), -1, &mut stmt, std::ptr::null_mut()) == 0 {
-                    let prefixes: [&[u8]; 3] = [b"Mouse:", b"Key:", b"Button:"];
+                    let prefixes: [&[u8]; 4] = [b"Keyboard:", b"Mouse:", b"Key:", b"Button:"];
                     while step(stmt) == 100 {
                         let p_val = col_blob(stmt, 0);
                         let len = col_bytes(stmt, 0) as usize;
                         if !p_val.is_null() && len > 0 {
                             let bytes = std::slice::from_raw_parts(p_val, len);
                             if bytes.windows(12).any(|w| w == b"Push to Talk" || w == b"Push-to-Talk") {
+                                let mut matches: Vec<(usize, String)> = Vec::new();
                                 for prefix in prefixes {
-                                    if let Some(pos) = bytes.windows(prefix.len()).position(|w| w == prefix) {
+                                    let mut start = 0;
+                                    while let Some(rel) = bytes[start..].windows(prefix.len()).position(|w| w == prefix) {
+                                        let pos = start + rel;
                                         let mut end = pos + prefix.len();
-                                        while end < bytes.len() && bytes[end] >= 0x20 && bytes[end] < 0x7F && bytes[end] != b'@' {
+                                        while end < bytes.len() && bytes[end] >= 0x20 && bytes[end] < 0x7F && bytes[end] != b'@' && bytes[end] != b'\n' && bytes[end] != b'\r' {
                                             end += 1;
                                         }
                                         let raw_key = String::from_utf8_lossy(&bytes[pos..end]).to_string();
-                                        result = Some(format_ts3_raw_key_to_display(&raw_key));
-                                        break;
+                                        matches.push((pos, raw_key));
+                                        start = pos + prefix.len();
                                     }
                                 }
-                                if result.is_some() {
-                                    break;
+                                if !matches.is_empty() {
+                                    matches.sort_by_key(|m| m.0);
+                                    let last_raw = &matches.last().unwrap().1;
+                                    result = Some(format_ts3_raw_key_to_display(last_raw));
                                 }
                             }
                         }
@@ -1930,6 +1935,28 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
 }
 
 fn format_ts3_raw_key_to_display(raw: &str) -> String {
+    if let Some(stripped) = raw.strip_prefix("Keyboard:") {
+        if let Ok(code) = stripped.parse::<u32>() {
+            match code {
+                65..=90 => return ((b'A' + (code - 65) as u8) as char).to_string(),
+                48..=57 => return ((b'0' + (code - 48) as u8) as char).to_string(),
+                112..=123 => return format!("F{}", code - 111),
+                20 => return "CAPS LOCK".to_string(),
+                18 => return "LEFT ALT".to_string(),
+                17 => return "LEFT CTRL".to_string(),
+                16 => return "LEFT SHIFT".to_string(),
+                32 => return "SPACE".to_string(),
+                9 => return "TAB".to_string(),
+                33 => return "PAGE UP".to_string(),
+                34 => return "PAGE DOWN".to_string(),
+                35 => return "END".to_string(),
+                36 => return "HOME".to_string(),
+                45 => return "INSERT".to_string(),
+                46 => return "DELETE".to_string(),
+                _ => return format!("KEY {}", code),
+            }
+        }
+    }
     match raw {
         "Mouse:4" => "MOUSE 4".to_string(),
         "Mouse:5" => "MOUSE 5".to_string(),
@@ -1957,33 +1984,48 @@ fn format_ts3_raw_key_to_display(raw: &str) -> String {
 fn map_display_key_to_ts3_raw(display_key: &str) -> (String, u32) {
     let trimmed = display_key.trim().to_uppercase();
     match trimmed.as_str() {
-        "MOUSE 4" => ("Mouse:4".to_string(), 320),
-        "MOUSE 5" => ("Mouse:5".to_string(), 321),
-        "MIDDLE CLICK" | "MOUSE 3" => ("Mouse:3".to_string(), 319),
-        "CAPS LOCK" | "CAPSLOCK" => ("Key:Capital".to_string(), 20),
-        "LEFT ALT" | "ALT" => ("Key:Alt".to_string(), 18),
-        "LEFT CTRL" | "CTRL" => ("Key:Control".to_string(), 17),
-        "LEFT SHIFT" | "SHIFT" => ("Key:Shift".to_string(), 16),
-        "PAGE DOWN" | "PAGEDOWN" => ("Key:PageDown".to_string(), 34),
-        "PAGE UP" | "PAGEUP" => ("Key:PageUp".to_string(), 33),
-        "END" => ("Key:End".to_string(), 35),
-        "INSERT" => ("Key:Insert".to_string(), 45),
+        "MOUSE 4" | "MOUSE:4" => ("Mouse:4".to_string(), 320),
+        "MOUSE 5" | "MOUSE:5" => ("Mouse:5".to_string(), 321),
+        "MIDDLE CLICK" | "MOUSE 3" | "MOUSE:3" => ("Mouse:3".to_string(), 319),
+        "CAPS LOCK" | "CAPSLOCK" => ("Keyboard:20".to_string(), 320),
+        "LEFT ALT" | "ALT" => ("Keyboard:18".to_string(), 320),
+        "LEFT CTRL" | "CTRL" => ("Keyboard:17".to_string(), 320),
+        "LEFT SHIFT" | "SHIFT" => ("Keyboard:16".to_string(), 320),
+        "PAGE DOWN" | "PAGEDOWN" => ("Keyboard:34".to_string(), 320),
+        "PAGE UP" | "PAGEUP" => ("Keyboard:33".to_string(), 320),
+        "END" => ("Keyboard:35".to_string(), 320),
+        "HOME" => ("Keyboard:36".to_string(), 320),
+        "INSERT" => ("Keyboard:45".to_string(), 320),
+        "DELETE" => ("Keyboard:46".to_string(), 320),
+        "SPACE" => ("Keyboard:32".to_string(), 320),
+        "TAB" => ("Keyboard:9".to_string(), 320),
         letter if letter.len() == 1 => {
             let b = letter.as_bytes()[0];
-            (format!("Key:{}", letter), b as u32)
+            if (b >= b'A' && b <= b'Z') || (b >= b'0' && b <= b'9') {
+                (format!("Keyboard:{}", b as u32), 320)
+            } else {
+                (format!("Keyboard:{}", b as u32), 320)
+            }
         },
         other => {
+            if let Some(num) = other.strip_prefix("F") {
+                if let Ok(n) = num.parse::<u32>() {
+                    if n >= 1 && n <= 12 {
+                        return (format!("Keyboard:{}", 111 + n), 320);
+                    }
+                }
+            }
             if other.starts_with("MOUSE:4") {
                 ("Mouse:4".to_string(), 320)
             } else if other.starts_with("MOUSE:5") {
                 ("Mouse:5".to_string(), 321)
             } else if other.starts_with("MOUSE:3") {
                 ("Mouse:3".to_string(), 319)
-            } else if let Some(stripped) = other.strip_prefix("KEY:") {
-                let code = if stripped.len() == 1 { stripped.as_bytes()[0] as u32 } else { 0 };
-                (other.to_string(), code)
+            } else if let Some(stripped) = other.strip_prefix("KEYBOARD:") {
+                let code = stripped.parse::<u32>().unwrap_or(320);
+                (format!("Keyboard:{}", code), 320)
             } else {
-                (format!("Key:{}", other), 0)
+                ("Mouse:4".to_string(), 320)
             }
         }
     }
@@ -2056,23 +2098,26 @@ fn build_ts3_hotkey_protobuf(raw_key: &str, key_code: u32) -> Vec<u8> {
     profile_body.extend_from_slice(&encode_proto_string(1, "11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
     profile_body.extend_from_slice(&encode_proto_string(2, "Default"));
     
-    let item1 = build_hotkey_item("Down", "Activate", "Activate Push-to-Talk", raw_key, key_code, "08b53b5b-eff8-ad72-dc55-921f28fc32df");
+    // TeamSpeak 3 requires Down and Up actions of Push-to-Talk to share the EXACT same UUID
+    let action_uuid = "656ff462-88cd-f3e8-2dc3-e09706c0359a";
+    let item1 = build_hotkey_item("Down", "Activate", "Activate Push-to-Talk", raw_key, key_code, action_uuid);
     profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item1));
     
-    let item2 = build_hotkey_item("Up", "Deactivate", "Deactivate Push-to-Talk", raw_key, key_code, "f57f0fc2-ee5b-c1e1-2414-ac72411b929a");
+    let item2 = build_hotkey_item("Up", "Deactivate", "Deactivate Push-to-Talk", raw_key, key_code, action_uuid);
     profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item2));
     
     profile_body.extend_from_slice(&encode_proto_varint_field(4, 1));
     
     let mut env = Vec::new();
     env.extend_from_slice(&encode_proto_string(2, "b4daaa6d-5b30-3f2f-3004-638fe1ae6b98"));
-    env.extend_from_slice(&encode_proto_string(3, "d8953c5f-043d-8ac7-d585-a2dc3a115e56"));
-    env.extend_from_slice(&encode_proto_varint_field(4, 3));
-    env.extend_from_slice(&encode_proto_string(5, "91dc32d3-9ba7-0e53-e6ba-5c5a3cbf7ce6"));
+    env.extend_from_slice(&encode_proto_string(3, "e127bc56-4619-4e02-7080-5b9a2b10d6c9"));
+    env.extend_from_slice(&encode_proto_varint_field(4, 1));
+    env.extend_from_slice(&encode_proto_string(5, "d8953c5f-043d-8ac7-d585-a2dc3a115e56"));
     env.extend_from_slice(&encode_proto_varint_field(6, 3));
     env.extend_from_slice(&encode_proto_string(7, ""));
     env.extend_from_slice(&encode_proto_string(8, ""));
-    env.extend_from_slice(&encode_proto_varint_field(9, 1769392420));
+    let now_ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(1793392518);
+    env.extend_from_slice(&encode_proto_varint_field(9, now_ts));
     env.extend_from_slice(&encode_proto_length_delimited(19, &profile_body));
     env
 }
