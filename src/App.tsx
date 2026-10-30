@@ -1214,6 +1214,19 @@ function App() {
 
 
 
+  const resolveAudioDeviceId = (devices: { name: string; id: string }[], currentId: string) => {
+    if (!currentId) return "";
+    const exact = devices.find(d => d.id === currentId);
+    if (exact) return exact.id;
+    const ci = devices.find(d => d.id.toLowerCase() === currentId.toLowerCase());
+    if (ci) return ci.id;
+    const byName = devices.find(d => d.name.toLowerCase() === currentId.toLowerCase() ||
+      d.name.toLowerCase().includes(currentId.toLowerCase()) ||
+      currentId.toLowerCase().includes(d.name.toLowerCase()));
+    if (byName) return byName.id;
+    return currentId;
+  };
+
   const refreshTs3AudioDevices = async () => {
     try {
       const res = await invoke<{
@@ -1223,10 +1236,16 @@ function App() {
         current_output_id: string;
       }>('get_ts3_audio_devices_backend');
       if (res) {
-        setAudioInputDevices(res.input_devices || []);
-        setAudioOutputDevices(res.output_devices || []);
-        setSelectedInputDev(res.current_input_id || "");
-        setSelectedOutputDev(res.current_output_id || "");
+        const inDevs = res.input_devices || [];
+        const outDevs = res.output_devices || [];
+        setAudioInputDevices(inDevs);
+        setAudioOutputDevices(outDevs);
+        if (res.current_input_id) {
+          setSelectedInputDev(resolveAudioDeviceId(inDevs, res.current_input_id));
+        }
+        if (res.current_output_id) {
+          setSelectedOutputDev(resolveAudioDeviceId(outDevs, res.current_output_id));
+        }
       }
     } catch (err) {
       console.error("Failed to load audio devices:", err);
@@ -4125,6 +4144,11 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         onFocus={refreshTs3AudioDevices}
                         disabled={isTs3Busy || !ts3Installed}
                       >
+                        {selectedInputDev && !audioInputDevices.some(d => d.id === selectedInputDev) && (
+                          <option key={selectedInputDev} value={selectedInputDev}>
+                            {audioInputDevices.find(d => d.id.toLowerCase() === selectedInputDev.toLowerCase())?.name || "Active Microphone"}
+                          </option>
+                        )}
                         {audioInputDevices.map((d) => (
                           <option key={d.id} value={d.id}>{d.name}</option>
                         ))}
@@ -4143,6 +4167,11 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         onFocus={refreshTs3AudioDevices}
                         disabled={isTs3Busy || !ts3Installed}
                       >
+                        {selectedOutputDev && !audioOutputDevices.some(d => d.id === selectedOutputDev) && (
+                          <option key={selectedOutputDev} value={selectedOutputDev}>
+                            {audioOutputDevices.find(d => d.id.toLowerCase() === selectedOutputDev.toLowerCase())?.name || "Active Output Device"}
+                          </option>
+                        )}
                         {audioOutputDevices.map((d) => (
                           <option key={d.id} value={d.id}>{d.name}</option>
                         ))}

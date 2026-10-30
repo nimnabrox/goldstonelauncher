@@ -1689,6 +1689,8 @@ fn configure_teamspeak_profile() {
         "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerSoundPack', 'nosounds')",
         "DELETE FROM Connecting WHERE key='LastUsedServer'",
         "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServer', 'play.goldstonerp.com')",
+        "DELETE FROM Connecting WHERE key='LastUsedServerPort'",
+        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerPort', '9987')",
         "DELETE FROM Connecting WHERE key='LastUsedServerCaptureProfile'",
         "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerCaptureProfile', 'Default')",
         "DELETE FROM Connecting WHERE key='LastUsedServerPlaybackProfile'",
@@ -1696,11 +1698,11 @@ fn configure_teamspeak_profile() {
         "DELETE FROM Application WHERE key='HotkeyMode'",
         "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyMode', '2')",
         "DELETE FROM Application WHERE key='HotkeyProfile'",
-        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
+        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
         "DELETE FROM Connecting WHERE key='LastUsedServerHotkeyProfile'",
-        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
+        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
         "DELETE FROM Profiles WHERE key='DefaultHotkeyProfile'",
-        "INSERT INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad')",
+        "INSERT INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
         "UPDATE Profiles SET value = replace(replace(value, 'vad=true', 'vad=false'), 'continous_transmission=true', 'continous_transmission=false') WHERE key='Capture/Default/PreProcessing'",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultCaptureProfile', 'Default')",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultPlaybackProfile', 'Default')",
@@ -1709,7 +1711,7 @@ fn configure_teamspeak_profile() {
         "DELETE FROM Addons WHERE value LIKE '%teamspeak_control_plugin%'",
         "DELETE FROM AccountData",
         "DELETE FROM General WHERE key='ConnectToLastUsedServerOnStartup'",
-        "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'ConnectToLastUsedServerOnStartup', '1')",
+        "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'ConnectToLastUsedServerOnStartup', '0')",
     ];
     execute_sqlite_statements_on_dbs(&candidate_dbs, &stmts);
 }
@@ -1987,29 +1989,92 @@ fn map_display_key_to_ts3_raw(display_key: &str) -> (String, u32) {
     }
 }
 
-fn make_hotkey_block(raw_key: &str, key_code: u32) -> Vec<u8> {
-    let k_bytes = raw_key.as_bytes();
-    let mut inner = Vec::with_capacity(2 + k_bytes.len());
-    inner.push(0x0a);
-    inner.push(k_bytes.len() as u8);
-    inner.extend_from_slice(k_bytes);
-
-    let mut tag7 = Vec::with_capacity(2 + inner.len());
-    tag7.push(0x3a);
-    tag7.push(inner.len() as u8);
-    tag7.extend_from_slice(&inner);
-
-    let mut tag8 = Vec::with_capacity(4);
-    tag8.push(0x40);
-    let mut val = key_code;
-    while val >= 0x80 {
-        tag8.push(((val & 0x7f) as u8) | 0x80);
-        val >>= 7;
+fn encode_proto_varint(val: u64) -> Vec<u8> {
+    let mut res = Vec::new();
+    let mut v = val;
+    while v >= 0x80 {
+        res.push(((v & 0x7f) as u8) | 0x80);
+        v >>= 7;
     }
-    tag8.push(val as u8);
+    res.push(v as u8);
+    res
+}
 
-    tag7.extend_from_slice(&tag8);
-    tag7
+fn encode_proto_tag(tag: u32, wtype: u8) -> Vec<u8> {
+    encode_proto_varint(((tag as u64) << 3) | (wtype as u64))
+}
+
+fn encode_proto_length_delimited(tag: u32, data: &[u8]) -> Vec<u8> {
+    let mut res = encode_proto_tag(tag, 2);
+    res.extend_from_slice(&encode_proto_varint(data.len() as u64));
+    res.extend_from_slice(data);
+    res
+}
+
+fn encode_proto_string(tag: u32, s: &str) -> Vec<u8> {
+    encode_proto_length_delimited(tag, s.as_bytes())
+}
+
+fn encode_proto_varint_field(tag: u32, val: u64) -> Vec<u8> {
+    let mut res = encode_proto_tag(tag, 0);
+    res.extend_from_slice(&encode_proto_varint(val));
+    res
+}
+
+fn build_hotkey_item(direction: &str, action_name: &str, action_desc: &str, raw_key: &str, key_code: u32, uuid_str: &str) -> Vec<u8> {
+    let mut body = Vec::new();
+    body.extend_from_slice(&encode_proto_varint_field(3, 0));
+    body.extend_from_slice(&encode_proto_varint_field(4, 1));
+    body.extend_from_slice(&encode_proto_string(5, uuid_str));
+    body.extend_from_slice(&encode_proto_string(6, direction));
+    
+    let tag7_inner = encode_proto_string(1, raw_key);
+    body.extend_from_slice(&encode_proto_length_delimited(7, &tag7_inner));
+    
+    body.extend_from_slice(&encode_proto_varint_field(8, key_code as u64));
+    body.extend_from_slice(&encode_proto_string(9, ""));
+    body.extend_from_slice(&encode_proto_varint_field(10, 0));
+    body.extend_from_slice(&encode_proto_string(11, action_name));
+    body.extend_from_slice(&encode_proto_string(12, ""));
+    body.extend_from_slice(&encode_proto_string(13, action_desc));
+    body.extend_from_slice(&encode_proto_string(14, ""));
+    body.extend_from_slice(&encode_proto_string(15, ""));
+    body.extend_from_slice(&encode_proto_string(16, ""));
+    body.extend_from_slice(&encode_proto_string(17, ""));
+    body.extend_from_slice(&encode_proto_string(18, ""));
+    body.extend_from_slice(&encode_proto_string(19, ""));
+    body.extend_from_slice(&encode_proto_string(20, ""));
+    body.extend_from_slice(&encode_proto_string(21, ""));
+    body.extend_from_slice(&encode_proto_varint_field(22, 1));
+    body.extend_from_slice(&encode_proto_string(23, "Default"));
+    body.extend_from_slice(&encode_proto_varint_field(24, 0));
+    body
+}
+
+fn build_ts3_hotkey_protobuf(raw_key: &str, key_code: u32) -> Vec<u8> {
+    let mut profile_body = Vec::new();
+    profile_body.extend_from_slice(&encode_proto_string(1, "11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
+    profile_body.extend_from_slice(&encode_proto_string(2, "Default"));
+    
+    let item1 = build_hotkey_item("Down", "Activate", "Activate Push-to-Talk", raw_key, key_code, "08b53b5b-eff8-ad72-dc55-921f28fc32df");
+    profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item1));
+    
+    let item2 = build_hotkey_item("Up", "Deactivate", "Deactivate Push-to-Talk", raw_key, key_code, "f57f0fc2-ee5b-c1e1-2414-ac72411b929a");
+    profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item2));
+    
+    profile_body.extend_from_slice(&encode_proto_varint_field(4, 1));
+    
+    let mut env = Vec::new();
+    env.extend_from_slice(&encode_proto_string(2, "b4daaa6d-5b30-3f2f-3004-638fe1ae6b98"));
+    env.extend_from_slice(&encode_proto_string(3, "d8953c5f-043d-8ac7-d585-a2dc3a115e56"));
+    env.extend_from_slice(&encode_proto_varint_field(4, 3));
+    env.extend_from_slice(&encode_proto_string(5, "91dc32d3-9ba7-0e53-e6ba-5c5a3cbf7ce6"));
+    env.extend_from_slice(&encode_proto_varint_field(6, 3));
+    env.extend_from_slice(&encode_proto_string(7, ""));
+    env.extend_from_slice(&encode_proto_string(8, ""));
+    env.extend_from_slice(&encode_proto_varint_field(9, 1769392420));
+    env.extend_from_slice(&encode_proto_length_delimited(19, &profile_body));
+    env
 }
 
 fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32) -> Result<(), String> {
@@ -2081,81 +2146,52 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
             }
             finalize(stmt);
 
-            let new_block = make_hotkey_block(new_raw_key, new_key_code);
-            let prefixes: [&[u8]; 3] = [b"Mouse:", b"Key:", b"Button:"];
-            let targets: [&[u8]; 4] = [
-                b"Activate Push-to-Talk",
-                b"Deactivate Push-to-Talk",
-                b"Activate Push to Talk",
-                b"Deactivate Push to Talk",
-            ];
+            let new_proto = build_ts3_hotkey_protobuf(new_raw_key, new_key_code);
 
+            // Find existing row containing hotkey items or default profile uuid
             let mut target_idx = None;
-            for (i, (_k, v)) in rows.iter_mut().enumerate() {
-                let mut modified = false;
-                for ptt_target in &targets {
-                    let mut search_idx = 0;
-                    while let Some(rel_pos) = v[search_idx..].windows(ptt_target.len()).position(|w| w == *ptt_target) {
-                        let target_pos = search_idx + rel_pos;
-                        let search_start = target_pos.saturating_sub(60);
-                        let mut found_pos = None;
-                        for pref in &prefixes {
-                            if let Some(p) = v[search_start..target_pos].windows(pref.len()).position(|w| w == *pref) {
-                                found_pos = Some(search_start + p);
-                                break;
-                            }
-                        }
-                        if let Some(f_pos) = found_pos {
-                            if f_pos >= 4 && v[f_pos - 4] == 0x3a {
-                                let tag7_start = f_pos - 4;
-                                let key_len = v[f_pos - 1] as usize;
-                                let tag8_start = f_pos + key_len;
-                                if tag8_start < v.len() && v[tag8_start] == 0x40 {
-                                    let mut tag8_end = tag8_start + 1;
-                                    while tag8_end < v.len() && (v[tag8_end] & 0x80) != 0 {
-                                        tag8_end += 1;
-                                    }
-                                    if tag8_end < v.len() {
-                                        tag8_end += 1;
-                                        v.splice(tag7_start..tag8_end, new_block.iter().cloned());
-                                        modified = true;
-                                        search_idx = tag7_start + new_block.len() + ptt_target.len();
-                                        continue;
-                                    }
-                                }
-                            }
-                        }
-                        search_idx = target_pos + ptt_target.len();
-                    }
-                }
-                if modified {
+            for (i, (_k, v)) in rows.iter().enumerate() {
+                if v.windows(b"Activate Push-to-Talk".len()).any(|w| w == b"Activate Push-to-Talk")
+                    || v.windows(b"11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa".len()).any(|w| w == b"11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+                    || v.windows(b"5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad".len()).any(|w| w == b"5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad") {
                     target_idx = Some(i);
+                    break;
                 }
             }
 
+            let key_to_update: String;
             if let Some(idx) = target_idx {
-                let key_inline = &rows[idx].0;
-                let sql_upd = to_wide(&format!("UPDATE ProtobufItems SET value = ? WHERE key = '{}'", key_inline));
-                let mut stmt_upd: *mut std::ffi::c_void = std::ptr::null_mut();
-                if prep(db, sql_upd.as_ptr(), -1, &mut stmt_upd, std::ptr::null_mut()) == 0 {
-                    bind_blob(stmt_upd, 1, rows[idx].1.as_ptr(), rows[idx].1.len() as i32, std::ptr::null_mut());
-                    step(stmt_upd);
-                    finalize(stmt_upd);
-                }
+                key_to_update = rows[idx].0.clone();
+                rows[idx].1 = new_proto.clone();
+            } else {
+                let max_key: i32 = rows.iter().filter_map(|(k, _)| k.parse::<i32>().ok()).max().unwrap_or(0);
+                let next_key = (max_key + 1).to_string();
+                key_to_update = next_key.clone();
+                rows.push((next_key, new_proto.clone()));
+            }
 
-                let mut all_data = Vec::new();
-                for (_k, v) in &rows {
-                    all_data.extend_from_slice(v);
-                }
-                let new_checksum = sha1_digest(&all_data);
+            let sql_upd = to_wide(&format!("INSERT OR REPLACE INTO ProtobufItems (timestamp, key, value) VALUES (strftime('%s','now'), '{}', ?)", key_to_update));
+            let mut stmt_upd: *mut std::ffi::c_void = std::ptr::null_mut();
+            if prep(db, sql_upd.as_ptr(), -1, &mut stmt_upd, std::ptr::null_mut()) == 0 {
+                bind_blob(stmt_upd, 1, new_proto.as_ptr(), new_proto.len() as i32, std::ptr::null_mut());
+                step(stmt_upd);
+                finalize(stmt_upd);
+            }
 
-                let sql_chk = to_wide("UPDATE ProtobufItems SET value = ? WHERE key = 'Checksum'");
-                let mut stmt_chk: *mut std::ffi::c_void = std::ptr::null_mut();
-                if prep(db, sql_chk.as_ptr(), -1, &mut stmt_chk, std::ptr::null_mut()) == 0 {
-                    bind_blob(stmt_chk, 1, new_checksum.as_ptr(), 20, std::ptr::null_mut());
-                    step(stmt_chk);
-                    finalize(stmt_chk);
-                }
+            // Recompute Checksum over all non-checksum items
+            rows.sort_by_key(|(k, _)| k.parse::<i32>().unwrap_or(999));
+            let mut all_data = Vec::new();
+            for (_k, v) in &rows {
+                all_data.extend_from_slice(v);
+            }
+            let new_checksum = sha1_digest(&all_data);
+
+            let sql_chk = to_wide("INSERT OR REPLACE INTO ProtobufItems (timestamp, key, value) VALUES (strftime('%s','now'), 'Checksum', ?)");
+            let mut stmt_chk: *mut std::ffi::c_void = std::ptr::null_mut();
+            if prep(db, sql_chk.as_ptr(), -1, &mut stmt_chk, std::ptr::null_mut()) == 0 {
+                bind_blob(stmt_chk, 1, new_checksum.as_ptr(), 20, std::ptr::null_mut());
+                step(stmt_chk);
+                finalize(stmt_chk);
             }
 
             close(db);
@@ -2360,6 +2396,8 @@ fn execute_sqlite_statements_on_dbs(candidate_dbs: &[PathBuf], statements: &[&st
 fn read_current_audio_devices_from_db() -> (String, String) {
     let mut input_name = String::new();
     let mut output_name = String::new();
+    let mut input_display = String::new();
+    let mut output_display = String::new();
 
     let candidate_dbs = get_ts3_db_candidates();
     unsafe {
@@ -2405,17 +2443,22 @@ fn read_current_audio_devices_from_db() -> (String, String) {
                             if !k_ptr.is_null() && !v_ptr.is_null() {
                                 let k_str = String::from_utf8_lossy(std::slice::from_raw_parts(k_ptr, k_len));
                                 let v_str = String::from_utf8_lossy(std::slice::from_raw_parts(v_ptr, v_len));
-                                let mut dev_name = String::new();
+                                let mut dev_id = String::new();
+                                let mut dev_disp = String::new();
                                 for line in v_str.lines() {
-                                    if let Some(stripped) = line.trim().strip_prefix("Device=") {
-                                        dev_name = stripped.to_string();
-                                        break;
+                                    let trimmed = line.trim();
+                                    if let Some(stripped) = trimmed.strip_prefix("Device=") {
+                                        dev_id = stripped.trim().to_string();
+                                    } else if let Some(stripped) = trimmed.strip_prefix("DeviceDisplayName=") {
+                                        dev_disp = stripped.trim().to_string();
                                     }
                                 }
                                 if k_str == "Capture/Default" {
-                                    input_name = dev_name;
+                                    input_name = dev_id;
+                                    input_display = dev_disp;
                                 } else if k_str == "Playback/Default" {
-                                    output_name = dev_name;
+                                    output_name = dev_id;
+                                    output_display = dev_disp;
                                 }
                             }
                         }
@@ -2429,6 +2472,19 @@ fn read_current_audio_devices_from_db() -> (String, String) {
             }
         }
         FreeLibrary(h_sqlite);
+    }
+
+    if input_name.is_empty() && !input_display.is_empty() {
+        let inputs = enumerate_audio_devices_registry(true);
+        if let Some(m) = inputs.iter().find(|d| d.name.eq_ignore_ascii_case(&input_display)) {
+            input_name = m.id.clone();
+        }
+    }
+    if output_name.is_empty() && !output_display.is_empty() {
+        let outputs = enumerate_audio_devices_registry(false);
+        if let Some(m) = outputs.iter().find(|d| d.name.eq_ignore_ascii_case(&output_display)) {
+            output_name = m.id.clone();
+        }
     }
 
     (input_name, output_name)
