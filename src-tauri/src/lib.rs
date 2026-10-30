@@ -1546,6 +1546,40 @@ fn prevent_and_clean_overwolf() {
     }
 }
 
+fn build_ts3_bookmark_protobuf() -> Vec<u8> {
+    let mut bm = Vec::new();
+    bm.extend_from_slice(&encode_proto_string(1, "Goldstone County RP"));
+    bm.extend_from_slice(&encode_proto_string(2, "play.goldstonerp.com"));
+    bm.extend_from_slice(&encode_proto_varint_field(3, 9987));
+    bm.extend_from_slice(&encode_proto_string(4, ""));
+    bm.extend_from_slice(&encode_proto_string(5, ""));
+    bm.extend_from_slice(&encode_proto_string(6, "4c0d8a70-cdb2-5ada-f3cb-52e284393fcb"));
+    bm.extend_from_slice(&encode_proto_string(7, ""));
+    bm.extend_from_slice(&encode_proto_string(8, ""));
+    bm.extend_from_slice(&encode_proto_string(9, ""));
+    bm.extend_from_slice(&encode_proto_varint_field(10, 0));
+    bm.extend_from_slice(&encode_proto_string(11, "Default"));
+    bm.extend_from_slice(&encode_proto_string(12, "Default"));
+    bm.extend_from_slice(&encode_proto_string(13, "8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b"));
+    bm.extend_from_slice(&encode_proto_varint_field(14, 0));
+    bm.extend_from_slice(&encode_proto_string(15, ""));
+    bm.extend_from_slice(&encode_proto_string(17, ""));
+    bm.extend_from_slice(&encode_proto_varint_field(18, 0));
+    bm.extend_from_slice(&encode_proto_varint_field(19, 0));
+    bm.extend_from_slice(&encode_proto_varint_field(22, 1)); // connect on startup
+    
+    let mut env = Vec::new();
+    env.extend_from_slice(&encode_proto_string(2, "2fd1c0a7-41e0-e20c-f76b-33ee79e99920"));
+    env.extend_from_slice(&encode_proto_varint_field(4, 0));
+    env.extend_from_slice(&encode_proto_string(5, "ffffffff-ffff-ffff-ffff-ffffffffffff"));
+    env.extend_from_slice(&encode_proto_varint_field(6, 0));
+    env.extend_from_slice(&encode_proto_string(7, ""));
+    env.extend_from_slice(&encode_proto_string(8, ""));
+    env.extend_from_slice(&encode_proto_varint_field(9, 1793394458));
+    env.extend_from_slice(&encode_proto_length_delimited(16, &bm));
+    env
+}
+
 fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
     if !db_path.exists() {
         return;
@@ -1564,7 +1598,6 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
         type Sqlite3ColumnBlob = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> *const u8;
         type Sqlite3ColumnBytes = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> i32;
         type Sqlite3BindBlob = unsafe extern "system" fn(*mut std::ffi::c_void, i32, *const u8, i32, *mut std::ffi::c_void) -> i32;
-        type Sqlite3BindText16 = unsafe extern "system" fn(*mut std::ffi::c_void, i32, *const u16, i32, *mut std::ffi::c_void) -> i32;
         type Sqlite3Finalize = unsafe extern "system" fn(*mut std::ffi::c_void) -> i32;
 
         let open: Option<Sqlite3Open16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_open16\0".as_ptr()));
@@ -1574,11 +1607,10 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
         let col_blob: Option<Sqlite3ColumnBlob> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_blob\0".as_ptr()));
         let col_bytes: Option<Sqlite3ColumnBytes> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_bytes\0".as_ptr()));
         let bind_blob: Option<Sqlite3BindBlob> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_bind_blob\0".as_ptr()));
-        let bind_text: Option<Sqlite3BindText16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_bind_text16\0".as_ptr()));
         let finalize: Option<Sqlite3Finalize> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_finalize\0".as_ptr()));
 
-        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(_bind_text), Some(finalize)) = 
-            (open, close, prep, step, col_blob, col_bytes, bind_blob, bind_text, finalize) {
+        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(bind_blob), Some(finalize)) = 
+            (open, close, prep, step, col_blob, col_bytes, bind_blob, finalize) {
             let path_w = to_wide(&db_path.to_string_lossy());
             let mut db: *mut std::ffi::c_void = std::ptr::null_mut();
             if open(path_w.as_ptr(), &mut db) == 0 && !db.is_null() {
@@ -1604,25 +1636,27 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
                             Vec::new()
                         };
 
-                        if val_bytes.windows(b"voice.teamspeak.com".len()).any(|w| w == b"voice.teamspeak.com") {
-                            if val_bytes.ends_with(&[0xb0, 0x01, 0x01]) {
-                                let l = val_bytes.len();
-                                val_bytes[l - 1] = 0x00;
-                                modified = true;
-                            }
-                        }
-
-                        if val_bytes.windows(b"play.goldstonerp.com".len()).any(|w| w == b"play.goldstonerp.com") {
-                            if val_bytes.ends_with(&[0xb0, 0x01, 0x00]) {
-                                let l = val_bytes.len();
-                                val_bytes[l - 1] = 0x01;
-                                modified = true;
-                            }
+                        if key_str == "1" || val_bytes.windows(b"voice.teamspeak.com".len()).any(|w| w == b"voice.teamspeak.com") {
+                            val_bytes = build_ts3_bookmark_protobuf();
+                            modified = true;
                         }
 
                         rows.push((key_str, val_bytes));
                     }
                     finalize(stmt);
+
+                    // Remove any key 4 or dummy 11111111 profile
+                    let orig_len = rows.len();
+                    rows.retain(|(k, v)| k != "4" && !v.windows(b"11111111".len()).any(|w| w == b"11111111"));
+                    if rows.len() != orig_len {
+                        modified = true;
+                        let sql_del = to_wide("DELETE FROM ProtobufItems WHERE key='4' OR value LIKE '%11111111%'");
+                        let mut stmt_del: *mut std::ffi::c_void = std::ptr::null_mut();
+                        if prep(db, sql_del.as_ptr(), -1, &mut stmt_del, std::ptr::null_mut()) == 0 {
+                            step(stmt_del);
+                            finalize(stmt_del);
+                        }
+                    }
 
                     if modified {
                         for (k, v) in &rows {
@@ -1698,11 +1732,11 @@ fn configure_teamspeak_profile() {
         "DELETE FROM Application WHERE key='HotkeyMode'",
         "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyMode', '2')",
         "DELETE FROM Application WHERE key='HotkeyProfile'",
-        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
+        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b')",
         "DELETE FROM Connecting WHERE key='LastUsedServerHotkeyProfile'",
-        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
+        "INSERT INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b')",
         "DELETE FROM Profiles WHERE key='DefaultHotkeyProfile'",
-        "INSERT INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa')",
+        "INSERT INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b')",
         "UPDATE Profiles SET value = replace(replace(value, 'vad=true', 'vad=false'), 'continous_transmission=true', 'continous_transmission=false') WHERE key='Capture/Default/PreProcessing'",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultCaptureProfile', 'Default')",
         "INSERT OR IGNORE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultPlaybackProfile', 'Default')",
@@ -1711,7 +1745,7 @@ fn configure_teamspeak_profile() {
         "DELETE FROM Addons WHERE value LIKE '%teamspeak_control_plugin%'",
         "DELETE FROM AccountData",
         "DELETE FROM General WHERE key='ConnectToLastUsedServerOnStartup'",
-        "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'ConnectToLastUsedServerOnStartup', '0')",
+        "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'ConnectToLastUsedServerOnStartup', '1')",
     ];
     execute_sqlite_statements_on_dbs(&candidate_dbs, &stmts);
 }
@@ -2095,28 +2129,25 @@ fn build_hotkey_item(direction: &str, action_name: &str, action_desc: &str, raw_
 
 fn build_ts3_hotkey_protobuf(raw_key: &str, key_code: u32) -> Vec<u8> {
     let mut profile_body = Vec::new();
-    profile_body.extend_from_slice(&encode_proto_string(1, "11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
+    profile_body.extend_from_slice(&encode_proto_string(1, "8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b"));
     profile_body.extend_from_slice(&encode_proto_string(2, "Default"));
     
-    // TeamSpeak 3 requires Down and Up actions of Push-to-Talk to share the EXACT same UUID
-    let action_uuid = "656ff462-88cd-f3e8-2dc3-e09706c0359a";
-    let item1 = build_hotkey_item("Down", "Activate", "Activate Push-to-Talk", raw_key, key_code, action_uuid);
+    let item1 = build_hotkey_item("Down", "Activate", "Activate Push-to-Talk", raw_key, key_code, "91efbd6b-960c-4420-52ed-f16f3808e819");
     profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item1));
     
-    let item2 = build_hotkey_item("Up", "Deactivate", "Deactivate Push-to-Talk", raw_key, key_code, action_uuid);
+    let item2 = build_hotkey_item("Up", "Deactivate", "Deactivate Push-to-Talk", raw_key, key_code, "a29745cf-9d3a-4745-51e2-fcba6a0c9782");
     profile_body.extend_from_slice(&encode_proto_length_delimited(3, &item2));
     
     profile_body.extend_from_slice(&encode_proto_varint_field(4, 1));
     
     let mut env = Vec::new();
-    env.extend_from_slice(&encode_proto_string(2, "b4daaa6d-5b30-3f2f-3004-638fe1ae6b98"));
-    env.extend_from_slice(&encode_proto_string(3, "e127bc56-4619-4e02-7080-5b9a2b10d6c9"));
-    env.extend_from_slice(&encode_proto_varint_field(4, 1));
-    env.extend_from_slice(&encode_proto_string(5, "d8953c5f-043d-8ac7-d585-a2dc3a115e56"));
+    env.extend_from_slice(&encode_proto_string(2, "7adb9752-5930-50ab-7fd4-8caa8238326b"));
+    env.extend_from_slice(&encode_proto_varint_field(4, 0));
+    env.extend_from_slice(&encode_proto_string(5, "ffffffff-ffff-ffff-ffff-ffffffffffff"));
     env.extend_from_slice(&encode_proto_varint_field(6, 3));
     env.extend_from_slice(&encode_proto_string(7, ""));
     env.extend_from_slice(&encode_proto_string(8, ""));
-    let now_ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(1793392518);
+    let now_ts = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(1793395872);
     env.extend_from_slice(&encode_proto_varint_field(9, now_ts));
     env.extend_from_slice(&encode_proto_length_delimited(19, &profile_body));
     env
@@ -2193,12 +2224,20 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
 
             let new_proto = build_ts3_hotkey_protobuf(new_raw_key, new_key_code);
 
-            // Find existing row containing hotkey items or default profile uuid
+            // Clean any dummy 11111111 profile
+            rows.retain(|(k, v)| k != "4" && !v.windows(b"11111111".len()).any(|w| w == b"11111111"));
+            let sql_del_dummy = to_wide("DELETE FROM ProtobufItems WHERE key='4' OR value LIKE '%11111111%'");
+            let mut stmt_del: *mut std::ffi::c_void = std::ptr::null_mut();
+            if prep(db, sql_del_dummy.as_ptr(), -1, &mut stmt_del, std::ptr::null_mut()) == 0 {
+                step(stmt_del);
+                finalize(stmt_del);
+            }
+
+            // Find existing row containing hotkey items or default profile uuid 8dfc6a1e
             let mut target_idx = None;
             for (i, (_k, v)) in rows.iter().enumerate() {
-                if v.windows(b"Activate Push-to-Talk".len()).any(|w| w == b"Activate Push-to-Talk")
-                    || v.windows(b"11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa".len()).any(|w| w == b"11111111-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                    || v.windows(b"5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad".len()).any(|w| w == b"5b6ff4a5-6881-5cf4-47d6-6b21db3de1ad") {
+                if v.windows(b"8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b".len()).any(|w| w == b"8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b")
+                    || v.windows(b"Activate Push-to-Talk".len()).any(|w| w == b"Activate Push-to-Talk") {
                     target_idx = Some(i);
                     break;
                 }
@@ -2209,10 +2248,8 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
                 key_to_update = rows[idx].0.clone();
                 rows[idx].1 = new_proto.clone();
             } else {
-                let max_key: i32 = rows.iter().filter_map(|(k, _)| k.parse::<i32>().ok()).max().unwrap_or(0);
-                let next_key = (max_key + 1).to_string();
-                key_to_update = next_key.clone();
-                rows.push((next_key, new_proto.clone()));
+                key_to_update = "3".to_string();
+                rows.push(("3".to_string(), new_proto.clone()));
             }
 
             let sql_upd = to_wide(&format!("INSERT OR REPLACE INTO ProtobufItems (timestamp, key, value) VALUES (strftime('%s','now'), '{}', ?)", key_to_update));
@@ -2237,6 +2274,14 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
                 bind_blob(stmt_chk, 1, new_checksum.as_ptr(), 20, std::ptr::null_mut());
                 step(stmt_chk);
                 finalize(stmt_chk);
+            }
+
+            // Sync Application, Connecting and Profiles
+            let sql_sync = to_wide("UPDATE Application SET value='8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b' WHERE key='HotkeyProfile'; UPDATE Connecting SET value='8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b' WHERE key='LastUsedServerHotkeyProfile'; UPDATE Profiles SET value='8dfc6a1e-7aaf-e6f8-1d75-e51ccbd3837b' WHERE key='DefaultHotkeyProfile';");
+            let mut stmt_sync: *mut std::ffi::c_void = std::ptr::null_mut();
+            if prep(db, sql_sync.as_ptr(), -1, &mut stmt_sync, std::ptr::null_mut()) == 0 {
+                step(stmt_sync);
+                finalize(stmt_sync);
             }
 
             close(db);
@@ -2456,20 +2501,18 @@ fn read_current_audio_devices_from_db() -> (String, String) {
         type Sqlite3Close = unsafe extern "system" fn(*mut std::ffi::c_void) -> i32;
         type Sqlite3Prepare16V2 = unsafe extern "system" fn(*mut std::ffi::c_void, *const u16, i32, *mut *mut std::ffi::c_void, *mut *const u16) -> i32;
         type Sqlite3Step = unsafe extern "system" fn(*mut std::ffi::c_void) -> i32;
-        type Sqlite3ColumnBlob = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> *const u8;
-        type Sqlite3ColumnBytes = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> i32;
+        type Sqlite3ColumnText = unsafe extern "system" fn(*mut std::ffi::c_void, i32) -> *const std::ffi::c_char;
         type Sqlite3Finalize = unsafe extern "system" fn(*mut std::ffi::c_void) -> i32;
 
         let open: Option<Sqlite3Open16> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_open16\0".as_ptr()));
         let close: Option<Sqlite3Close> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_close\0".as_ptr()));
         let prep: Option<Sqlite3Prepare16V2> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_prepare16_v2\0".as_ptr()));
         let step: Option<Sqlite3Step> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_step\0".as_ptr()));
-        let col_blob: Option<Sqlite3ColumnBlob> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_blob\0".as_ptr()));
-        let col_bytes: Option<Sqlite3ColumnBytes> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_bytes\0".as_ptr()));
+        let col_text: Option<Sqlite3ColumnText> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_column_text\0".as_ptr()));
         let finalize: Option<Sqlite3Finalize> = std::mem::transmute(GetProcAddress(h_sqlite, b"sqlite3_finalize\0".as_ptr()));
 
-        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_blob), Some(col_bytes), Some(finalize)) = 
-            (open, close, prep, step, col_blob, col_bytes, finalize) {
+        if let (Some(open), Some(close), Some(prep), Some(step), Some(col_text), Some(finalize)) = 
+            (open, close, prep, step, col_text, finalize) {
             let sql_w = to_wide("SELECT key, value FROM Profiles WHERE key='Capture/Default' OR key='Playback/Default'");
             for db_path in candidate_dbs {
                 if !db_path.exists() {
@@ -2481,13 +2524,11 @@ fn read_current_audio_devices_from_db() -> (String, String) {
                     let mut stmt: *mut std::ffi::c_void = std::ptr::null_mut();
                     if prep(db, sql_w.as_ptr(), -1, &mut stmt, std::ptr::null_mut()) == 0 {
                         while step(stmt) == 100 {
-                            let k_ptr = col_blob(stmt, 0);
-                            let k_len = col_bytes(stmt, 0) as usize;
-                            let v_ptr = col_blob(stmt, 1);
-                            let v_len = col_bytes(stmt, 1) as usize;
+                            let k_ptr = col_text(stmt, 0);
+                            let v_ptr = col_text(stmt, 1);
                             if !k_ptr.is_null() && !v_ptr.is_null() {
-                                let k_str = String::from_utf8_lossy(std::slice::from_raw_parts(k_ptr, k_len));
-                                let v_str = String::from_utf8_lossy(std::slice::from_raw_parts(v_ptr, v_len));
+                                let k_str = std::ffi::CStr::from_ptr(k_ptr).to_string_lossy();
+                                let v_str = std::ffi::CStr::from_ptr(v_ptr).to_string_lossy();
                                 let mut dev_id = String::new();
                                 let mut dev_disp = String::new();
                                 for line in v_str.lines() {
@@ -2602,16 +2643,43 @@ async fn get_ts3_audio_devices_backend() -> Result<AudioDevicesResponse, String>
 #[tauri::command]
 async fn set_ts3_audio_device_backend(device_type: String, device_name: String, device_id: String) -> Result<bool, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        update_ts3_audio_device_in_db(&device_type, &device_name, &device_id)
+        let running = is_teamspeak_running();
+        if running {
+            kill_processes_by_name(&["ts3client_win64.exe", "ts3client_win32.exe"]);
+            std::thread::sleep(std::time::Duration::from_millis(150));
+        }
+
+        let res = update_ts3_audio_device_in_db(&device_type, &device_name, &device_id)?;
+
+        if running {
+            if let Some(ts_path) = find_teamspeak_exe(None) {
+                let ts_str = ts_path.to_string_lossy().to_string();
+                let _ = spawn_process(&ts_str, &["ts3server://play.goldstonerp.com?port=9987"]);
+            }
+        }
+        Ok(res)
     }).await.map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
 async fn set_ts3_proximity_key_backend(key_name: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || {
+        let running = is_teamspeak_running();
+        if running {
+            kill_processes_by_name(&["ts3client_win64.exe", "ts3client_win32.exe"]);
+            std::thread::sleep(std::time::Duration::from_millis(150));
+        }
+
         let (raw, code) = map_display_key_to_ts3_raw(&key_name);
         for db in get_ts3_db_candidates() {
             let _ = update_ts3_ptt_key_in_db(&db, &raw, code);
+        }
+
+        if running {
+            if let Some(ts_path) = find_teamspeak_exe(None) {
+                let ts_str = ts_path.to_string_lossy().to_string();
+                let _ = spawn_process(&ts_str, &["ts3server://play.goldstonerp.com?port=9987"]);
+            }
         }
         Ok(key_name)
     }).await.map_err(|e| e.to_string())?
