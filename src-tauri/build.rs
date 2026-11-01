@@ -25,6 +25,23 @@ fn main() {
         }
     }
 
+        // 1b. Mask MicrosoftEdgeWebview2Setup.exe with 0x5C for automated silent install on new PCs
+    let setup_candidates = [
+        manifest_dir.join("MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("scratch/MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("../../scratch/MicrosoftEdgeWebview2Setup.exe"),
+    ];
+    for p in &setup_candidates {
+        if p.exists() {
+            if let Ok(bytes) = fs::read(p) {
+                let masked: Vec<u8> = bytes.into_iter().map(|b| b ^ 0x5C).collect();
+                let _ = fs::write(out_dir.join("webview2_setup.bin"), masked);
+                break;
+            }
+        }
+    }
+
     // 2. Compile webview2_thunk.c to provide direct dynamic-forwarding stubs
     let c_file = manifest_dir.join("webview2_thunk.c");
     let o_file = out_dir.join("webview2_thunk.o");
