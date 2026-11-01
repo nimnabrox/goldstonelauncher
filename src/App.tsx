@@ -8307,7 +8307,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                     <button 
                       className={`hotkey-cap-full ${isListeningVoiceKey ? 'listening' : ''}`}
                       onClick={() => !isTs3SettingBusy && setIsListeningVoiceKey(!isListeningVoiceKey)}
-                      disabled={isTs3SettingBusy || !ts3Installed}
+                      disabled={isTs3SettingBusy}
                       title="Click to record any key or mouse button"
                     >
                       <span>{isListeningVoiceKey ? "PRESS ANY KEY / MOUSE NOW..." : "CLICK TO BIND ANY KEY (AUTO-SYNC)"}</span>
@@ -8319,9 +8319,9 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         className="hotkey-select-full"
                         value={proximityVoiceKey}
                         onChange={(e) => handleProximityKeyChange(e.target.value)}
-                        disabled={isTs3SettingBusy || !ts3Installed}
+                        disabled={isTs3SettingBusy}
                       >
-                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "KEY: F", "KEY: N", "KEY: V", "KEY: B", "KEY: T", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "SPACE", "PAGE DOWN", "END"].includes(proximityVoiceKey) && (
+                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "KEY: F", "KEY: N", "KEY: V", "KEY: B", "KEY: T", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "SPACE", "PAGE DOWN", "END", "F12"].includes(proximityVoiceKey) && (
                           <option key={proximityVoiceKey} value={proximityVoiceKey}>{proximityVoiceKey}</option>
                         )}
                         <option value="MOUSE 4">MOUSE 4 (RECOMMENDED)</option>
@@ -8339,7 +8339,35 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         <option value="SPACE">SPACE</option>
                         <option value="PAGE DOWN">PAGE DOWN</option>
                         <option value="END">END</option>
+                        <option value="F12">F12</option>
                       </select>
+                    </div>
+
+                    <div className="hotkey-presets-grid" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px", marginTop: "8px" }}>
+                      {[
+                        "KEY: N", "KEY: F", "KEY: V", "KEY: B", "MOUSE 4", "MOUSE 5",
+                        "MIDDLE CLICK", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "SPACE", "F12"
+                      ].map(preset => (
+                        <button
+                          key={preset}
+                          type="button"
+                          className={`btn-preset ${proximityVoiceKey === preset ? 'active' : ''}`}
+                          onClick={() => handleProximityKeyChange(preset)}
+                          disabled={isTs3SettingBusy}
+                          style={{
+                            padding: "6px 2px",
+                            fontSize: "11px",
+                            fontWeight: "600",
+                            background: proximityVoiceKey === preset ? "rgba(223, 170, 67, 0.3)" : "rgba(255, 255, 255, 0.05)",
+                            border: proximityVoiceKey === preset ? "1px solid #dfaa43" : "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "4px",
+                            color: proximityVoiceKey === preset ? "#dfaa43" : "#e2e8f0",
+                            cursor: "pointer"
+                          }}
+                        >
+                          {preset}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>

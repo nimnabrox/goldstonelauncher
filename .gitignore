@@ -35,6 +35,7 @@ src-tauri/gen/schemas/
 *.so
 !src-tauri/resources/WebView2Loader.dll
 !src-tauri/WebView2Loader.dll
+!src-tauri/goldstone_ptt_win64.dll
 !ts3_pt_key_test/*.dll
 
 # Logs & temporary files

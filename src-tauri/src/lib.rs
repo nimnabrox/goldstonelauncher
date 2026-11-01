@@ -5416,15 +5416,6 @@ unsafe extern "system" fn enum_ts3_window_proc(hwnd: *mut std::ffi::c_void, lpar
 
 fn kill_headless_ts3_zombies() {
     send_to_goldstone_pipe("EXIT_TS3");
-    // Only terminate dead or truly headless zombies (0 visible windows)
-    let _ = Command::new("taskkill")
-        .args(&["/F", "/IM", "ts3client_win64.exe", "/FI", "WINDOWTITLE eq "])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output();
-    let _ = Command::new("taskkill")
-        .args(&["/F", "/IM", "ts3client_win32.exe", "/FI", "WINDOWTITLE eq "])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output();
     unsafe {
         let snapshot = CreateToolhelp32Snapshot(0x00000002, 0);
         if !snapshot.is_null() && snapshot as isize != -1 {
@@ -5444,16 +5435,18 @@ fn kill_headless_ts3_zombies() {
                 loop {
                     let len = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
                     let exe_name = String::from_utf16_lossy(&entry.szExeFile[..len]).to_ascii_lowercase();
-                    if exe_name == "ts3client_win64.exe" || exe_name == "ts3client_win32.exe" {
+                    if exe_name == "ts3client_win64.exe" || exe_name == "ts3client_win32.exe" || exe_name == "teamspeak.exe" {
                         let pid = entry.th32ProcessID;
-                        let mut state = (pid, false);
-                        EnumWindows(Some(enum_ts3_window_proc), &mut state as *mut (u32, bool) as isize);
-                        if !state.1 {
-                            // Headless zombie with 0 visible windows! Terminate it immediately
-                            let h_proc = OpenProcess(0x0001, 0, pid);
-                            if !h_proc.is_null() {
-                                TerminateProcess(h_proc, 0);
-                                CloseHandle(h_proc);
+                        if entry.cntThreads > 0 {
+                            let mut state = (pid, false);
+                            EnumWindows(Some(enum_ts3_window_proc), &mut state as *mut (u32, bool) as isize);
+                            if !state.1 {
+                                // Headless zombie with 0 visible windows! Terminate it immediately
+                                let h_proc = OpenProcess(0x0001, 0, pid);
+                                if !h_proc.is_null() {
+                                    TerminateProcess(h_proc, 0);
+                                    CloseHandle(h_proc);
+                                }
                             }
                         }
                     }
@@ -6359,7 +6352,7 @@ fn sanitize_ts3_bookmarks_in_db(db_path: &Path) {
                     }
                     if !has_ptt {
                         let env_id = "ea77046a-b5cf-ff1e-0eeb-5cfed1ac51aa";
-                        let proto = build_ts3_hotkey_protobuf(env_id, &prof_uuid, "Goldstone:ptt", 320);
+                        let proto = build_ts3_hotkey_protobuf(env_id, &prof_uuid, "Goldstone:ptt", 0);
                         rows.push(("3".to_string(), proto));
                         modified = true;
                     }
@@ -6593,12 +6586,19 @@ async fn launch_teamspeak_backend(server: String, nickname: String, custom_path:
                     break;
                 }
             }
-            let (raw_key, key_code) = map_vk_to_ts3_raw_and_code(active_vk, &active_lbl);
             for db in &candidate_dbs {
                 if db.exists() {
-                    let _ = update_ts3_ptt_key_in_db(db, &raw_key, key_code);
+                    let _ = update_ts3_ptt_key_in_db(db, "Goldstone:ptt", 0);
                 }
             }
+            if let Ok(appdata) = std::env::var("APPDATA") {
+                let key_file = Path::new(&appdata).join(r"TS3Client\goldstone_ptt_key.txt");
+                let _ = fs::write(&key_file, format!("{}:{}", active_lbl, active_vk));
+            }
+            let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", active_lbl, active_vk));
+
+            // Automatically clean any dead headless zombies (WINDOWTITLE eq "") before checking or launching
+            kill_headless_ts3_zombies();
 
             // If TeamSpeak 3 is already running and has a visible window, bring to front and connect
             if is_teamspeak_running() {
@@ -6607,9 +6607,6 @@ async fn launch_teamspeak_backend(server: String, nickname: String, custom_path:
                 send_to_goldstone_pipe(&cmd);
                 return Ok(());
             }
-
-            // Clean any dead headless zombies before launching
-            kill_headless_ts3_zombies();
 
             // Launch normal interactive GUI window directly with connection URL
             let res = spawn_gui_process(&ts_str, &[&url_arg]);
@@ -7272,6 +7269,7 @@ fn map_key_name_to_label_and_vk(key_name: &str) -> (String, u32) {
     }
 }
 
+#[allow(dead_code)]
 fn map_vk_to_ts3_raw_and_code(vk: u32, display_label: &str) -> (String, u32) {
     let trimmed = display_label.trim().to_uppercase();
     match trimmed.as_str() {
@@ -7342,7 +7340,32 @@ fn map_ts3_raw_to_label_and_vk(raw: &str) -> Option<(String, u32)> {
 }
 
 fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
-    // 1. Try reading directly from settings.db first (Two-Way Sync from TeamSpeak 3)
+    // 1. Check goldstone_ptt_key.txt first (Primary persistence store for Goldstone PTT)
+    let candidates = [
+        std::env::var("APPDATA").ok().map(|a| PathBuf::from(a).join(r"TS3Client\goldstone_ptt_key.txt")),
+        Some(PathBuf::from("goldstone_ptt_key.txt")),
+    ];
+    for cand in candidates.into_iter().flatten() {
+        if cand.exists() {
+            if let Ok(txt) = fs::read_to_string(&cand) {
+                let line = txt.trim();
+                if let Some(colon) = line.rfind(':') {
+                    let lbl = line[..colon].trim();
+                    let vk = line[colon + 1..].trim().parse::<u32>().unwrap_or(0x05);
+                    if !lbl.is_empty() {
+                        ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
+                        return Some(lbl.to_string());
+                    }
+                } else if !line.is_empty() {
+                    let (lbl, vk) = map_key_name_to_label_and_vk(line);
+                    ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
+                    return Some(lbl);
+                }
+            }
+        }
+    }
+
+    // 2. Fall back to settings.db if native key was bound in TS3
     if db_path.exists() {
         let mut db_raw_key: Option<String> = None;
         unsafe {
@@ -7410,7 +7433,6 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
 
         if let Some(raw) = db_raw_key {
             if let Some((lbl, vk)) = map_ts3_raw_to_label_and_vk(&raw) {
-                // Keep goldstone_ptt_key.txt and ACTIVE_PTT_VK synchronized
                 if let Ok(appdata) = std::env::var("APPDATA") {
                     let key_file = Path::new(&appdata).join(r"TS3Client\goldstone_ptt_key.txt");
                     let _ = fs::write(&key_file, format!("{}:{}", lbl, vk));
@@ -7418,31 +7440,6 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
                 let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", lbl, vk));
                 ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
                 return Some(lbl);
-            }
-        }
-    }
-
-    // 2. Fall back to goldstone_ptt_key.txt
-    let candidates = [
-        std::env::var("APPDATA").ok().map(|a| PathBuf::from(a).join(r"TS3Client\goldstone_ptt_key.txt")),
-        Some(PathBuf::from("goldstone_ptt_key.txt")),
-    ];
-    for cand in candidates.into_iter().flatten() {
-        if cand.exists() {
-            if let Ok(txt) = fs::read_to_string(&cand) {
-                let line = txt.trim();
-                if let Some(colon) = line.rfind(':') {
-                    let lbl = line[..colon].trim();
-                    let vk = line[colon + 1..].trim().parse::<u32>().unwrap_or(0x05);
-                    if !lbl.is_empty() {
-                        ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
-                        return Some(lbl.to_string());
-                    }
-                } else if !line.is_empty() {
-                    let (lbl, vk) = map_key_name_to_label_and_vk(line);
-                    ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
-                    return Some(lbl);
-                }
             }
         }
     }
@@ -9416,11 +9413,16 @@ async fn set_ts3_audio_device_backend(device_type: String, device_name: String, 
 #[tauri::command]
 async fn set_ts3_proximity_key_backend(key_name: String) -> Result<String, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        deploy_goldstone_ptt_plugin();
-
         let (display_label, vk_code) = map_key_name_to_label_and_vk(&key_name);
-        let (raw_key, key_code) = map_vk_to_ts3_raw_and_code(vk_code, &display_label);
         
+        // 1. Send live pipe update FIRST for 0ms instant response in TS3!
+        let pipe_cmd = format!("SET_KEY:{}:{}", display_label, vk_code);
+        send_to_goldstone_pipe(&pipe_cmd);
+
+        // 2. Immediate in-memory active key update
+        ACTIVE_PTT_VK.store(vk_code, std::sync::atomic::Ordering::SeqCst);
+
+        // 3. Persist to goldstone_ptt_key.txt (both APPDATA and local)
         if let Ok(appdata) = std::env::var("APPDATA") {
             let client_dir = Path::new(&appdata).join("TS3Client");
             let _ = fs::create_dir_all(&client_dir);
@@ -9429,20 +9431,19 @@ async fn set_ts3_proximity_key_backend(key_name: String) -> Result<String, Strin
         }
         let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", display_label, vk_code));
 
+        // 4. Update settings.db with Goldstone:ptt (Action type 320 Push-to-Talk)
         let candidate_dbs: Vec<PathBuf> = get_ts3_db_candidates()
             .into_iter()
             .filter(|db| db.exists())
             .collect();
-
-        ACTIVE_PTT_VK.store(vk_code, std::sync::atomic::Ordering::SeqCst);
         if !candidate_dbs.is_empty() {
             for db in &candidate_dbs {
-                let _ = update_ts3_ptt_key_in_db(db, &raw_key, key_code);
+                let _ = update_ts3_ptt_key_in_db(db, "Goldstone:ptt", 0);
             }
         }
 
-        let pipe_cmd = format!("SET_KEY:{}:{}", display_label, vk_code);
-        send_to_goldstone_pipe(&pipe_cmd);
+        // 5. Ensure plugin is deployed
+        deploy_goldstone_ptt_plugin();
 
         Ok(display_label)
     }).await.map_err(|e| e.to_string())?
@@ -12238,6 +12239,7 @@ async fn set_reshade_toggle_key_backend(key_code: u32) -> Result<(), String> {
 
 
 pub fn run() {
+    kill_headless_ts3_zombies();
     deploy_goldstone_ptt_plugin();
     start_launcher_ptt_bridge();
     
