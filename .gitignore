@@ -39,6 +39,8 @@ src-tauri/gen/schemas/
 !ts3_pt_key_test/*.dll
 
 # Logs & temporary files
+__pycache__/
+*.py[cod]
 logs/
 *.log
 npm-debug.log*

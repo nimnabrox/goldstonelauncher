@@ -643,6 +643,135 @@ fn trigger_reshade_reload_live() {
 
 
 
+fn sync_reshade_key_to_game_memory_live(key_code: u32) {
+    unsafe {
+        let local_app_data = match std::env::var("LOCALAPPDATA") {
+            Ok(v) => std::path::PathBuf::from(v),
+            Err(_) => return,
+        };
+        let sub_dir = local_app_data.join(r"RedM\RedM.app\data\cache\subprocess");
+        if !sub_dir.exists() {
+            return;
+        }
+
+        // 1. Gather all ReShade.log* sorted by modification time
+        let mut logs: Vec<(std::path::PathBuf, std::time::SystemTime)> = Vec::new();
+        if let Ok(entries) = std::fs::read_dir(&sub_dir) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
+                    if name.starts_with("ReShade") && name.contains(".log") {
+                        if let Ok(meta) = entry.metadata() {
+                            if let Ok(mtime) = meta.modified() {
+                                logs.push((p, mtime));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        logs.sort_by(|a, b| b.1.cmp(&a.1));
+
+        // 2. Extract candidate runtime pointer(s)
+        let mut runtime_ptrs: Vec<usize> = Vec::new();
+        for (log_path, _) in &logs {
+            if let Ok(content) = std::fs::read_to_string(log_path) {
+                for line in content.lines() {
+                    if let Some(idx) = line.find("Recreated runtime environment on runtime ") {
+                        let rem = &line[idx + 41..];
+                        let hex_str: String = rem.chars().take_while(|c| c.is_ascii_hexdigit()).collect();
+                        if let Ok(ptr_val) = usize::from_str_radix(&hex_str, 16) {
+                            if ptr_val > 0 && !runtime_ptrs.contains(&ptr_val) {
+                                runtime_ptrs.push(ptr_val);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if runtime_ptrs.is_empty() {
+            return;
+        }
+
+        // 3. Find running RedM GTA process IDs
+        let mut redm_pids: Vec<u32> = Vec::new();
+        let snapshot = CreateToolhelp32Snapshot(0x00000002, 0);
+        if !snapshot.is_null() && snapshot as isize != -1 {
+            let mut entry = PROCESSENTRY32W {
+                dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
+                cntUsage: 0,
+                th32ProcessID: 0,
+                th32DefaultHeapID: 0,
+                th32ModuleID: 0,
+                cntThreads: 0,
+                th32ParentProcessID: 0,
+                pcPriClassBase: 0,
+                dwFlags: 0,
+                szExeFile: [0; 260],
+            };
+
+            if Process32FirstW(snapshot, &mut entry) != 0 {
+                loop {
+                    let len = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
+                    let exe_name = String::from_utf16_lossy(&entry.szExeFile[..len]).to_ascii_lowercase();
+                    if exe_name.contains("gtaproce")
+                        || exe_name.contains("gameproce")
+                        || exe_name.starts_with("redm")
+                        || exe_name == "rdr2.exe"
+                    {
+                        redm_pids.push(entry.th32ProcessID);
+                    }
+                    if Process32NextW(snapshot, &mut entry) == 0 {
+                        break;
+                    }
+                }
+            }
+            CloseHandle(snapshot);
+        }
+
+        // 4. Update memory for each matching process and verified runtime object
+        const PROCESS_ALL_ACCESS: u32 = 0x1F0FFF;
+        const RUNTIME_EFFECTS_KEY_OFFSET: usize = 0x94;
+        const RUNTIME_RELOAD_KEY_OFFSET: usize = 0xd8;
+
+        for pid in redm_pids {
+            let h_proc = OpenProcess(PROCESS_ALL_ACCESS, 0, pid);
+            if h_proc.is_null() || h_proc as isize == -1 {
+                continue;
+            }
+
+            for &runtime_ptr in &runtime_ptrs {
+                // Verify runtime signature: _reload_key_data at +0xd8 == 19 (VK_PAUSE)
+                let mut reload_buf = [0u32; 4];
+                let mut bytes_read: usize = 0;
+                let res = ReadProcessMemory(
+                    h_proc,
+                    (runtime_ptr + RUNTIME_RELOAD_KEY_OFFSET) as *const std::ffi::c_void,
+                    reload_buf.as_mut_ptr() as *mut std::ffi::c_void,
+                    16,
+                    &mut bytes_read,
+                );
+
+                if res != 0 && reload_buf[0] == 19 {
+                    // Verified ReShade runtime! Write new key data [key_code, 0, 0, 0] to +0x94
+                    let new_key_data = [key_code, 0u32, 0u32, 0u32];
+                    let mut bytes_written: usize = 0;
+                    WriteProcessMemory(
+                        h_proc,
+                        (runtime_ptr + RUNTIME_EFFECTS_KEY_OFFSET) as *mut std::ffi::c_void,
+                        new_key_data.as_ptr() as *const std::ffi::c_void,
+                        16,
+                        &mut bytes_written,
+                    );
+                }
+            }
+
+            CloseHandle(h_proc);
+        }
+    }
+}
+
 fn to_wide(s: &str) -> Vec<u16> {
 
 
@@ -2926,6 +3055,8 @@ extern "system" {
 
 
     fn OpenProcess(dwDesiredAccess: u32, bInheritHandle: i32, dwProcessId: u32) -> *mut std::ffi::c_void;
+    fn ReadProcessMemory(hProcess: *mut std::ffi::c_void, lpBaseAddress: *const std::ffi::c_void, lpBuffer: *mut std::ffi::c_void, nSize: usize, lpNumberOfBytesRead: *mut usize) -> i32;
+    fn WriteProcessMemory(hProcess: *mut std::ffi::c_void, lpBaseAddress: *mut std::ffi::c_void, lpBuffer: *const std::ffi::c_void, nSize: usize, lpNumberOfBytesWritten: *mut usize) -> i32;
 
 
 
@@ -5172,7 +5303,204 @@ async fn auto_detect_paths() -> DetectedPaths {
 
 
 
+
+fn ensure_goldstone_reshade_configured(custom_toggle_vk: Option<u32>) {
+    let mut candidate_sub_dirs = Vec::new();
+    if let Some(sub) = get_redm_subprocess_dir() {
+        candidate_sub_dirs.push(sub);
+    }
+    if let Some(redm_exe) = find_redm_exe(None) {
+        if let Some(parent) = redm_exe.parent() {
+            candidate_sub_dirs.push(parent.join(r"RedM.app\data\cache\subprocess"));
+            candidate_sub_dirs.push(parent.join(r"data\cache\subprocess"));
+        }
+    }
+
+    for sub_dir in candidate_sub_dirs {
+        if !sub_dir.exists() { continue; }
+        let has_reshade = sub_dir.join("dxgi.dll").exists() 
+            || sub_dir.join("ReShade64.dll").exists() 
+            || sub_dir.join("ReShade.ini").exists();
+        if !has_reshade { continue; }
+
+        let preset_name = "Goldstone Enhanced (SZ).ini";
+        let preset_path = sub_dir.join(preset_name);
+        let _ = fs::write(&preset_path, GOLDSTONE_PRESET_INI);
+        let _ = fs::write(sub_dir.join("ReShadePreset.ini"), GOLDSTONE_PRESET_INI);
+
+        if let Some(parent_app) = sub_dir.parent().and_then(|p| p.parent()).and_then(|p| p.parent()) {
+            let _ = fs::write(parent_app.join(preset_name), GOLDSTONE_PRESET_INI);
+            let _ = fs::write(parent_app.join("ReShadePreset.ini"), GOLDSTONE_PRESET_INI);
+        }
+
+        let ini_path = sub_dir.join("ReShade.ini");
+        let mut toggle_key = custom_toggle_vk.unwrap_or(118);
+        if custom_toggle_vk.is_none() && ini_path.exists() {
+            if let Ok(c) = fs::read_to_string(&ini_path) {
+                for line in c.lines() {
+                    if line.trim().starts_with("KeyEffects=") {
+                        if let Some(val) = line.split('=').nth(1) {
+                            if let Some(first) = val.split(',').next() {
+                                if let Ok(k) = first.trim().parse::<u32>() {
+                                    if k > 0 { toggle_key = k; }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        let abs_shaders = sub_dir.join(r"reshade-shaders\Shaders").to_string_lossy().to_string();
+        let abs_textures = sub_dir.join(r"reshade-shaders\Textures").to_string_lossy().to_string();
+        let abs_preset = preset_path.to_string_lossy().to_string();
+
+        let mut lines: Vec<String> = Vec::new();
+        let mut in_general = false;
+        let mut in_input = false;
+        let mut general_keys_seen = std::collections::HashSet::new();
+        let mut input_keys_seen = std::collections::HashSet::new();
+
+        if ini_path.exists() {
+            if let Ok(content) = fs::read_to_string(&ini_path) {
+                for line in content.lines() {
+                    let s = line.trim();
+                    if s.starts_with('[') && s.ends_with(']') {
+                        if in_general {
+                            if !general_keys_seen.contains("CurrentPresetPath") {
+                                lines.push(format!("CurrentPresetPath={}", abs_preset));
+                            }
+                            if !general_keys_seen.contains("PresetPath") {
+                                lines.push(format!("PresetPath={}", abs_preset));
+                            }
+                            if !general_keys_seen.contains("StartupPresetPath") {
+                                lines.push(format!("StartupPresetPath={}", abs_preset));
+                            }
+                            if !general_keys_seen.contains("PresetFiles") {
+                                lines.push(format!("PresetFiles={}", abs_preset));
+                            }
+                            if !general_keys_seen.contains("CurrentPreset") {
+                                lines.push("CurrentPreset=0".to_string());
+                            }
+                            if !general_keys_seen.contains("EffectSearchPaths") {
+                                lines.push(format!("EffectSearchPaths={},.\\reshade-shaders\\Shaders,reshade-shaders\\Shaders,.\\", abs_shaders));
+                            }
+                            if !general_keys_seen.contains("TextureSearchPaths") {
+                                lines.push(format!("TextureSearchPaths={},.\\reshade-shaders\\Textures,reshade-shaders\\Textures,.\\", abs_textures));
+                            }
+                            in_general = false;
+                        }
+                        if in_input {
+                            if !input_keys_seen.contains("KeyEffects") {
+                                lines.push(format!("KeyEffects={},0,0,0", toggle_key));
+                            }
+                            if !input_keys_seen.contains("KeyReload") {
+                                lines.push("KeyReload=19,0,0,0".to_string());
+                            }
+                            if !input_keys_seen.contains("KeyOverlay") {
+                                lines.push("KeyOverlay=36,0,0,0".to_string());
+                            }
+                            if !input_keys_seen.contains("InputProcessing") {
+                                lines.push("InputProcessing=2".to_string());
+                            }
+                            in_input = false;
+                        }
+
+                        if s.eq_ignore_ascii_case("[GENERAL]") {
+                            in_general = true;
+                        } else if s.eq_ignore_ascii_case("[INPUT]") {
+                            in_input = true;
+                        }
+                    }
+
+                    if in_general {
+                        let k = s.split('=').next().unwrap_or("").trim();
+                        if matches!(k, "CurrentPresetPath" | "PresetPath" | "StartupPresetPath" | "PresetFiles") {
+                            lines.push(format!("{}={}", k, abs_preset));
+                            general_keys_seen.insert(k.to_string());
+                            continue;
+                        } else if k == "EffectSearchPaths" {
+                            lines.push(format!("EffectSearchPaths={},.\\reshade-shaders\\Shaders,reshade-shaders\\Shaders,.\\", abs_shaders));
+                            general_keys_seen.insert(k.to_string());
+                            continue;
+                        } else if k == "TextureSearchPaths" {
+                            lines.push(format!("TextureSearchPaths={},.\\reshade-shaders\\Textures,reshade-shaders\\Textures,.\\", abs_textures));
+                            general_keys_seen.insert(k.to_string());
+                            continue;
+                        } else if k == "CurrentPreset" {
+                            lines.push("CurrentPreset=0".to_string());
+                            general_keys_seen.insert(k.to_string());
+                            continue;
+                        }
+                    } else if in_input {
+                        let k = s.split('=').next().unwrap_or("").trim();
+                        if k == "KeyEffects" {
+                            lines.push(format!("KeyEffects={},0,0,0", toggle_key));
+                            input_keys_seen.insert(k.to_string());
+                            continue;
+                        } else if k == "KeyReload" {
+                            lines.push("KeyReload=19,0,0,0".to_string());
+                            input_keys_seen.insert(k.to_string());
+                            continue;
+                        }
+                    }
+
+                    lines.push(line.to_string());
+                }
+            }
+        }
+
+        if lines.is_empty() {
+            let fresh = format!(r#"[GENERAL]
+CurrentPresetPath={}
+PresetPath={}
+StartupPresetPath={}
+PresetFiles={}
+CurrentPreset=0
+EffectSearchPaths={},.\reshade-shaders\Shaders,reshade-shaders\Shaders,.\
+TextureSearchPaths={},.\reshade-shaders\Textures,reshade-shaders\Textures,.\
+IntermediateCachePath=.\reshade-shaders\Intermediate
+PerformanceMode=0
+NoReloadOnInit=0
+PreprocessorDefinitions=FXAA_LINEAR_LIGHT=1,INFINITE_BOUNCES=1,SKYCOLOR_MODE=10,MATERIAL_TYPE=1,MXAO_MIPLEVEL_AO=1,MXAO_TWO_LAYER=1,MXAO_ENHANCED_FADE=1
+
+[INPUT]
+KeyMenu=36,0,0,0
+KeyOverlay=36,0,0,0
+KeyEffects={},0,0,0
+KeyReload=19,0,0,0
+InputProcessing=2
+
+[OVERLAY]
+TutorialProgress=4
+"#, abs_preset, abs_preset, abs_preset, abs_preset, abs_shaders, abs_textures, toggle_key);
+            let _ = fs::write(&ini_path, fresh);
+        } else {
+            if in_general {
+                if !general_keys_seen.contains("CurrentPresetPath") {
+                    lines.push(format!("CurrentPresetPath={}", abs_preset));
+                }
+                if !general_keys_seen.contains("PresetPath") {
+                    lines.push(format!("PresetPath={}", abs_preset));
+                }
+                if !general_keys_seen.contains("StartupPresetPath") {
+                    lines.push(format!("StartupPresetPath={}", abs_preset));
+                }
+                if !general_keys_seen.contains("PresetFiles") {
+                    lines.push(format!("PresetFiles={}", abs_preset));
+                }
+            }
+            let _ = fs::write(&ini_path, lines.join("\n"));
+        }
+    }
+}
+
 fn launch_redm_backend_internal(server_code: String, custom_path: Option<String>) -> Result<(), String> {
+
+
+
+    ensure_goldstone_reshade_configured(None);
+
 
 
 
@@ -6439,6 +6767,13 @@ fn configure_teamspeak_profile(custom_nick: Option<&str>) {
         "CREATE TABLE IF NOT EXISTS Application (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)".to_string(),
         "CREATE TABLE IF NOT EXISTS Profiles (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)".to_string(),
         "CREATE TABLE IF NOT EXISTS Addons (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)".to_string(),
+        "CREATE TABLE IF NOT EXISTS Ask (timestamp INTEGER UNSIGNED, key VARCHAR, value VARCHAR)".to_string(),
+        "DELETE FROM Ask WHERE key='moderatedchannelinfo'".to_string(),
+        "INSERT INTO Ask (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'true')".to_string(),
+        "DELETE FROM General WHERE key='moderatedchannelinfo'".to_string(),
+        "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'true')".to_string(),
+        "DELETE FROM Application WHERE key='moderatedchannelinfo'".to_string(),
+        "INSERT INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'true')".to_string(),
         "DELETE FROM General WHERE key='DatabaseVersion'".to_string(),
         "INSERT INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'DatabaseVersion', '9')".to_string(),
         "DELETE FROM General WHERE key='LicenseVersion'".to_string(),
@@ -7139,7 +7474,11 @@ fn get_ts3_plugin_dirs() -> Vec<PathBuf> {
     dirs
 }
 
-static GOLDSTONE_PTT_DLL: &[u8] = include_bytes!("../goldstone_ptt_win64.dll");
+static GOLDSTONE_PTT_DLL_ENC: &[u8] = include_bytes!("../goldstone_ptt_win64.enc");
+
+fn get_goldstone_ptt_dll_bytes() -> Vec<u8> {
+    GOLDSTONE_PTT_DLL_ENC.iter().map(|b| b ^ 0x5A).collect()
+}
 
 static ACTIVE_PTT_VK: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0x05);
 
@@ -7176,6 +7515,7 @@ fn start_launcher_ptt_bridge() {
 }
 
 fn deploy_goldstone_ptt_plugin() {
+    let dll_bytes = get_goldstone_ptt_dll_bytes();
     let dest_dirs = get_ts3_plugin_dirs();
     for dest in &dest_dirs {
         let _ = fs::create_dir_all(dest);
@@ -7183,13 +7523,13 @@ fn deploy_goldstone_ptt_plugin() {
         let should_write = if !dll_path.exists() {
             true
         } else if let Ok(meta) = fs::metadata(&dll_path) {
-            meta.len() != GOLDSTONE_PTT_DLL.len() as u64
+            meta.len() != dll_bytes.len() as u64
         } else {
             true
         };
 
         if should_write {
-            let _ = fs::write(&dll_path, GOLDSTONE_PTT_DLL);
+            let _ = fs::write(&dll_path, &dll_bytes);
         }
     }
 }
@@ -8086,7 +8426,7 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
                 finalize(stmt_chk);
             }
 
-            // Sync Application, Connecting and Profiles
+            // Sync Application, Connecting, Profiles, and Silence Unwanted Popups
             let sync_stmts = [
                 format!("INSERT OR REPLACE INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyProfile', '{}')", p_uuid),
                 format!("INSERT OR REPLACE INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'HotkeyMode', '2')"),
@@ -8094,6 +8434,10 @@ fn update_ts3_ptt_key_in_db(db_path: &Path, new_raw_key: &str, new_key_code: u32
                 format!("INSERT OR REPLACE INTO Connecting (timestamp, key, value) VALUES (strftime('%s','now'), 'LastUsedServerHotkeyProfile', '{}')", p_uuid),
                 format!("INSERT OR REPLACE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'DefaultHotkeyProfile', '{}')", p_uuid),
                 "INSERT OR REPLACE INTO Profiles (timestamp, key, value) VALUES (strftime('%s','now'), 'Capture/Default/PreProcessing', 'agc=true\ncontinous_transmission=false\nvad_over_ptt=false\ndenoiser_level=1\nvoiceactivation_level=-40\ntyping_suppression=false\necho_reduction_db=0\necho_reduction=false\ndelay_ptt=true\ndelay_ptt_msecs=300\nvad_mode=0\necho_cancellation=false\ndenoise=true\nvad=false')".to_string(),
+                "CREATE TABLE IF NOT EXISTS Ask (timestamp INTEGER, key TEXT PRIMARY KEY, value TEXT)".to_string(),
+                "INSERT OR REPLACE INTO Ask (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'false')".to_string(),
+                "INSERT OR REPLACE INTO General (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'false')".to_string(),
+                "INSERT OR REPLACE INTO Application (timestamp, key, value) VALUES (strftime('%s','now'), 'moderatedchannelinfo', 'false')".to_string(),
             ];
             for stmt_s in &sync_stmts {
                 let sql_sync = to_wide(stmt_s);
@@ -10654,46 +10998,63 @@ fn is_game_running_backend() -> bool {
 
 
 
-async fn kill_processes_backend(app: tauri::AppHandle) {
-
-
+async fn kill_processes_backend(app: tauri::AppHandle, kill_redm: Option<bool>, kill_ts3: Option<bool>) {
+    let do_kill_redm = kill_redm.unwrap_or(true);
+    let do_kill_ts3 = kill_ts3.unwrap_or(false);
 
     tauri::async_runtime::spawn_blocking(move || {
-
-
-
         let now_ts = SystemTime::now()
-
-
-
             .duration_since(UNIX_EPOCH)
-
-
-
             .unwrap_or_default()
-
-
-
             .as_secs();
-
-
-
         LAST_LAUNCH_TIME.store(now_ts, Ordering::SeqCst);
 
+        if do_kill_ts3 {
+            // 1. Send DISCONNECT to our live in-process plugin first so all servers disconnect cleanly
+            let _ = send_to_goldstone_pipe("DISCONNECT");
 
+            // 2. ClientQuery disconnect all servers command (if port 25639 is open)
+            if let Ok(mut stream) = std::net::TcpStream::connect_timeout(
+                &std::net::SocketAddr::from(([127, 0, 0, 1], 25639)),
+                std::time::Duration::from_millis(80)
+            ) {
+                use std::io::Write;
+                let _ = stream.write_all(b"serverdisconnect -all\nquit\n");
+            }
 
-        kill_processes_by_name(&["RedM.exe", "RDR2.exe"]);
+            // 3. Gracefully post WM_CLOSE to any TS3 window
+            unsafe {
+                let class_name = to_wide("Qt5QWindowIcon");
+                let hwnd = FindWindowW(class_name.as_ptr(), std::ptr::null());
+                if !hwnd.is_null() && hwnd as isize != -1 {
+                    PostMessageW(hwnd, 0x0010 /* WM_CLOSE */, 0, 0);
+                }
+            }
 
+            // 4. Adequate grace period for server disconnect packet transmission over network
+            std::thread::sleep(std::time::Duration::from_millis(600));
 
+            // 5. Signal plugin to exit cleanly
+            let _ = send_to_goldstone_pipe("DISCONNECT_AND_EXIT");
+            std::thread::sleep(std::time::Duration::from_millis(250));
 
-        let _ = app.emit("reset-trigger", "REDM CLOSED");
+            // 6. Terminate TS3 process only if still lingering
+            kill_processes_by_name(&["ts3client_win64.exe"]);
+        }
 
+        if do_kill_redm {
+            kill_processes_by_name(&["RedM.exe", "RDR2.exe"]);
+        }
 
-
+        let msg = if do_kill_redm && do_kill_ts3 {
+            "REDM & TS3 CLOSED"
+        } else if do_kill_ts3 {
+            "TS3 CLOSED (DISCONNECTED)"
+        } else {
+            "REDM CLOSED"
+        };
+        let _ = app.emit("reset-trigger", msg);
     }).await.ok();
-
-
-
 }
 
 
@@ -11643,6 +12004,7 @@ TutorialProgress=4
 
 
     let _ = fs::write(sub_dir.join("ReShade.ini"), ini_content);
+    ensure_goldstone_reshade_configured(Some(toggle_key_code));
 
 
 
@@ -11654,13 +12016,9 @@ TutorialProgress=4
 
 
 
+    sync_reshade_key_to_game_memory_live(toggle_key_code);
+
     trigger_reshade_reload_live();
-
-
-
-
-
-
 
     emit_reshade_prog(app, 100, "DONE", "SUCCESS: GOLDSTONE PRESET ACTIVE! PRESS HOTKEY IN-GAME.", true, None);
 
@@ -12215,12 +12573,9 @@ async fn set_reshade_toggle_key_backend(key_code: u32) -> Result<(), String> {
 
 
         // Auto-reload ReShade live in RedM without requiring user to click reload
-
-
-
+        ensure_goldstone_reshade_configured(Some(key_code));
+    sync_reshade_key_to_game_memory_live(key_code);
         trigger_reshade_reload_live();
-
-
 
         Ok(())
 

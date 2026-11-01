@@ -114,11 +114,7 @@ import {
 
 
 
-  SearchIcon,
-
-
-
-  CheckIcon
+  SearchIcon
 
 
 
@@ -723,6 +719,14 @@ function App() {
 
 
   const marqueeBoxRef = useRef<HTMLDivElement>(null);
+  const [killRedm, setKillRedm] = useState<boolean>(() => {
+    const saved = localStorage.getItem("fc_kill_redm");
+    return saved !== null ? saved === "true" : true;
+  });
+  const [killTs3, setKillTs3] = useState<boolean>(() => {
+    const saved = localStorage.getItem("fc_kill_ts3");
+    return saved !== null ? saved === "true" : false;
+  });
 
 
 
@@ -4321,38 +4325,20 @@ const loadPlaylist = async (dirPath: string) => {
 
 
   const forceReset = async () => {
-
-
-
-    setStatus("CLOSING GAME PROCESSES...");
-
-
-
-    try { 
-
-
-
-      await invoke('kill_processes_backend'); 
-
-
-
-      setStatus("GAME PROCESSES CLOSED"); 
-
-
-
+    if (!killRedm && !killTs3) {
+      setStatus("SELECT REDM OR TS3 TO CLOSE");
       setTimeout(() => setStatus("READY TO CONNECT"), 2500);
-
-
-
-      if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
-
-
-
-        safePlayMusic(800);
-
-
-
-      }
+      return;
+    }
+    const targets = [];
+    if (killRedm) targets.push("REDM");
+    if (killTs3) targets.push("TS3");
+    setStatus(`CLOSING ${targets.join(" & ")}...`);
+    try {
+      await invoke("kill_processes_backend", { killRedm, killTs3 });
+      setStatus(`${targets.join(" & ")} CLOSED`);
+      setTimeout(() => setStatus("READY TO CONNECT"), 2500);
+      /* Music auto-play on force close removed per user preference */
 
 
 
@@ -4368,15 +4354,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
-
-
-
-        safePlayMusic(800);
-
-
-
-      }
+      /* Music auto-play on force close removed per user preference */
 
 
 
@@ -5330,31 +5308,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-        if (musicEnabledRef.current && localStorage.getItem("music_enabled") === "true") {
-
-
-
-          if (safePlayMusicRef.current) {
-
-
-
-            safePlayMusicRef.current(1000);
-
-
-
-          } else {
-
-
-
-            safePlayMusic(1000);
-
-
-
-          }
-
-
-
-        }
+        /* Music auto-play on game close removed per user preference */
 
 
 
@@ -6704,7 +6658,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                    if (isChecked) { if (musicPath) loadPlaylist(musicPath); else syncAndLoadMusic(true); }
+                    if (isChecked) { if (musicPath) loadPlaylist(musicPath); else syncAndLoadMusic(false); }
 
 
 
@@ -7850,69 +7804,21 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
                 <div className="glass-card shortcuts-card">
-
-
-
                   <span className="card-label">IN-GAME CONTROLS</span>
-
-
-
                   <div className="shortcut-item">
-
-
-
                     <kbd>HOME</kbd>
-
-
-
-                    <div>
-
-
-
-                      <b>OPEN RESHADE OVERLAY</b>
-
-
-
-                      <small>ADJUST PRESET, SHADER SETTINGS, OR BRIGHTNESS</small>
-
-
-
+                    <div className="shortcut-info">
+                      <div className="shortcut-name">OPEN RESHADE OVERLAY</div>
+                      <div className="shortcut-desc">Adjust preset, shader settings, or brightness</div>
                     </div>
-
-
-
                   </div>
-
-
-
                   <div className="shortcut-item">
-
-
-
                     <kbd>{formatKeyName(reshadeToggleKey).toUpperCase()}</kbd>
-
-
-
-                    <div>
-
-
-
-                      <b>TOGGLE EFFECTS ON / OFF</b>
-
-
-
-                      <small>INSTANTLY SWITCH BETWEEN ENHANCED & VANILLA LOOK</small>
-
-
-
+                    <div className="shortcut-info">
+                      <div className="shortcut-name">TOGGLE EFFECTS ON / OFF</div>
+                      <div className="shortcut-desc">Instantly switch between enhanced & vanilla look</div>
                     </div>
-
-
-
                   </div>
-
-
-
                 </div>
 
 
@@ -8185,13 +8091,6 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
                     <span className="card-label">AUDIO HARDWARE</span>
 
-                    <div className="audio-live-tag">
-
-                      <span className="live-dot-pulse"></span>
-
-                      <span>LIVE SYNC</span>
-
-                    </div>
 
                   </div>
 
@@ -8321,17 +8220,12 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         onChange={(e) => handleProximityKeyChange(e.target.value)}
                         disabled={isTs3SettingBusy}
                       >
-                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "KEY: F", "KEY: N", "KEY: V", "KEY: B", "KEY: T", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "SPACE", "PAGE DOWN", "END", "F12"].includes(proximityVoiceKey) && (
+                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "SPACE", "PAGE DOWN", "END"].includes(proximityVoiceKey) && (
                           <option key={proximityVoiceKey} value={proximityVoiceKey}>{proximityVoiceKey}</option>
                         )}
                         <option value="MOUSE 4">MOUSE 4 (RECOMMENDED)</option>
                         <option value="MOUSE 5">MOUSE 5</option>
                         <option value="MIDDLE CLICK">MIDDLE CLICK</option>
-                        <option value="KEY: F">KEY: F</option>
-                        <option value="KEY: N">KEY: N</option>
-                        <option value="KEY: V">KEY: V</option>
-                        <option value="KEY: B">KEY: B</option>
-                        <option value="KEY: T">KEY: T</option>
                         <option value="CAPS LOCK">CAPS LOCK</option>
                         <option value="LEFT ALT">LEFT ALT</option>
                         <option value="LEFT CTRL">LEFT CTRL</option>
@@ -8341,33 +8235,6 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                         <option value="END">END</option>
                         <option value="F12">F12</option>
                       </select>
-                    </div>
-
-                    <div className="hotkey-presets-grid" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "6px", marginTop: "8px" }}>
-                      {[
-                        "KEY: N", "KEY: F", "KEY: V", "KEY: B", "MOUSE 4", "MOUSE 5",
-                        "MIDDLE CLICK", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "SPACE", "F12"
-                      ].map(preset => (
-                        <button
-                          key={preset}
-                          type="button"
-                          className={`btn-preset ${proximityVoiceKey === preset ? 'active' : ''}`}
-                          onClick={() => handleProximityKeyChange(preset)}
-                          disabled={isTs3SettingBusy}
-                          style={{
-                            padding: "6px 2px",
-                            fontSize: "11px",
-                            fontWeight: "600",
-                            background: proximityVoiceKey === preset ? "rgba(223, 170, 67, 0.3)" : "rgba(255, 255, 255, 0.05)",
-                            border: proximityVoiceKey === preset ? "1px solid #dfaa43" : "1px solid rgba(255, 255, 255, 0.1)",
-                            borderRadius: "4px",
-                            color: proximityVoiceKey === preset ? "#dfaa43" : "#e2e8f0",
-                            cursor: "pointer"
-                          }}
-                        >
-                          {preset}
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -9035,45 +8902,17 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
               <div className="reshade-pill-status">
-
-
-
                 {reshadeInstalled ? (
-
-
-
-                  <span className="reshade-tick-badge active" title="ReShade Active & Ready">
-
-
-
-                    <CheckIcon size={13} />
-
-
-
+                  <span className="pill-status-tick active" title="ReShade Active & Ready">
+                    <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />
+                    </svg>
                   </span>
-
-
-
                 ) : (
-
-
-
-                  <span className="reshade-tick-badge inactive" title="Vanilla RedM (Not Installed)">
-
-
-
-                    <span className="tick-dot" />
-
-
-
+                  <span className="pill-status-tick inactive" title="ReShade Not Installed (Click to Setup)">
+                    <span className="pill-tick-dot-idle" />
                   </span>
-
-
-
                 )}
-
-
-
               </div>
 
 
@@ -9139,45 +8978,17 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
               <div className="reshade-pill-status">
-
-
-
                 {ts3Installed && saltyInstalled ? (
-
-
-
-                  <span className="reshade-tick-badge active" title="Voice Ready">
-
-
-
-                    <CheckIcon size={13} />
-
-
-
+                  <span className="pill-status-tick active" title="TeamSpeak 3 & SaltyChat Ready">
+                    <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />
+                    </svg>
                   </span>
-
-
-
                 ) : (
-
-
-
-                  <span className="reshade-tick-badge inactive" title="Voice Not Setup">
-
-
-
-                    <span className="tick-dot" />
-
-
-
+                  <span className="pill-status-tick inactive" title="Voice Setup Required (Click to Configure)">
+                    <span className="pill-tick-dot-idle" />
                   </span>
-
-
-
                 )}
-
-
-
               </div>
 
 
@@ -9210,19 +9021,46 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-              <button className="tool-btn red-tool" onClick={forceReset}>
-
-
-
-                <ShieldAlertIcon size={14} />
-
-
-
-                <span>FORCE CLOSE</span>
-
-
-
-              </button>
+              <div className="force-close-wrap">
+                <button className="tool-btn red-tool force-close-btn" onClick={forceReset}>
+                  <div className="fc-main-row">
+                    <ShieldAlertIcon size={12} />
+                    <span>FORCE CLOSE</span>
+                  </div>
+                  <div className="fc-toggles-row">
+                    <span 
+                      className={`fc-chip ${killRedm ? "active-redm" : "inactive"}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const next = !killRedm;
+                        setKillRedm(next);
+                        localStorage.setItem("fc_kill_redm", String(next));
+                      }}
+                      title="Include RedM in Force Close"
+                    >
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
+                      </svg>
+                      REDM
+                    </span>
+                    <span 
+                      className={`fc-chip ${killTs3 ? "active-ts3" : "inactive"}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const next = !killTs3;
+                        setKillTs3(next);
+                        localStorage.setItem("fc_kill_ts3", String(next));
+                      }}
+                      title="Include TS3 in Force Close (disconnects servers cleanly first)"
+                    >
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
+                      </svg>
+                      TS3
+                    </span>
+                  </div>
+                </button>
+              </div>
 
 
 
