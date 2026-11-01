@@ -3,7 +3,7 @@
   "name": "Goldstone County Launcher v0.3.1",
   "mandatory": true,
   "downloadUrl": "https://launcher-update.goldstonecounty.com/goldstone-launcher.exe",
-  "checksum": "6720f237e92fb61665d3bcbe551962ce6b9ffcff3714806dc7a2543832055e5d",
-  "sha256": "6720f237e92fb61665d3bcbe551962ce6b9ffcff3714806dc7a2543832055e5d",
-  "size": 15779336
+  "checksum": "6595cd376548286618df55c553b3c20b5cd93f0a5f79fb553df55354740bff75",
+  "sha256": "6595cd376548286618df55c553b3c20b5cd93f0a5f79fb553df55354740bff75",
+  "size": 13886472
 }
