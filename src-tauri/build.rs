@@ -10,6 +10,7 @@ fn main() {
 
     // 1. Mask WebView2Loader.dll with 0x5B so no raw PE header triggers heuristics
     let dll_candidates = [
+        manifest_dir.join("WebView2Loader.dll"),
         PathBuf::from("WebView2Loader.dll"),
         PathBuf::from("../WebView2Loader.dll"),
         PathBuf::from("../../WebView2Loader.dll"),
@@ -19,6 +20,23 @@ fn main() {
             if let Ok(bytes) = fs::read(p) {
                 let masked: Vec<u8> = bytes.into_iter().map(|b| b ^ 0x5B).collect();
                 let _ = fs::write(out_dir.join("webview2_loader.bin"), masked);
+                break;
+            }
+        }
+    }
+
+    // 1b. Mask MicrosoftEdgeWebview2Setup.exe with 0x5C for automated silent install on new PCs
+    let setup_candidates = [
+        manifest_dir.join("MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("scratch/MicrosoftEdgeWebview2Setup.exe"),
+        PathBuf::from("../../scratch/MicrosoftEdgeWebview2Setup.exe"),
+    ];
+    for p in &setup_candidates {
+        if p.exists() {
+            if let Ok(bytes) = fs::read(p) {
+                let masked: Vec<u8> = bytes.into_iter().map(|b| b ^ 0x5C).collect();
+                let _ = fs::write(out_dir.join("webview2_setup.bin"), masked);
                 break;
             }
         }

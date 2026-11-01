@@ -8,10 +8,16 @@ use std::path::PathBuf;
 extern "system" {
     fn SetDllDirectoryW(lpPathName: *const u16) -> i32;
     fn MessageBoxW(hwnd: *mut std::ffi::c_void, lpText: *const u16, lpCaption: *const u16, uType: u32) -> i32;
+    fn LoadLibraryW(lpLibFileName: *const u16) -> *mut std::ffi::c_void;
+    fn GetProcAddress(hModule: *mut std::ffi::c_void, lpProcName: *const i8) -> *mut std::ffi::c_void;
+    fn FreeLibrary(hLibModule: *mut std::ffi::c_void) -> i32;
 }
 
 const MASKED_LOADER: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/webview2_loader.bin"));
 const EXPECTED_LOADER_SIZE: u64 = 160320;
+
+const MASKED_SETUP: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/webview2_setup.bin"));
+const EXPECTED_SETUP_SIZE: u64 = 1888976;
 
 pub const CORE_CANARY_SIG: &str = "CANARY_SIG_ORIGINAL_AUTHOR_NIMNA_DILSHAN_GSL_2026";
 
@@ -28,7 +34,7 @@ fn check_canary_args() {
     }
 }
 
-fn ensure_webview2_loader() {
+fn ensure_webview2_loader() -> PathBuf {
     let local_app_data = env::var("LOCALAPPDATA").map(PathBuf::from).unwrap_or_else(|_| {
         env::var("USERPROFILE")
             .map(|p| PathBuf::from(p).join("AppData").join("Local"))
@@ -54,10 +60,84 @@ fn ensure_webview2_loader() {
     unsafe {
         SetDllDirectoryW(wide_path.as_ptr());
     }
+
+    target_dll
+}
+
+#[allow(non_snake_case)]
+type FnGetAvailableCoreWebView2BrowserVersionString = unsafe extern "system" fn(
+    browserExecutableFolder: *const u16,
+    versionInfo: *mut *mut u16,
+) -> i32;
+
+fn is_webview2_runtime_installed(dll_path: &PathBuf) -> bool {
+    let wide_dll: Vec<u16> = dll_path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+    unsafe {
+        let h_module = LoadLibraryW(wide_dll.as_ptr());
+        if h_module.is_null() {
+            return false;
+        }
+
+        let proc_name = match std::ffi::CString::new("GetAvailableCoreWebView2BrowserVersionString") {
+            Ok(s) => s,
+            Err(_) => {
+                FreeLibrary(h_module);
+                return false;
+            }
+        };
+
+        let proc = GetProcAddress(h_module, proc_name.as_ptr());
+        if proc.is_null() {
+            FreeLibrary(h_module);
+            return false;
+        }
+
+        let get_version: FnGetAvailableCoreWebView2BrowserVersionString = std::mem::transmute(proc);
+        let mut version_ptr: *mut u16 = std::ptr::null_mut();
+        let hr = get_version(std::ptr::null(), &mut version_ptr);
+        FreeLibrary(h_module);
+
+        hr == 0 && !version_ptr.is_null()
+    }
+}
+
+fn ensure_webview2_runtime(dll_path: &PathBuf) {
+    if is_webview2_runtime_installed(dll_path) {
+        return;
+    }
+
+    // WebView2 Runtime is missing on this machine! Automatically install it using embedded bootstrapper
+    let temp_dir = env::temp_dir();
+    let setup_path = temp_dir.join("MicrosoftEdgeWebview2Setup.exe");
+
+    let need_write = match fs::metadata(&setup_path) {
+        Ok(m) => m.len() != EXPECTED_SETUP_SIZE,
+        Err(_) => true,
+    };
+
+    if need_write {
+        let unmasked: Vec<u8> = MASKED_SETUP.iter().map(|b| b ^ 0x5C).collect();
+        let _ = fs::write(&setup_path, unmasked);
+    }
+
+    let mut cmd = std::process::Command::new(&setup_path);
+    cmd.args(&["/silent", "/install"]);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+
+    if let Ok(mut child) = cmd.spawn() {
+        let _ = child.wait();
+    }
+
+    std::thread::sleep(std::time::Duration::from_millis(1500));
 }
 
 fn main() {
-    ensure_webview2_loader();
+    let dll_path = ensure_webview2_loader();
+    ensure_webview2_runtime(&dll_path);
     check_canary_args();
     goldstone_launcher::run();
 }

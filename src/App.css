@@ -16367,13 +16367,64 @@ body {
 
 
 /* ==========================================================================
-   FORCE CLOSE - TWO-TIER COMPACT CARD (DESIGN 3)
+   ENHANCED DASHBOARD PILLS SPACING (RESHADE & TS3 VOICE)
+   ========================================================================== */
+.dash-pill-row .reshade-dash-pill {
+  padding: 7px 9px !important;
+  min-width: 0 !important;
+}
+
+.dash-pill-row .reshade-pill-left {
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+.dash-pill-row .dash-reshade-icon-wrap {
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+}
+
+.dash-pill-row .dash-reshade-title {
+  font-size: 9.8px !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  font-weight: 800 !important;
+}
+
+.dash-pill-row .pill-status-tick {
+  width: 17px !important;
+  height: 17px !important;
+  flex-shrink: 0 !important;
+  margin-left: 4px !important;
+}
+
+/* ==========================================================================
+   FORCE CLOSE - TWO-TIER COMPACT CARD (DESIGN 3) & RECOVERY GRID BALANCE
    ========================================================================== */
 .tools-grid-weighted {
   display: grid !important;
-  grid-template-columns: 1.34fr 0.83fr 0.83fr !important;
+  grid-template-columns: 1.16fr 0.92fr 0.92fr !important;
   gap: 6px !important;
   width: 100% !important;
+}
+
+.tools-grid-weighted .tool-btn {
+  height: 52px !important;
+  min-height: 52px !important;
+  padding: 4px 2px !important;
+}
+
+.tools-grid-weighted .tool-btn span {
+  font-size: 7.2px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1px !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  width: auto !important;
+  max-width: none !important;
 }
 
 .fc-two-tier-card {
@@ -16507,10 +16558,4 @@ body {
   height: 5px !important;
   display: inline-block !important;
   flex-shrink: 0 !important;
-}
-
-/* Ensure FIX VULKAN and CLEAN CACHE match 52px height */
-.tools-grid-weighted .tool-btn {
-  height: 52px !important;
-  min-height: 52px !important;
 }
