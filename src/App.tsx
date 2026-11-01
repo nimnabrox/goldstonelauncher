@@ -7985,6 +7985,33 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
                   </div>
 
+                  {/* Official Sites Bar */}
+                  <div className="ts3-official-sites-bar">
+                    <span className="ts3-sites-label">OFFICIAL SITES</span>
+                    <div className="ts3-sites-btns">
+                      <button 
+                        type="button"
+                        className="ts3-site-pill"
+                        onClick={() => invoke('open_url_backend', { url: "https://www.teamspeak.com" })}
+                        title="Visit TeamSpeak Official Website"
+                      >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span>teamspeak.com</span>
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      </button>
+                      <button 
+                        type="button"
+                        className="ts3-site-pill"
+                        onClick={() => invoke('open_url_backend', { url: "https://saltyhub.net" })}
+                        title="Visit SaltyChat Official Website"
+                      >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span>saltyhub.net</span>
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
 
 
