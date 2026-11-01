@@ -9024,7 +9024,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
               <div className="force-close-wrap">
                 <button className="tool-btn red-tool force-close-btn" onClick={forceReset}>
                   <div className="fc-main-row">
-                    <ShieldAlertIcon size={12} />
+                    <ShieldAlertIcon size={11} />
                     <span>FORCE CLOSE</span>
                   </div>
                   <div className="fc-toggles-row">
@@ -9038,7 +9038,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       }}
                       title="Include RedM in Force Close"
                     >
-                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
                       REDM
@@ -9053,7 +9053,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       }}
                       title="Include TS3 in Force Close (disconnects servers cleanly first)"
                     >
-                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="6" height="6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
                       TS3
