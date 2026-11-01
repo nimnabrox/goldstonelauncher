@@ -9021,45 +9021,55 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-              <div className="force-close-wrap">
-                <button className="tool-btn red-tool force-close-btn" onClick={forceReset}>
-                  <div className="fc-main-row">
-                    <ShieldAlertIcon size={11} />
-                    <b className="fc-main-title">FORCE CLOSE</b>
-                  </div>
-                  <div className="fc-toggles-row">
-                    <div 
-                      className={`fc-chip ${killRedm ? "active-redm" : "inactive"}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const next = !killRedm;
-                        setKillRedm(next);
-                        localStorage.setItem("fc_kill_redm", String(next));
-                      }}
-                      title="Include RedM in Force Close"
-                    >
+                            {/* SLOT 1: UNIFIED SPLIT POD (VARIATION A - VERTICAL STACKED TOGGLES) */}
+              <div className="fc-unified-pod" title="Force Close Utilities">
+                <div 
+                  className="fc-action-side" 
+                  onClick={forceReset} 
+                  title="Click to Force Close selected processes"
+                >
+                  <ShieldAlertIcon size={11} />
+                  <span className="fc-action-label">FORCE CLOSE</span>
+                </div>
+
+                <div className="fc-pod-divider"></div>
+
+                <div className="fc-stack-side">
+                  <div 
+                    className={`fc-vert-chip ${killRedm ? "redm-active" : "inactive"}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next = !killRedm;
+                      setKillRedm(next);
+                      localStorage.setItem("fc_kill_redm", String(next));
+                    }}
+                    title="Include RedM in Force Close"
+                  >
+                    {killRedm && (
                       <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
-                      <b className="fc-chip-text">REDM</b>
-                    </div>
-                    <div 
-                      className={`fc-chip ${killTs3 ? "active-ts3" : "inactive"}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const next = !killTs3;
-                        setKillTs3(next);
-                        localStorage.setItem("fc_kill_ts3", String(next));
-                      }}
-                      title="Include TS3 in Force Close (disconnects servers cleanly first)"
-                    >
+                    )}
+                    <span>REDM</span>
+                  </div>
+                  <div 
+                    className={`fc-vert-chip ${killTs3 ? "ts3-active" : "inactive"}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const next = !killTs3;
+                      setKillTs3(next);
+                      localStorage.setItem("fc_kill_ts3", String(next));
+                    }}
+                    title="Include TS3 in Force Close (disconnects servers cleanly first)"
+                  >
+                    {killTs3 && (
                       <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
-                      <b className="fc-chip-text">TS3</b>
-                    </div>
+                    )}
+                    <span>TS3</span>
                   </div>
-                </button>
+                </div>
               </div>
 
 
