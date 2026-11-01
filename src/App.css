@@ -16098,3 +16098,85 @@ body {
 
 }
 
+
+
+/* Unified TS3 Hotkey Row (Compact & Zero-Scroll) */
+.hotkey-unified-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.hotkey-cap-btn {
+  flex: 1.15 !important;
+  height: 32px !important;
+  border-radius: 7px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 10px !important;
+  transition: all 0.2s ease !important;
+  color: #f1f5f9 !important;
+  font-family: inherit !important;
+}
+
+.hotkey-cap-btn:hover {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+.hotkey-cap-btn.listening {
+  border-color: var(--accent-gold, #f59e0b) !important;
+  background: rgba(245, 158, 11, 0.2) !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+.hotkey-cap-btn .rec-text {
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  color: #94a3b8 !important;
+  text-transform: uppercase !important;
+}
+
+.hotkey-cap-btn kbd {
+  font-family: 'JetBrains Mono', 'Cascadia Code', monospace !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.18) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  border-radius: 5px !important;
+  padding: 2px 7px !important;
+}
+
+.hotkey-select-quick {
+  flex: 1 !important;
+  height: 32px !important;
+  border-radius: 7px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  color: #f1f5f9 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 0 8px !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.hotkey-select-quick:focus,
+.hotkey-select-quick:hover {
+  border-color: rgba(245, 158, 11, 0.45) !important;
+}
+
+.hotkey-select-quick option {
+  background: #0d1216 !important;
+  color: #e8ede9 !important;
+  font-size: 10px !important;
+}

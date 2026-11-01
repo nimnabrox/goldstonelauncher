@@ -11,7 +11,8 @@ extern "system" {
 }
 
 const MASKED_LOADER: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/webview2_loader.bin"));
-const EXPECTED_SIZE: u64 = 160320;
+const EXPECTED_LOADER_SIZE: u64 = 160320;
+
 pub const CORE_CANARY_SIG: &str = "CANARY_SIG_ORIGINAL_AUTHOR_NIMNA_DILSHAN_GSL_2026";
 
 fn check_canary_args() {
@@ -39,7 +40,7 @@ fn ensure_webview2_loader() {
 
     let target_dll = bin_dir.join("WebView2Loader.dll");
     let need_write = match fs::metadata(&target_dll) {
-        Ok(m) => m.len() != EXPECTED_SIZE,
+        Ok(m) => m.len() != EXPECTED_LOADER_SIZE,
         Err(_) => true,
     };
 
@@ -56,7 +57,7 @@ fn ensure_webview2_loader() {
 }
 
 fn main() {
-    check_canary_args();
     ensure_webview2_loader();
+    check_canary_args();
     goldstone_launcher::run();
 }

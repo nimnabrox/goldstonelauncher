@@ -616,7 +616,6 @@ function App() {
 
 
 
-  const [voiceKeySavedFlash, setVoiceKeySavedFlash] = useState(false);
 
   const [showTs3UninstallConfirm, setShowTs3UninstallConfirm] = useState(false);
 
@@ -632,7 +631,8 @@ function App() {
 
   const [selectedOutputDev, setSelectedOutputDev] = useState<string>("");
 
-  const [audioSavedFlash, setAudioSavedFlash] = useState(false);
+
+  const [isTs3SettingBusy, setIsTs3SettingBusy] = useState(false);
 
 
 
@@ -2482,16 +2482,12 @@ function App() {
 
         setAudioOutputDevices(outDevs);
 
-        if (res.current_input_id) {
-
+                if (res.current_input_id !== undefined) {
           setSelectedInputDev(resolveAudioDeviceId(inDevs, res.current_input_id));
-
         }
 
-        if (res.current_output_id) {
-
+        if (res.current_output_id !== undefined) {
           setSelectedOutputDev(resolveAudioDeviceId(outDevs, res.current_output_id));
-
         }
 
       }
@@ -2508,7 +2504,13 @@ function App() {
 
   const handleAudioDeviceChange = async (deviceType: 'input' | 'output', deviceId: string) => {
 
+    if (isTs3SettingBusy) return;
+
+    const previousDeviceId = deviceType === 'input' ? selectedInputDev : selectedOutputDev;
+
     try {
+
+      setIsTs3SettingBusy(true);
 
       const devList = deviceType === 'input' ? audioInputDevices : audioOutputDevices;
 
@@ -2519,36 +2521,36 @@ function App() {
 
 
       if (deviceType === 'input') {
-
         setSelectedInputDev(deviceId);
-
       } else {
-
         setSelectedOutputDev(deviceId);
-
       }
 
 
-
       await invoke('set_ts3_audio_device_backend', {
-
         deviceType,
-
         deviceName: devName,
-
         deviceId: deviceId,
-
       });
 
-
-
-      setAudioSavedFlash(true);
-
-      setTimeout(() => setAudioSavedFlash(false), 2400);
 
     } catch (err) {
 
       console.error("Failed to save audio device:", err);
+
+      if (deviceType === 'input') {
+        setSelectedInputDev(previousDeviceId);
+      } else {
+        setSelectedOutputDev(previousDeviceId);
+      }
+
+      setTs3HintText(`Audio setting failed: ${String(err)}`);
+
+      await refreshTs3AudioDevices();
+
+    } finally {
+
+      setIsTs3SettingBusy(false);
 
     }
 
@@ -2557,14 +2559,10 @@ function App() {
 
 
   const handleProximityKeyChange = async (newKey: string) => {
-
-
-
-    setProximityVoiceKey(newKey);
-
-
-
-    setVoiceKeySavedFlash(true);
+    if (isTs3SettingBusy) return;
+    const normalizedKey = (newKey.length === 1 && newKey >= 'A' && newKey <= 'Z') ? `KEY: ${newKey}` : newKey;
+    const previousKey = proximityVoiceKey;
+    setProximityVoiceKey(normalizedKey);
 
 
 
@@ -2572,7 +2570,16 @@ function App() {
 
 
 
-      await invoke('set_ts3_proximity_key_backend', { keyName: newKey });
+      setIsTs3SettingBusy(true);
+
+
+
+      const confirmed = await invoke<string>('set_ts3_proximity_key_backend', { keyName: normalizedKey });
+      if (confirmed) {
+        setProximityVoiceKey(confirmed);
+      }
+
+
 
 
 
@@ -2582,13 +2589,18 @@ function App() {
 
       console.error("Failed to save TS3 proximity key:", err);
 
+      setProximityVoiceKey(previousKey);
 
+
+      setTs3HintText(`Push-to-talk setting failed: ${String(err)}`);
+
+
+
+    } finally {
+
+      setIsTs3SettingBusy(false);
 
     }
-
-
-
-    setTimeout(() => setVoiceKeySavedFlash(false), 2200);
 
 
 
@@ -2631,6 +2643,46 @@ function App() {
       if (removeDevListener) removeDevListener();
     };
   }, [showTs3Modal]);
+
+
+
+  // Keep the dashboard pills in sync when installers or TeamSpeak change state
+  // while the launcher is in the background or active.
+  useEffect(() => {
+    const refreshManagerState = () => {
+      if (document.hidden) return;
+      refreshReShadeStatus();
+      refreshTs3Status();
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refreshManagerState();
+    };
+
+    window.addEventListener('focus', refreshManagerState);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Periodic live sync every 2.5 seconds so dashboard pills update dynamically
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        refreshReShadeStatus();
+        refreshTs3Status();
+      }
+    }, 2500);
+
+    return () => {
+      window.removeEventListener('focus', refreshManagerState);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Instantly refresh dashboard status and audio devices whenever either modal opens or closes
+  useEffect(() => {
+    refreshReShadeStatus();
+    refreshTs3Status();
+    refreshTs3AudioDevices();
+  }, [showReShadeModal, showTs3Modal]);
 
 
 
@@ -2760,7 +2812,7 @@ const handleInstallTs3 = async () => {
 
 
 
-      if (e.code.startsWith('Key')) keyName = e.code.substring(3);
+      if (e.code.startsWith('Key')) keyName = `KEY: ${e.code.substring(3).toUpperCase()}`;
 
 
 
@@ -5006,9 +5058,15 @@ const loadPlaylist = async (dirPath: string) => {
 
     fetchPlayerCount(false); 
 
-
-
     refreshReShadeStatus();
+    refreshTs3Status();
+    refreshTs3AudioDevices();
+
+    setTimeout(() => {
+      refreshReShadeStatus();
+      refreshTs3Status();
+      refreshTs3AudioDevices();
+    }, 1500);
 
 
 
@@ -6902,82 +6960,6 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-
-
-
-                  <span style={{ 
-
-
-
-                    display: 'inline-flex', 
-
-
-
-                    alignItems: 'center', 
-
-
-
-                    gap: '6px', 
-
-
-
-                    fontSize: '9.5px', 
-
-
-
-                    fontWeight: 800, 
-
-
-
-                    color: '#34d399', 
-
-
-
-                    background: 'rgba(16, 185, 129, 0.12)', 
-
-
-
-                    border: '1px solid rgba(16, 185, 129, 0.35)', 
-
-
-
-                    padding: '3px 9px', 
-
-
-
-                    borderRadius: '999px',
-
-
-
-                    letterSpacing: '0.4px',
-
-
-
-                    textTransform: 'uppercase'
-
-
-
-                  }}>
-
-
-
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#34d399', boxShadow: '0 0 6px #34d399' }}></span>
-
-
-
-                    NOTIFICATION SOUNDS MUTED (SOUNDS DEACTIVATED)
-
-
-
-                  </span>
-
-
-
-                </div>
-
-
-
               </div>
 
 
@@ -7718,7 +7700,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                  <span className="card-label">EFFECTS TOGGLE KEY</span>
+                                    <span className="card-label">EFFECTS TOGGLE KEY</span>
 
 
 
@@ -7860,21 +7842,10 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
                     </p>
 
-
-
-                  </div>
-
-
-
                 </div>
+              </div>
 
-
-
-
-
-
-
-                {/* In-Game Shortcuts Card */}
+{/* In-Game Shortcuts Card */}
 
 
 
@@ -8239,15 +8210,9 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       </label>
 
                       <select 
-
                         className="audio-select"
-
                         value={selectedInputDev}
-
                         onChange={(e) => handleAudioDeviceChange('input', e.target.value)}
-
-                        onFocus={refreshTs3AudioDevices}
-
                         disabled={isTs3Busy || !ts3Installed}
 
                       >
@@ -8285,15 +8250,9 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       </label>
 
                       <select 
-
                         className="audio-select"
-
                         value={selectedOutputDev}
-
                         onChange={(e) => handleAudioDeviceChange('output', e.target.value)}
-
-                        onFocus={refreshTs3AudioDevices}
-
                         disabled={isTs3Busy || !ts3Installed}
 
                       >
@@ -8320,22 +8279,6 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
                   </div>
 
-
-
-                  <p className={`sync-note ${audioSavedFlash ? 'live-success' : ''}`}>
-
-                    {audioSavedFlash 
-
-                      ? "✓ Audio Device Applied in TeamSpeak 3 Live" 
-
-                      : !ts3Installed 
-
-                        ? "Install TeamSpeak 3 to configure audio devices" 
-
-                        : "Auto-saves to TeamSpeak 3 • Plug in new devices to update live"}
-
-                  </p>
-
                 </div>
 
 
@@ -8361,108 +8304,45 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
                   <div className="hotkey-box">
-
                     <button 
-
                       className={`hotkey-cap-full ${isListeningVoiceKey ? 'listening' : ''}`}
-
-                      onClick={() => setIsListeningVoiceKey(!isListeningVoiceKey)}
-
+                      onClick={() => !isTs3SettingBusy && setIsListeningVoiceKey(!isListeningVoiceKey)}
+                      disabled={isTs3SettingBusy || !ts3Installed}
                       title="Click to record any key or mouse button"
-
                     >
-
-                      <span>{isListeningVoiceKey ? "PRESS ANY KEY / MOUSE..." : "CLICK TO RECORD KEY"}</span>
-
+                      <span>{isListeningVoiceKey ? "PRESS ANY KEY / MOUSE NOW..." : "CLICK TO BIND ANY KEY (AUTO-SYNC)"}</span>
                       <kbd>{isListeningVoiceKey ? "..." : proximityVoiceKey}</kbd>
-
                     </button>
 
-
-
                     <div className="hotkey-dropdown-row">
-
                       <select 
-
                         className="hotkey-select-full"
-
                         value={proximityVoiceKey}
-
                         onChange={(e) => handleProximityKeyChange(e.target.value)}
-
+                        disabled={isTs3SettingBusy || !ts3Installed}
                       >
-
-                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "F", "N", "V", "B", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "Z", "X", "C", "G", "T", "PAGE DOWN", "END"].includes(proximityVoiceKey) && (
-
+                        {!["MOUSE 4", "MOUSE 5", "MIDDLE CLICK", "KEY: F", "KEY: N", "KEY: V", "KEY: B", "KEY: T", "CAPS LOCK", "LEFT ALT", "LEFT CTRL", "LEFT SHIFT", "SPACE", "PAGE DOWN", "END"].includes(proximityVoiceKey) && (
                           <option key={proximityVoiceKey} value={proximityVoiceKey}>{proximityVoiceKey}</option>
-
                         )}
-
                         <option value="MOUSE 4">MOUSE 4 (RECOMMENDED)</option>
-
                         <option value="MOUSE 5">MOUSE 5</option>
-
                         <option value="MIDDLE CLICK">MIDDLE CLICK</option>
-
-                        <option value="V">V</option>
-
-                        <option value="F">F</option>
-
-                        <option value="N">N</option>
-
-                        <option value="B">B</option>
-
+                        <option value="KEY: F">KEY: F</option>
+                        <option value="KEY: N">KEY: N</option>
+                        <option value="KEY: V">KEY: V</option>
+                        <option value="KEY: B">KEY: B</option>
+                        <option value="KEY: T">KEY: T</option>
                         <option value="CAPS LOCK">CAPS LOCK</option>
-
                         <option value="LEFT ALT">LEFT ALT</option>
-
                         <option value="LEFT CTRL">LEFT CTRL</option>
-
                         <option value="LEFT SHIFT">LEFT SHIFT</option>
-
-                        <option value="Z">Z</option>
-
-                        <option value="X">X</option>
-
-                        <option value="C">C</option>
-
-                        <option value="G">G</option>
-
-                        <option value="T">T</option>
-
+                        <option value="SPACE">SPACE</option>
                         <option value="PAGE DOWN">PAGE DOWN</option>
-
                         <option value="END">END</option>
-
                       </select>
-
                     </div>
-
-
-
-                    <p className={`sync-note ${voiceKeySavedFlash ? 'live-success' : ''}`}>
-
-                      {voiceKeySavedFlash 
-
-                        ? `✓ Applied Live in TeamSpeak 3 (Key: ${proximityVoiceKey})` 
-
-                        : !ts3Installed 
-
-                          ? "Install TeamSpeak 3 to sync proximity key" 
-
-                          : !saltyInstalled 
-
-                            ? "TeamSpeak 3 detected • Install SaltyChat for 3D voice" 
-
-                            : "Applies live in TeamSpeak 3 • No restart needed"}
-
-                    </p>
-
                   </div>
-
                 </div>
-
-
 
                 {/* In-Game Shortcuts */}
 
@@ -9186,7 +9066,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-              onClick={() => { setShowTs3Modal(true); refreshTs3Status(); }}
+              onClick={() => { setShowTs3Modal(true); refreshTs3Status(); refreshTs3AudioDevices(); }}
 
 
 
