@@ -16367,103 +16367,83 @@ body {
 
 
 /* ==========================================================================
-   FORCE CLOSE - UNIFIED SPLIT POD WITH VERTICAL STACKED TOGGLES (VARIATION A)
+   FORCE CLOSE - TWO-TIER COMPACT CARD (DESIGN 3)
    ========================================================================== */
-.fc-unified-pod {
+.tools-grid-weighted {
+  display: grid !important;
+  grid-template-columns: 1.34fr 0.83fr 0.83fr !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.fc-two-tier-card {
   background: rgba(18, 24, 36, 0.75) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border: 1px solid rgba(239, 68, 68, 0.32) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
   border-radius: 8px !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
+  height: 52px !important;
+  min-height: 52px !important;
   display: flex !important;
-  align-items: stretch !important;
-  overflow: hidden !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px 4px 4px 4px !important;
+  cursor: pointer !important;
   transition: all 0.15s ease !important;
+  user-select: none !important;
   position: relative !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-}
-
-.fc-unified-pod:hover {
-  border-color: rgba(239, 68, 68, 0.55) !important;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
-}
-
-/* Left Action Trigger */
-.fc-action-side {
-  flex: 1 1 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 2.5px !important;
-  padding: 3px 2px !important;
-  cursor: pointer !important;
-  color: #fca5a5 !important;
-  background: transparent !important;
-  transition: background 0.15s ease, color 0.15s ease !important;
-  user-select: none !important;
-  min-width: 0 !important;
-}
-
-.fc-action-side:hover {
-  background: rgba(239, 68, 68, 0.18) !important;
-  color: #ffffff !important;
-}
-
-.fc-action-side:active {
-  background: rgba(239, 68, 68, 0.3) !important;
-}
-
-.fc-action-label {
-  font-size: 7.2px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.2px !important;
-  text-transform: uppercase !important;
-  line-height: 1 !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  color: inherit !important;
-  display: block !important;
-  padding: 0 !important;
-}
-
-/* Vertical Divider */
-.fc-pod-divider {
-  width: 1px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
-  height: 68% !important;
-  align-self: center !important;
-  flex-shrink: 0 !important;
-}
-
-/* Right Vertical Stack */
-.fc-stack-side {
-  width: 32px !important;
-  flex: 0 0 32px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  gap: 3px !important;
-  padding: 3px 3px 3px 2px !important;
-  background: rgba(0, 0, 0, 0.25) !important;
   box-sizing: border-box !important;
 }
 
-.fc-vert-chip {
+.fc-two-tier-card:hover {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
+  background: rgba(28, 24, 36, 0.85) !important;
+}
+
+.fc-tier-action {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 1.5px !important;
-  height: 18px !important;
-  padding: 0 2px !important;
-  border-radius: 4px !important;
-  font-size: 6.8px !important;
+  gap: 3.5px !important;
+  color: #fca5a5 !important;
+  width: 100% !important;
+  padding: 2px 0 !important;
+  line-height: 1 !important;
+}
+
+.fc-tier-title {
+  font-size: 7.8px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.2px !important;
+  letter-spacing: 0.3px !important;
+  text-transform: uppercase !important;
+  line-height: 1 !important;
+  color: #fca5a5 !important;
+  display: inline-block !important;
+  padding: 0 !important;
+}
+
+.fc-tier-shelf {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  width: 100% !important;
+}
+
+.fc-shelf-chip {
+  flex: 1 !important;
+  height: 17px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  border-radius: 4px !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.25px !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
   user-select: none !important;
@@ -16472,59 +16452,65 @@ body {
   box-sizing: border-box !important;
 }
 
-.fc-vert-chip span {
+.fc-shelf-chip span {
   width: auto !important;
   max-width: none !important;
   overflow: visible !important;
   text-overflow: clip !important;
-  font-size: 6.8px !important;
+  font-size: 7px !important;
   font-weight: 800 !important;
-  letter-spacing: 0.2px !important;
+  letter-spacing: 0.25px !important;
   line-height: 1 !important;
   display: inline-block !important;
   padding: 0 !important;
 }
 
-.fc-vert-chip.redm-active {
-  background: rgba(239, 68, 68, 0.28) !important;
-  border: 1px solid rgba(239, 68, 68, 0.85) !important;
+.fc-shelf-chip.redm-on {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border: 1px solid rgba(239, 68, 68, 0.75) !important;
   color: #fca5a5 !important;
-  box-shadow: 0 0 5px rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.3) !important;
 }
 
-.fc-vert-chip.redm-active:hover {
-  background: rgba(239, 68, 68, 0.45) !important;
-  color: #ffffff !important;
+.fc-shelf-chip.redm-on:hover {
+  background: rgba(239, 68, 68, 0.4) !important;
+  color: #fff !important;
 }
 
-.fc-vert-chip.ts3-active {
-  background: rgba(59, 130, 246, 0.28) !important;
-  border: 1px solid rgba(59, 130, 246, 0.85) !important;
+.fc-shelf-chip.ts3-on {
+  background: rgba(59, 130, 246, 0.25) !important;
+  border: 1px solid rgba(59, 130, 246, 0.75) !important;
   color: #93c5fd !important;
-  box-shadow: 0 0 5px rgba(59, 130, 246, 0.35) !important;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3) !important;
 }
 
-.fc-vert-chip.ts3-active:hover {
-  background: rgba(59, 130, 246, 0.45) !important;
-  color: #ffffff !important;
+.fc-shelf-chip.ts3-on:hover {
+  background: rgba(59, 130, 246, 0.4) !important;
+  color: #fff !important;
 }
 
-.fc-vert-chip.inactive {
+.fc-shelf-chip.off {
   background: rgba(0, 0, 0, 0.45) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   color: #64748b !important;
-  opacity: 0.6 !important;
+  opacity: 0.55 !important;
 }
 
-.fc-vert-chip.inactive:hover {
+.fc-shelf-chip.off:hover {
   background: rgba(255, 255, 255, 0.08) !important;
-  color: #94a3b8 !important;
+  color: #cbd5e1 !important;
   opacity: 1 !important;
 }
 
-.fc-vert-chip .fc-chip-check {
+.fc-shelf-chip .fc-chip-check {
   width: 5px !important;
   height: 5px !important;
   display: inline-block !important;
   flex-shrink: 0 !important;
+}
+
+/* Ensure FIX VULKAN and CLEAN CACHE match 52px height */
+.tools-grid-weighted .tool-btn {
+  height: 52px !important;
+  min-height: 52px !important;
 }

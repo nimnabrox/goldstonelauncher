@@ -9017,26 +9017,20 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-            <div className="tools-grid tools-grid-3">
+            <div className="tools-grid tools-grid-3 tools-grid-weighted">
 
 
 
-                            {/* SLOT 1: UNIFIED SPLIT POD (VARIATION A - VERTICAL STACKED TOGGLES) */}
-              <div className="fc-unified-pod" title="Force Close Utilities">
-                <div 
-                  className="fc-action-side" 
-                  onClick={forceReset} 
-                  title="Click to Force Close selected processes"
-                >
-                  <ShieldAlertIcon size={11} />
-                  <span className="fc-action-label">FORCE CLOSE</span>
+                                          {/* SLOT 1: TWO-TIER FORCE CLOSE CARD (DESIGN 3) */}
+              <div className="fc-two-tier-card" onClick={forceReset} title="Click to Force Close selected processes">
+                <div className="fc-tier-action">
+                  <ShieldAlertIcon size={12} />
+                  <span className="fc-tier-title">FORCE CLOSE</span>
                 </div>
 
-                <div className="fc-pod-divider"></div>
-
-                <div className="fc-stack-side">
+                <div className="fc-tier-shelf" onClick={(e) => e.stopPropagation()}>
                   <div 
-                    className={`fc-vert-chip ${killRedm ? "redm-active" : "inactive"}`}
+                    className={`fc-shelf-chip ${killRedm ? "redm-on" : "off"}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       const next = !killRedm;
@@ -9046,14 +9040,14 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                     title="Include RedM in Force Close"
                   >
                     {killRedm && (
-                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
                     )}
                     <span>REDM</span>
                   </div>
                   <div 
-                    className={`fc-vert-chip ${killTs3 ? "ts3-active" : "inactive"}`}
+                    className={`fc-shelf-chip ${killTs3 ? "ts3-on" : "off"}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       const next = !killTs3;
@@ -9063,7 +9057,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                     title="Include TS3 in Force Close (disconnects servers cleanly first)"
                   >
                     {killTs3 && (
-                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
                     )}
