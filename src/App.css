@@ -16183,73 +16183,6 @@ body {
 
 
 /* ==========================================================================
-   FORCE CLOSE SELECTIVE PROCESS TOGGLES (REDM & TS3)
-   ========================================================================== */
-.force-close-wrap {
-  width: 100%;
-  display: flex;
-}
-
-.force-close-btn {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 3px !important;
-  padding: 5px 2px !important;
-}
-
-.fc-main-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  pointer-events: none;
-}
-
-.fc-toggles-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 1px;
-}
-
-.fc-pill {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  font-size: 8px !important;
-  font-weight: 800 !important;
-  padding: 1px 5px !important;
-  border-radius: 4px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  background: rgba(0, 0, 0, 0.35) !important;
-  color: #94a3b8 !important;
-  transition: all 0.15s ease !important;
-  user-select: none !important;
-  line-height: 1.2 !important;
-}
-
-.fc-pill:hover {
-  filter: brightness(1.25);
-  border-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.fc-pill.active-redm {
-  background: rgba(239, 68, 68, 0.28) !important;
-  border-color: rgba(239, 68, 68, 0.6) !important;
-  color: #fca5a5 !important;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.25);
-}
-
-.fc-pill.active-ts3 {
-  background: rgba(59, 130, 246, 0.28) !important;
-  border-color: rgba(59, 130, 246, 0.6) !important;
-  color: #93c5fd !important;
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.25);
-}
-
-/* ==========================================================================
    HOMEPAGE DASHBOARD STATUS BADGES (RESHADE & TS3 VOICE)
    ========================================================================== */
 .pill-status-badge {
@@ -16367,59 +16300,6 @@ body {
   display: block !important;
 }
 
-/* --- FORCE CLOSE CHIPS (COMPACT, NO TRUNCATION) --- */
-.fc-chip {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  font-size: 7.5px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.3px !important;
-  padding: 1.5px 5px !important;
-  border-radius: 3px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 2px !important;
-  white-space: nowrap !important;
-  transition: all 0.15s ease !important;
-  user-select: none !important;
-  line-height: 1.1 !important;
-}
-
-.fc-chip.active-redm {
-  background: rgba(239, 68, 68, 0.28) !important;
-  border: 1px solid rgba(239, 68, 68, 0.75) !important;
-  color: #fca5a5 !important;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3) !important;
-}
-
-.fc-chip.active-ts3 {
-  background: rgba(59, 130, 246, 0.28) !important;
-  border: 1px solid rgba(59, 130, 246, 0.75) !important;
-  color: #93c5fd !important;
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.3) !important;
-}
-
-.fc-chip.inactive {
-  background: rgba(0, 0, 0, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #64748b !important;
-}
-
-.fc-chip:hover {
-  filter: brightness(1.25);
-}
-
-.fc-chip-check {
-  display: inline-block !important;
-  flex-shrink: 0 !important;
-}
-
-.fc-chip.inactive .fc-chip-check {
-  display: none !important;
-}
-
-
 /* ==========================================================================
    ENHANCED IN-GAME CONTROLS & RESHADE WINDOW FIXES
    ========================================================================== */
@@ -16489,6 +16369,10 @@ body {
 /* ==========================================================================
    FORCE CLOSE BUTTON & COMPACT INTEGRATED TOGGLES - ZERO OVERFLOW
    ========================================================================== */
+
+/* ==========================================================================
+   FORCE CLOSE BUTTON & COMPACT INTEGRATED TOGGLES - ZERO OVERFLOW
+   ========================================================================== */
 .force-close-wrap {
   width: 100% !important;
   display: flex !important;
@@ -16499,7 +16383,7 @@ body {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 2.5px !important;
+  gap: 3px !important;
   padding: 4px 2px !important;
   min-height: 48px !important;
   width: 100% !important;
@@ -16512,22 +16396,32 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 3px !important;
+  gap: 3.5px !important;
   pointer-events: none !important;
-  font-size: 7.8px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.25px !important;
-  color: #fca5a5 !important;
   line-height: 1 !important;
   white-space: nowrap !important;
-  width: 100% !important;
+}
+
+.fc-main-title,
+b.fc-main-title {
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.3px !important;
+  color: #fca5a5 !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  padding: 0 !important;
 }
 
 .fc-toggles-row {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 2.5px !important;
+  gap: 3px !important;
   margin-top: 1px !important;
   width: 100% !important;
   max-width: 100% !important;
@@ -16537,21 +16431,34 @@ body {
 .fc-chip {
   pointer-events: auto !important;
   cursor: pointer !important;
-  font-size: 6.5px !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.15px !important;
-  padding: 1px 3.5px !important;
-  border-radius: 999px !important;
+  width: auto !important;
+  max-width: none !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 1.5px !important;
+  gap: 2px !important;
+  padding: 1.5px 4.5px !important;
+  border-radius: 999px !important;
   white-space: nowrap !important;
   transition: all 0.15s ease !important;
   user-select: none !important;
   line-height: 1 !important;
   box-sizing: border-box !important;
-  flex-shrink: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+.fc-chip-text,
+b.fc-chip-text {
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 6.8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.2px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  padding: 0 !important;
 }
 
 .fc-chip.active-redm {

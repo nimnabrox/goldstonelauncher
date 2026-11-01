@@ -9025,10 +9025,10 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                 <button className="tool-btn red-tool force-close-btn" onClick={forceReset}>
                   <div className="fc-main-row">
                     <ShieldAlertIcon size={11} />
-                    <span>FORCE CLOSE</span>
+                    <b className="fc-main-title">FORCE CLOSE</b>
                   </div>
                   <div className="fc-toggles-row">
-                    <span 
+                    <div 
                       className={`fc-chip ${killRedm ? "active-redm" : "inactive"}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -9041,9 +9041,9 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
-                      REDM
-                    </span>
-                    <span 
+                      <b className="fc-chip-text">REDM</b>
+                    </div>
+                    <div 
                       className={`fc-chip ${killTs3 ? "active-ts3" : "inactive"}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -9056,8 +9056,8 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                       <svg className="fc-chip-check" viewBox="0 0 12 12" width="5" height="5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="2.5 6.5 4.5 8.5 9.5 3.5" />
                       </svg>
-                      TS3
-                    </span>
+                      <b className="fc-chip-text">TS3</b>
+                    </div>
                   </div>
                 </button>
               </div>
