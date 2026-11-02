@@ -601,6 +601,7 @@ function App() {
 
 
   const [isTs3Busy, setIsTs3Busy] = useState(false);
+  const isTs3BusyRef = useRef(false);
 
 
 
@@ -2310,11 +2311,14 @@ function App() {
 
 
 
-  const refreshTs3Status = async () => {
+  const refreshTs3Status = async (forceSync = false) => {
 
 
 
     try {
+      if (isTs3BusyRef.current && !forceSync) {
+        return;
+      }
 
 
 
@@ -2691,80 +2695,48 @@ function App() {
 
 
 const handleInstallTs3 = async () => {
-
-
-
-    if (isTs3Busy) return;
-
-
-
+    if (isTs3BusyRef.current) return;
+    isTs3BusyRef.current = true;
     setIsTs3Busy(true);
 
-
-
-    setTs3StatusText(ts3Installed ? "INSTALLING SALTYCHAT..." : "INSTALLING TS3 & SALTYCHAT...");
-
-
-
+    setTs3StatusText(ts3Installed ? "INSTALLING SALTYCHAT..." : "INITIALIZING TEAMSPEAK 3 INSTALLATION...");
     setTs3HintText("Setting up official 3D voice packages...");
-
-
+    setTs3Progress(5);
 
     try {
-
       await invoke('install_ts3_backend');
-
-      await refreshTs3Status();
-
+      await refreshTs3Status(true);
     } catch (err) {
-
       console.error("Install TS3 failed:", err);
-
-      await refreshTs3Status();
-
+      setTs3StatusText("INSTALLATION FAILED");
+      setTs3HintText(String(err));
+      await refreshTs3Status(true);
     } finally {
-
+      isTs3BusyRef.current = false;
       setIsTs3Busy(false);
-
     }
-
   };
 
-
-
   const handleUninstallTs3 = async () => {
-
-    if (isTs3Busy) return;
-
+    if (isTs3BusyRef.current) return;
+    isTs3BusyRef.current = true;
     setIsTs3Busy(true);
 
     setTs3StatusText("UNINSTALLING...");
-
     setTs3HintText("Closing voice client and cleaning files...");
-
-
+    setTs3Progress(20);
 
     try {
-
       await invoke('uninstall_ts3_backend');
-
-      await refreshTs3Status();
-
+      await refreshTs3Status(true);
     } catch (err) {
-
       console.error("Uninstall TS3 failed:", err);
-
-      await refreshTs3Status();
-
+      await refreshTs3Status(true);
     } finally {
-
+      isTs3BusyRef.current = false;
       setIsTs3Busy(false);
-
     }
-
   };
-
-
 
   const confirmAndExecuteUninstall = async () => {
 
