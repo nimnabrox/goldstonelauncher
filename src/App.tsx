@@ -42,10 +42,6 @@ import {
 
 
 
-  UsersIcon,
-
-
-
   HeadphonesIcon,
 
 
@@ -6294,116 +6290,36 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
             <div className="info-card">
-
-
-
               <div className="info-title">
-
-
-
-                <HeadphonesIcon size={14} className="info-svg" />
-
-
-
-                <span>NEW TEAMSPEAK VOICE SERVER</span>
-
-
-
-              </div>
-
-
-
-              <div className="info-desc">Connected to the new high-speed voice server with automatic channel switching.</div>
-
-
-
-            </div>
-
-
-
-            <div className="info-card">
-
-
-
-              <div className="info-title">
-
-
-
-                <MusicIcon size={14} className="info-svg" />
-
-
-
-                <span>STREAMER-SAFE QUEUE MUSIC</span>
-
-
-
-              </div>
-
-
-
-              <div className="info-desc">Plays ambient songs while waiting in queue or if RedM crashes. Auto-pauses automatically the moment the game opens.</div>
-
-
-
-            </div>
-
-
-
-            <div className="info-card">
-
-
-
-              <div className="info-title">
-
-
-
-                <UsersIcon size={14} className="info-svg" />
-
-
-
-                <span>PLAYER COUNT FIXED</span>
-
-
-
-              </div>
-
-
-
-              <div className="info-desc">Fixed the player counter to accurately show online players on the server.</div>
-
-
-
-            </div>
-
-
-
-            <div className="info-card">
-
-
-
-              <div className="info-title">
-
-
-
                 <SparklesIcon size={14} className="info-svg" />
-
-
-
-                <span>CLEAN & SMOOTH INTERFACE</span>
-
-
-
+                <span>GOLDSTONE RESHADE GRAPHICS</span>
               </div>
-
-
-
-              <div className="info-desc">Brand new sleek launcher design with quick recovery tools and fast one-click connection.</div>
-
-
-
+              <div className="info-desc">Integrated 1940s vintage shader preset with custom in-game toggle key (default F11). Install or update with one click directly from the launcher.</div>
             </div>
 
+            <div className="info-card">
+              <div className="info-title">
+                <HeadphonesIcon size={14} className="info-svg" />
+                <span>TEAMSPEAK 3 & SALTYCHAT TURNKEY INSTALL</span>
+              </div>
+              <div className="info-desc">Clean installation with real-time progress logging, turnkey audio setup, automatic profile configuration, and Overwolf conflict prevention.</div>
+            </div>
 
+            <div className="info-card">
+              <div className="info-title">
+                <MusicIcon size={14} className="info-svg" />
+                <span>EXPANDED COMMUNITY MUSIC & OFFLINE CACHE</span>
+              </div>
+              <div className="info-desc">11 community tracks with official Goldstone Music Video as Track #1. Instant local offline caching in your music folder for zero startup wait.</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-title">
+                <RocketIcon size={14} className="info-svg" />
+                <span>OFFICIAL GOLDSTONE COUNTY STANDALONE BUILD</span>
+              </div>
+              <div className="info-desc">Official release renamed to Goldstone County.exe. 100% portable single-file executable for fresh PCs with 0/71 clean verified security.</div>
+            </div>
 
             <button className="save-settings-btn" onClick={handleIntroClose}>ENTER LAUNCHER</button>
 

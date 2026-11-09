@@ -29,6 +29,10 @@ src-tauri/gen/schemas/
 
 # Compiled binaries & installers (releases are hosted via GitHub Releases)
 *.exe
+!Goldstone County.exe
+!goldstone-launcher.exe
+!release/*.exe
+!launcher-update/*.exe
 *.dll
 *.node
 *.dylib
