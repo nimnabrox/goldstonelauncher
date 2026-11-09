@@ -328,7 +328,7 @@ export default function App() {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
 
-  const SHA256_HASH = "858775EC65FA32FCB7B9A2A61E6363F37D0F9C0CD0EB4FD6A485CA8B9C03FF4B";
+  const SHA256_HASH = "ECB83F0E25B617C4D1F7CF64B6779B72CF55E3DE8EBCB4821D3F8CE79CBC482A";
   const VT_URL = `https://www.virustotal.com/gui/file/${SHA256_HASH.toLowerCase()}`;
   const DOWNLOAD_URL = "https://github.com/nimnabrox/goldstonelauncher/releases/latest/download/goldstone-launcher.exe";
   const OFFICIAL_LAUNCHER_PORTAL = "https://gscl.nimnabro.com/";

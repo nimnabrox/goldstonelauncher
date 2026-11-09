@@ -11,7 +11,7 @@ Welcome to **v0.3.2** of the official **Goldstone County Launcher**! This update
 * 🏛️ **Official Goldstone Website**: [goldstonerp.com](https://www.goldstonerp.com/)
 * 🎮 **Server Direct Connect**: `cfx.re/join/qe3bl6`
 * 🎙️ **TeamSpeak Voice Server**: `play.goldstonerp.com`
-* 🛡️ **VirusTotal Security Report**: [100% Clean (0/71 Engines)](https://www.virustotal.com/gui/file/858775ec65fa32fcb7b9a2a61e6363f37d0f9c0cd0eb4fd6a485ca8b9c03ff4b)
+* 🛡️ **VirusTotal Security Report**: [100% Clean (0/71 Engines)](https://www.virustotal.com/gui/file/ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a)
 
 ---
 
@@ -52,11 +52,11 @@ Every official Goldstone build is signed with an Authenticode certificate and ve
 | **Architecture** | Windows x64 (64-bit) |
 | **File Size** | 15,853,576 bytes (~15.1 MB) |
 | **Digital Signature** | Goldstone County Roleplay (DigiCert RFC3161 Timestamped) |
-| **SHA-256 Checksum** | `858775ec65fa32fcb7b9a2a61e6363f37d0f9c0cd0eb4fd6a485ca8b9c03ff4b` |
-| **VirusTotal Status** | [✅ 0 Detections / 71 Engines Clean (100% Safe)](https://www.virustotal.com/gui/file/858775ec65fa32fcb7b9a2a61e6363f37d0f9c0cd0eb4fd6a485ca8b9c03ff4b) |
+| **SHA-256 Checksum** | `ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a` |
+| **VirusTotal Status** | [✅ 0 Detections / 71 Engines Clean (100% Safe)](https://www.virustotal.com/gui/file/ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a) |
 
 ### Verify Checksum via PowerShell:
 ```powershell
 Get-FileHash -Path "Goldstone County.exe" -Algorithm SHA256
-# Expected Hash: 858775EC65FA32FCB7B9A2A61E6363F37D0F9C0CD0EB4FD6A485CA8B9C03FF4B
+# Expected Hash: ECB83F0E25B617C4D1F7CF64B6779B72CF55E3DE8EBCB4821D3F8CE79CBC482A
 ```

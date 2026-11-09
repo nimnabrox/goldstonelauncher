@@ -4201,7 +4201,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-    const isCurrentlyEnabled = localStorage.getItem("music_enabled") === "true" && musicEnabledRef.current;
+    const isCurrentlyEnabled = localStorage.getItem("music_enabled") === "true" || musicEnabledRef.current;
 
 
 
@@ -4343,7 +4343,13 @@ const loadPlaylist = async (dirPath: string) => {
       await invoke("kill_processes_backend", { killRedm, killTs3 });
       setStatus(`${targets.join(" & ")} CLOSED`);
       setTimeout(() => setStatus("READY TO CONNECT"), 2500);
-      /* Music auto-play on force close removed per user preference */
+      if (killRedm && (musicEnabledRef.current || localStorage.getItem("music_enabled") === "true")) {
+        if (safePlayMusicRef.current) {
+          safePlayMusicRef.current(800);
+        } else {
+          safePlayMusic(800);
+        }
+      }
 
 
 
@@ -4359,7 +4365,13 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      /* Music auto-play on force close removed per user preference */
+      if (killRedm && (musicEnabledRef.current || localStorage.getItem("music_enabled") === "true")) {
+        if (safePlayMusicRef.current) {
+          safePlayMusicRef.current(800);
+        } else {
+          safePlayMusic(800);
+        }
+      }
 
 
 
@@ -5310,15 +5322,19 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-      if (event.payload === "REDM CLOSED") {
+      const payloadStr = typeof event.payload === "string" ? event.payload : "";
+      if (payloadStr === "REDM CLOSED" || payloadStr === "REDM & TS3 CLOSED" || payloadStr.includes("REDM")) {
 
 
 
         // Auto-resume music when RedM crashes or closes (strictly only if music is enabled by user)
-
-
-
-        /* Music auto-play on game close removed per user preference */
+        if (musicEnabledRef.current || localStorage.getItem("music_enabled") === "true") {
+          if (safePlayMusicRef.current) {
+            safePlayMusicRef.current(1000);
+          } else {
+            safePlayMusic(1000);
+          }
+        }
 
 
 
