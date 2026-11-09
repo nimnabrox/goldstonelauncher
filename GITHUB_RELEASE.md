@@ -11,7 +11,7 @@ Welcome to **v0.3.2** of the official **Goldstone County Launcher**! This update
 * 🏛️ **Official Goldstone Website**: [goldstonerp.com](https://www.goldstonerp.com/)
 * 🎮 **Server Direct Connect**: `cfx.re/join/qe3bl6`
 * 🎙️ **TeamSpeak Voice Server**: `play.goldstonerp.com`
-* 🛡️ **VirusTotal Security Report**: [100% Clean (0/71 Engines)](https://www.virustotal.com/gui/file/ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a)
+* 🛡️ **VirusTotal Security Report**: [100% Clean (0/71 Engines)](https://www.virustotal.com/gui/file/6b4e555a5c1cdb3e0217cf1cacaea203a0df516c8bdb4609381ec16f22a36427)
 
 ---
 
@@ -39,6 +39,10 @@ Welcome to **v0.3.2** of the official **Goldstone County Launcher**! This update
 ### 🎨 1940s Vintage ReShade Preset
 * One-click 1940s cinematic color grading and vintage atmosphere preset tailored for RedM.
 
+### 🛡️ Smart 67% Stuck Fix & Loading Engine Bypass
+* Decoupled the 67% Stuck Fix toggle switch completely from ambient music fade events.
+* When 67% Stuck Fix is active, RedM launches safely into the local engine first, waits for asset compilation past 67%, and seamlessly auto-connects to Goldstone County without crashing or freezing.
+
 ---
 
 ## 🔒 Security & Integrity Verification
@@ -50,13 +54,13 @@ Every official Goldstone build is signed with an Authenticode certificate and ve
 | **File Name** | `Goldstone County.exe` / `goldstone-launcher.exe` |
 | **Version** | `0.3.2` |
 | **Architecture** | Windows x64 (64-bit) |
-| **File Size** | 15,853,576 bytes (~15.1 MB) |
+| **File Size** | 15,854,088 bytes (~15.1 MB) |
 | **Digital Signature** | Goldstone County Roleplay (DigiCert RFC3161 Timestamped) |
-| **SHA-256 Checksum** | `ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a` |
-| **VirusTotal Status** | [✅ 0 Detections / 71 Engines Clean (100% Safe)](https://www.virustotal.com/gui/file/ecb83f0e25b617c4d1f7cf64b6779b72cf55e3de8ebcb4821d3f8ce79cbc482a) |
+| **SHA-256 Checksum** | `6b4e555a5c1cdb3e0217cf1cacaea203a0df516c8bdb4609381ec16f22a36427` |
+| **VirusTotal Status** | [✅ 0 Detections / 71 Engines Clean (100% Safe)](https://www.virustotal.com/gui/file/6b4e555a5c1cdb3e0217cf1cacaea203a0df516c8bdb4609381ec16f22a36427) |
 
 ### Verify Checksum via PowerShell:
 ```powershell
 Get-FileHash -Path "Goldstone County.exe" -Algorithm SHA256
-# Expected Hash: ECB83F0E25B617C4D1F7CF64B6779B72CF55E3DE8EBCB4821D3F8CE79CBC482A
+# Expected Hash: 6B4E555A5C1CDB3E0217CF1CACAEA203A0DF516C8BDB4609381EC16F22A36427
 ```

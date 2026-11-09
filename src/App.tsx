@@ -892,6 +892,26 @@ function App() {
 
 
 
+  const monitorEnabledRef = useRef<boolean>(monitorEnabled);
+
+  useEffect(() => {
+
+    monitorEnabledRef.current = monitorEnabled;
+
+  }, [monitorEnabled]);
+
+
+
+  const redmPathRef = useRef<string>(redmPath);
+
+  useEffect(() => {
+
+    redmPathRef.current = redmPath;
+
+  }, [redmPath]);
+
+
+
   const currentTrackIndexRef = useRef(currentTrackIndex);
 
 
@@ -1161,6 +1181,8 @@ function App() {
 
 
     setMonitorEnabled(newState);
+
+    monitorEnabledRef.current = newState;
 
 
 
@@ -3048,19 +3070,27 @@ const handleInstallTs3 = async () => {
 
 
 
-      setStatus("LAUNCHING REDM...");
+      const is67Fix = monitorEnabledRef.current || localStorage.getItem("ts_monitor_enabled") === "true";
 
+      if (is67Fix) {
 
+        setStatus("LAUNCHING REDM (67% STUCK BYPASS)...");
 
-      await invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm });
+        await invoke('launch_redm_plain', { customPath: customRedm });
 
+        setStatus("REDM ENGINE LOADED (WAITING FOR 67%)...");
 
+      } else {
 
-      setStatus("CONNECTED");
+        setStatus("LAUNCHING REDM...");
 
+        await invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm });
 
+        setStatus("CONNECTED");
 
-      setTimeout(() => setStatus("READY TO CONNECT"), 4000);
+        setTimeout(() => setStatus("READY TO CONNECT"), 4000);
+
+      }
 
 
 
@@ -3124,15 +3154,27 @@ const handleInstallTs3 = async () => {
 
 
 
-      await invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm }); 
+      const is67Fix = monitorEnabledRef.current || localStorage.getItem("ts_monitor_enabled") === "true";
 
+      if (is67Fix) {
 
+        setStatus("LAUNCHING REDM (67% STUCK BYPASS)...");
 
-      setStatus("REDM LAUNCHED");
+        await invoke('launch_redm_plain', { customPath: customRedm });
 
+        setStatus("REDM ENGINE LOADED (WAITING FOR 67%)...");
 
+      } else {
 
-      setTimeout(() => setStatus("READY TO CONNECT"), 3000);
+        setStatus("LAUNCHING REDM...");
+
+        await invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm }); 
+
+        setStatus("REDM LAUNCHED");
+
+        setTimeout(() => setStatus("READY TO CONNECT"), 3000);
+
+      }
 
 
 
@@ -5255,64 +5297,37 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
     const unlistenTrigger = listen('trigger-67', () => {
-
-
-
-      setTargetHit(true);
-
-
-
-      
-
-
-
       // Auto-pause ambient queue music when RedM hits 67% loading screen
-
-
-
       if (audioRef.current) { 
-
-
-
         fadeAudio(0, 400).then(() => {
-
-
-
           if (audioRef.current) {
-
-
-
             try { audioRef.current.pause(); } catch {}
-
-
-
             audioRef.current.volume = parseFloat(localStorage.getItem("music_volume") || "0.5");
-
-
-
             setIsPlaying(false);
-
-
-
           }
-
-
-
         });
-
-
-
       }
 
-
-
+      // If 67% Stuck Fix is active, auto-connect to the server now that the engine is ready
+      const is67Fix = monitorEnabledRef.current || localStorage.getItem("ts_monitor_enabled") === "true";
+      if (is67Fix) {
+        setTargetHit(true);
+        setStatus("67% HIT — CONNECTING TO GOLDSTONE...");
+        const customRedm = redmPathRef.current || null;
+        invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm })
+          .then(() => {
+            setStatus("CONNECTED");
+            setTimeout(() => {
+              setStatus("READY TO CONNECT");
+              setTargetHit(false);
+            }, 4000);
+          })
+          .catch((err) => {
+            console.log("67% auto-connect error:", err);
+            setTargetHit(false);
+          });
+      }
     });
-
-
-
-
-
-
 
     const unlistenReset = listen('reset-trigger', (event) => { 
 
@@ -8750,7 +8765,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-              className={`hero-stuck-fix-card ${monitorEnabled ? 'active' : ''} ${targetHit ? 'triggered' : ''}`}
+              className={`hero-stuck-fix-card ${monitorEnabled ? 'active' : ''} ${monitorEnabled && targetHit ? 'triggered' : ''}`}
 
 
 
@@ -8770,7 +8785,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-              <div className={`fluent-switch mini ${monitorEnabled || targetHit ? 'checked' : ''}`}>
+              <div className={`fluent-switch mini ${monitorEnabled ? 'checked' : ''}`}>
 
 
 
