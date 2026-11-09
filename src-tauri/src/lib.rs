@@ -9851,6 +9851,8 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
     tauri::async_runtime::spawn_blocking(move || {
         let ts_exe = find_teamspeak_exe(None);
         let user_had_overwolf = check_user_has_overwolf();
+        let (ow_stop_tx, ow_stop_rx) = std::sync::mpsc::channel();
+        let mut ow_watchdog: Option<std::thread::JoinHandle<()>> = None;
 
 
 
@@ -10087,69 +10089,172 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
 
 
             let setup_path_str = setup_dest.to_string_lossy().to_string();
-            let temp_dir = std::env::temp_dir();
-            let wrapper_cmd_path = temp_dir.join("ts3_clean_install.cmd");
 
-            // Build a clean install wrapper that suppresses bundled Overwolf via IFEO
-            // without using flaky process killing. Overwolf installer binaries are redirected to
-            // return exit code 0 immediately. Keys are cleaned up right after setup finishes.
-            let wrapper_content = format!(
-                "@echo off\r\n\
-                 setlocal\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfInstallerDownloader.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:64 >nul 2>&1\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfInstallerDownloader.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:32 >nul 2>&1\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfTeamSpeakInstaller.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:64 >nul 2>&1\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfTeamSpeakInstaller.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:32 >nul 2>&1\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OWInstaller.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:64 >nul 2>&1\r\n\
-                 reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OWInstaller.exe\" /v Debugger /t REG_SZ /d \"cmd.exe /c exit 0\" /f /reg:32 >nul 2>&1\r\n\
-                 start /wait \"\" \"{}\" /S\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfInstallerDownloader.exe\" /f /reg:64 >nul 2>&1\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfInstallerDownloader.exe\" /f /reg:32 >nul 2>&1\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfTeamSpeakInstaller.exe\" /f /reg:64 >nul 2>&1\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OverwolfTeamSpeakInstaller.exe\" /f /reg:32 >nul 2>&1\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OWInstaller.exe\" /f /reg:64 >nul 2>&1\r\n\
-                 reg delete \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\OWInstaller.exe\" /f /reg:32 >nul 2>&1\r\n",
-                setup_path_str
-            );
 
-            let _ = fs::write(&wrapper_cmd_path, wrapper_content);
 
-            let cmd_exe_path = "C:\\Windows\\System32\\cmd.exe";
-            let cmd_wide = to_wide(cmd_exe_path);
-            let wrapper_str = wrapper_cmd_path.to_string_lossy().to_string();
-            let cmd_params = format!("/c call \"{}\"", wrapper_str);
-            let params_wide = to_wide(&cmd_params);
+            let parent_dir = setup_dest.parent().map(|p| p.to_string_lossy().to_string());
+
+
+
+            let file_wide = to_wide(&setup_path_str);
+
+
+
+            let dir_wide = parent_dir.as_ref().map(|d| to_wide(d));
+
+
+
+            let params_wide = to_wide("/S");
+
+
+
             let op_wide = to_wide("runas");
 
-            unsafe {
-                let res = ShellExecuteW(
-                    std::ptr::null_mut(),
-                    op_wide.as_ptr(),
-                    cmd_wide.as_ptr(),
-                    params_wide.as_ptr(),
-                    std::ptr::null(),
-                    0,
-                );
+            if !user_had_overwolf {
+                ow_watchdog = Some(std::thread::spawn(move || {
+                    while ow_stop_rx.try_recv().is_err() {
+                        kill_processes_by_name(&["overwolf"]);
+                        close_overwolf_overlay_windows();
 
-                if res <= 32 {
-                    ShellExecuteW(
-                        std::ptr::null_mut(),
-                        std::ptr::null(),
-                        cmd_wide.as_ptr(),
-                        params_wide.as_ptr(),
-                        std::ptr::null(),
-                        0,
-                    );
-                }
+                        if let Ok(temp) = std::env::var("TEMP") {
+                            let ow_dir = PathBuf::from(&temp).join("overwolf_downloader");
+                            if ow_dir.exists() {
+                                let _ = fs::remove_dir_all(&ow_dir);
+                            }
+
+                            if let Ok(entries) = fs::read_dir(&temp) {
+                                for entry in entries.flatten() {
+                                    let path = entry.path();
+                                    if path.is_dir() {
+                                        let fname = path.file_name().unwrap_or_default().to_string_lossy().to_ascii_lowercase();
+                                        if fname.starts_with("ns") && fname.ends_with(".tmp") {
+                                            let ow1 = path.join("OverwolfInstallerDownloader.exe");
+                                            if ow1.exists() {
+                                                let _ = fs::remove_file(&ow1).or_else(|_| fs::write(&ow1, b""));
+                                            }
+                                            let ow2 = path.join("OverwolfTeamSpeakInstaller.exe");
+                                            if ow2.exists() {
+                                                let _ = fs::remove_file(&ow2).or_else(|_| fs::write(&ow2, b""));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        std::thread::sleep(Duration::from_millis(30));
+                    }
+                }));
             }
 
-            if !user_had_overwolf {
-                if let Ok(temp) = std::env::var("TEMP") {
-                    let ow_dir = PathBuf::from(&temp).join("overwolf_downloader");
-                    if ow_dir.exists() {
-                        let _ = fs::remove_dir_all(&ow_dir);
-                    }
+            unsafe {
+
+
+
+                let res = ShellExecuteW(
+
+
+
+                    std::ptr::null_mut(),
+
+
+
+                    op_wide.as_ptr(),
+
+
+
+                    file_wide.as_ptr(),
+
+
+
+                    params_wide.as_ptr(),
+
+
+
+                    dir_wide.as_ref().map(|d| d.as_ptr()).unwrap_or(std::ptr::null()),
+
+
+
+                    1,
+
+
+
+                );
+
+
+
+                if res <= 32 {
+
+
+
+                    ShellExecuteW(
+
+
+
+                        std::ptr::null_mut(),
+
+
+
+                        std::ptr::null(),
+
+
+
+                        file_wide.as_ptr(),
+
+
+
+                        params_wide.as_ptr(),
+
+
+
+                        dir_wide.as_ref().map(|d| d.as_ptr()).unwrap_or(std::ptr::null()),
+
+
+
+                        1,
+
+
+
+                    );
+
+
+
                 }
+
+
+
+            }
+
+
+
+
+
+
+
+            // Pre-emptively remove temporary overwolf downloader folder
+
+
+
+            if let Ok(temp) = std::env::var("TEMP") {
+
+
+
+                let ow_dir = PathBuf::from(&temp).join("overwolf_downloader");
+
+
+
+                if ow_dir.exists() {
+
+
+
+                    let _ = fs::remove_dir_all(&ow_dir);
+
+
+
+                }
+
+
+
             }
 
 
@@ -10161,49 +10266,15 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
             // Poll for up to 120 seconds while installer is running
             let poll_start = std::time::Instant::now();
             let mut installed = false;
-            let mut last_progress_emit = std::time::Instant::now();
-
             while poll_start.elapsed() < Duration::from_secs(120) {
                 let setup_running = is_process_running_fuzzy("TeamSpeak3-Client");
-                let ts_found = find_teamspeak_exe(None).is_some();
-
-                if ts_found {
+                if find_teamspeak_exe(None).is_some() {
                     installed = true;
                     if !setup_running {
                         break;
                     }
                 }
-
-                if last_progress_emit.elapsed() >= Duration::from_millis(700) {
-                    last_progress_emit = std::time::Instant::now();
-                    let elapsed_sec = poll_start.elapsed().as_secs();
-
-                    if ts_found {
-                        emit_ts3_prog(
-                            &app,
-                            78,
-                            "FINALIZING TEAMSPEAK 3...",
-                            "Verifying client installation files and libraries...",
-                        );
-                    } else if setup_running {
-                        let pct = (56 + (elapsed_sec * 2).min(19)) as u32;
-                        emit_ts3_prog(
-                            &app,
-                            pct,
-                            "INSTALLING TEAMSPEAK 3 (64-BIT)...",
-                            "Extracting core binaries, codecs and audio engines...",
-                        );
-                    } else if elapsed_sec > 3 {
-                        emit_ts3_prog(
-                            &app,
-                            55,
-                            "AWAITING ADMINISTRATOR PERMISSION...",
-                            "Please accept the Windows administrator prompt to install TeamSpeak 3...",
-                        );
-                    }
-                }
-
-                std::thread::sleep(Duration::from_millis(300));
+                std::thread::sleep(Duration::from_millis(500));
             }
 
 
@@ -10332,9 +10403,15 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
 
 
 
-            let _ = fs::remove_file(&wrapper_cmd_path);
+            // Allow final disk flush, then scrub any Overwolf remnant
+            std::thread::sleep(Duration::from_millis(1000));
+            prevent_and_clean_overwolf_internal(user_had_overwolf);
 
             if !installed {
+                let _ = ow_stop_tx.send(());
+                if let Some(w) = ow_watchdog {
+                    let _ = w.join();
+                }
                 prevent_and_clean_overwolf_internal(user_had_overwolf);
                 emit_ts3_prog(
                     &app,
@@ -10345,17 +10422,17 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
                 return Ok(false);
             }
 
-            emit_ts3_prog(
-                &app,
-                80,
-                "INITIALIZING CLIENT SETTINGS...",
-                "Configuring turnkey profile and audio database...",
-            );
 
-            // Allow final disk flush, then scrub any Overwolf remnant
-            std::thread::sleep(Duration::from_millis(600));
-            prevent_and_clean_overwolf_internal(user_had_overwolf);
-            std::thread::sleep(Duration::from_millis(400));
+
+
+
+
+
+            // Brief wait to ensure installation files and registry finish finalizing
+
+
+
+            std::thread::sleep(Duration::from_millis(1500));
 
 
 
@@ -10392,8 +10469,10 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
 
 
         // 2. Install SaltyChat Plugin v4.1.0 (Embedded Standalone Package)
-        let salty_pct = if ts_exe.is_none() { 85 } else { 60 };
-        emit_ts3_prog(&app, salty_pct, "INSTALLING SALTYCHAT v4.1.0...", "Extracting official 3D spatial audio plugin...");
+
+
+
+        emit_ts3_prog(&app, 60, "INSTALLING SALTYCHAT v4.1.0...", "Extracting official 3D spatial audio plugin...");
 
 
 
@@ -10482,10 +10561,16 @@ async fn install_ts3_backend(app: tauri::AppHandle) -> Result<bool, String> {
 
 
         // 3. Configure audio profile, suppress license agreement & disable Overwolf overlay
-        let prof_pct = if ts_exe.is_none() { 92 } else { 85 };
-        emit_ts3_prog(&app, prof_pct, "CONFIGURING AUDIO PROFILE & LICENSES...", "Accepting license agreements & configuring audio profile...");
+
+
+
+        emit_ts3_prog(&app, 85, "CONFIGURING AUDIO PROFILE & LICENSES...", "Accepting license agreements & configuring audio profile...");
         configure_teamspeak_profile(None);
 
+        let _ = ow_stop_tx.send(());
+        if let Some(w) = ow_watchdog {
+            let _ = w.join();
+        }
         prevent_and_clean_overwolf_internal(user_had_overwolf);
 
         emit_ts3_prog(&app, 100, "VOICE READY • ALL SYSTEMS UP TO DATE", "TeamSpeak 3 & SaltyChat are ready for Goldstone County RP.");

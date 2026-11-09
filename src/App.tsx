@@ -3374,9 +3374,7 @@ const handleInstallTs3 = async () => {
 
 
     const syncAndLoadMusic = async (autoPlay: boolean = false) => {
-
     try {
-
       let songsManifest = DEFAULT_TRACKS;
 
       try {
@@ -3456,10 +3454,9 @@ const handleInstallTs3 = async () => {
 
 
       if (newTracks.length > 0) {
-
         setPlaylist(newTracks);
-
         playlistRef.current = newTracks;
+        try { localStorage.setItem("goldstone_saved_playlist", JSON.stringify(newTracks)); } catch {}
 
         if (autoPlay) {
 
@@ -5011,15 +5008,20 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      setPlaylist(DEFAULT_TRACKS);
-
-
-
-      playlistRef.current = DEFAULT_TRACKS;
-
-
-
+      let initialTracks = DEFAULT_TRACKS;
+      try {
+        const localSaved = localStorage.getItem("goldstone_saved_playlist");
+        if (localSaved) {
+          const parsed = JSON.parse(localSaved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            initialTracks = parsed;
+          }
+        }
+      } catch {}
+      setPlaylist(initialTracks);
+      playlistRef.current = initialTracks;
       loadTrack(0, false);
+      syncAndLoadMusic(false);
 
 
 
