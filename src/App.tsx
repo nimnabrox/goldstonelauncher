@@ -6294,31 +6294,31 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                 <SparklesIcon size={14} className="info-svg" />
                 <span>GOLDSTONE RESHADE GRAPHICS</span>
               </div>
-              <div className="info-desc">Integrated 1940s vintage shader preset with custom in-game toggle key (default F11). Install or update with one click directly from the launcher.</div>
+              <div className="info-desc">Enhanced vintage 1940s graphics and cinematic visual presets with easy one-click install and in-game toggle.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <HeadphonesIcon size={14} className="info-svg" />
-                <span>TEAMSPEAK 3 & SALTYCHAT TURNKEY INSTALL</span>
+                <span>TS3 & SALTYCHAT EASY INSTALLER</span>
               </div>
-              <div className="info-desc">Clean installation with real-time progress logging, turnkey audio setup, automatic profile configuration, and Overwolf conflict prevention.</div>
+              <div className="info-desc">One-click easy installation with live progress for TeamSpeak 3 and SaltyChat plugin. No complicated manual setup needed.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <MusicIcon size={14} className="info-svg" />
-                <span>EXPANDED COMMUNITY MUSIC & OFFLINE CACHE</span>
+                <span>OFFICIAL SONGS & MUSIC PLAYER</span>
               </div>
-              <div className="info-desc">11 community tracks with official Goldstone Music Video as Track #1. Instant local offline caching in your music folder for zero startup wait.</div>
+              <div className="info-desc">Official Goldstone songs, music video by KRJ & EMD, remixes, and queue music player with instant offline playback.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <RocketIcon size={14} className="info-svg" />
-                <span>OFFICIAL GOLDSTONE COUNTY STANDALONE BUILD</span>
+                <span>GOLDSTONE COUNTY STANDALONE</span>
               </div>
-              <div className="info-desc">Official release renamed to Goldstone County.exe. 100% portable single-file executable for fresh PCs with 0/71 clean verified security.</div>
+              <div className="info-desc">Official standalone portable release (Goldstone County.exe). Zero installation required — just download, run, and play.</div>
             </div>
 
             <button className="save-settings-btn" onClick={handleIntroClose}>ENTER LAUNCHER</button>

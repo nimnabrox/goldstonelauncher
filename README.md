@@ -57,23 +57,25 @@ Jump into Goldstone County quickly and easily with our built-in recovery tools a
 ### 🚀 1. One-Click Dual-Sync
 Opens **RedM** and **TeamSpeak 3** simultaneously, synchronizes your in-game RP voice callsign, routes your audio to the SaltyChat radio frequency, and connects you straight into Goldstone County (`cfx.re/join/qe3bl6`). Dedicated **Only RedM** and **Only TeamSpeak** modes are also available.
 
-### 🎨 2. ReShade Graphics Suite & Custom Toggle Key
-Enhance your Red Dead Redemption 2 visuals with pre-configured vintage 1940s shaders.
-- **One-Click ReShade Setup**: Automatically downloads and installs ReShade64 with pre-tuned presets.
-- **Customizable Hotkey**: Toggle ReShade on/off anytime using your preferred key (defaults to **F11**, fully customizable in Settings).
-- **Vulkan & DirectX Compatibility**: Native rendering hook with zero performance drops.
+### 🎨 2. Goldstone ReShade Graphics
+Enhance your Red Dead Redemption 2 visuals with custom 1940s vintage shaders.
+- **One-Click ReShade Setup**: Automatically downloads and installs ReShade64 with pre-tuned vintage color grading.
+- **In-Game Toggle**: Easily toggle ReShade on or off in-game anytime using your preferred hotkey (customizable in Launcher Settings).
+- **Smooth Performance**: Native rendering hook with zero performance drops.
 
-### 🎧 3. TeamSpeak 3 & SaltyChat 4.1.0 Turnkey Installer
-Never struggle with manual voice plugin setups again.
-- **Automated Installer**: Automatically downloads and installs TeamSpeak 3 Client 64-bit and SaltyChat v4.1.0 plugin if not detected.
-- **Real-Time Progress & Status**: Displays granular download/installation stages directly inside the launcher console.
-- **Overwolf Conflict Suppression**: Automatically detects and stops conflicting overlays to prevent game crashes.
+### 🎧 3. TS3 & SaltyChat Easy Installer
+One-click setup for voice chat with live progress display.
+- **Automatic Setup**: Automatically downloads and installs TeamSpeak 3 Client 64-bit and the SaltyChat plugin if missing.
+- **Live Status & Progress**: Direct console logging showing download percentages and installation stages in the UI.
+- **Zero Configuration**: Sets up all required audio profiles and plugins automatically.
 
-### 🎵 4. 11 Stream-Safe Community Tracks & Music Player
+### 🎵 4. Official Songs & Music Player
 Atmospheric soundtrack automatically plays while waiting in queue or during loading screens, with smart auto-pause at the 67% loading screen.
 - **Official Music Video (KRJ & EMD)**: Featured as Track #1 on the playlist.
-- **11 Community Tracks**: Includes *Our Journey*, *Halloween Special*, 5 *Horizen Remixes*, *Horizen Aurudu 2026*, and original atmospheric ambience.
-- **Offline Music Caching**: Automatically saves and caches track lists to local storage so songs load instantly even offline.
+- **Official Community Tracks**: Includes *Our Journey*, *Halloween Special*, 5 *Horizen Remixes*, *Horizen Aurudu 2026*, and classic ambience.
+- **Instant Offline Playback**: Automatically caches songs to your local storage so your playlist loads instantly even without internet.
+- **Continuous Loop & Repeat Modes**: Loop individual songs or playback the complete album.
+- **Custom Music Directory**: Add your own local MP3 folder anytime.
 - **Continuous Loop & Repeat Modes**: Loop individual songs or playback the complete album.
 - **Custom Music Directory**: Add your own local MP3 folder anytime.
 

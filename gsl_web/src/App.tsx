@@ -642,9 +642,9 @@ export default function App() {
                     v0.3.2 NEW
                   </span>
                 </div>
-                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">Goldstone ReShade Preset</h3>
+                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">Goldstone ReShade Graphics</h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  Integrated 1940s vintage shader preset with custom in-game toggle key (default F11). Install, activate, or update with one click.
+                  Enhanced vintage 1940s graphics and cinematic visual presets with easy one-click install and in-game toggle.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
@@ -653,7 +653,7 @@ export default function App() {
               </div>
             </GlowCard>
 
-            {/* Feature 3: TeamSpeak 3 & SaltyChat Turnkey (NEW) */}
+            {/* Feature 3: TeamSpeak 3 & SaltyChat Auto Installer (NEW) */}
             <GlowCard 
               customSize={true} 
               glowColor="gold" 
@@ -668,18 +668,18 @@ export default function App() {
                     v0.3.2 NEW
                   </span>
                 </div>
-                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">Turnkey TS3 & SaltyChat</h3>
+                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">TS3 & SaltyChat Easy Installer</h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  Clean silent installer with real-time status logging, turnkey audio setup, automatic profile configuration, and Overwolf conflict prevention.
+                  One-click easy installation with live progress for TeamSpeak 3 and SaltyChat plugin. No complicated manual setup needed.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
                 <Check className="w-3.5 h-3.5" />
-                <span>Zero Manual Setup</span>
+                <span>Live Status & Auto Setup</span>
               </div>
             </GlowCard>
 
-            {/* Feature 4: 11-Track Community Music (NEW) */}
+            {/* Feature 4: Official Songs & Music Player (NEW) */}
             <GlowCard 
               customSize={true} 
               glowColor="gold" 
@@ -694,9 +694,9 @@ export default function App() {
                     11 TRACKS
                   </span>
                 </div>
-                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">Community Music & Cache</h3>
+                <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">Official Songs & Music Player</h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  11 stream-safe tracks featuring Goldstone Roleplay Music Video (KRJ & EMD) as Track #1. Instant offline folder cache with zero startup delay.
+                  Official Goldstone songs, music video by KRJ & EMD, remixes, and queue music player with instant offline playback.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
