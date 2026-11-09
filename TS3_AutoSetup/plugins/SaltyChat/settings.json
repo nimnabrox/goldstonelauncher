@@ -1,0 +1,21 @@
+{
+  "WebSocketAddress": "127.0.0.1:38088",
+  "UpdateBranch": "Stable",
+  "AccptedTerms300": false,
+  "AcceptedTerms400": true,
+  "OriginExceptions": [
+    "^http:\\/\\/resource$",
+    "^(?:(?!http).)*$"
+  ],
+  "InstanceTimeout": 6,
+  "Is3dEnabled": true,
+  "ExpertMode": false,
+  "LogLevel": "Info",
+  "PhoneOffset": "Stereo",
+  "RadioOffset": "Stereo",
+  "SecondaryRadioOffset": "Stereo",
+  "MicClickMode": "ScriptDependent",
+  "SeenSmotdIds": [],
+  "PersistentFingerprint": "",
+  "VerifiedServers": {}
+}

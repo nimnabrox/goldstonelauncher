@@ -1,0 +1,22 @@
+/*
+    This is an example configuration, which includes all available options.
+    To apply this configuration, you have to rename the file from "settings-example.json" to "settings.json".
+*/
+
+{
+    "WebSocketAddress": "127.0.0.1:8088",                   // "0.0.0.0" applies to every interface on your computer -- default: 127.0.0.1:8088
+    "UpdateBranch": "Stable",                               // Set the branch you want to receive update notifications for (Stable or Testing) -- default: Stable
+    "OriginExceptions":
+    [
+        "^(?:(?!http).)*$",
+        "^http:\\/\\/resource$"
+    ],                                                      // Used to define allowed origins for the WebSocket, which will be checked with RegEx -- default: ["^(?:(?!http).)*$","^http:\\/\\/resource$"]
+    "InstanceTimeout": 6,                                   // Time in seconds after which the instance will reset without a pong  -- default: 6
+    "Is3dEnabled": true,                                    // "true" to enable 3D voice (proximity, phone and radio), "false" to disable it -- default: true
+    "ExpertMode": false,                                    // Enables/disables export mode in settings menu -- default: false
+    "LogLevel": "Info",                                     // Defines how extensive the logging will be, set to "Error", "Warning", "Info", "Debug" or "Extensive" -- default: Info
+    "PhoneOffset": "RightOnly",                             // Offset position of the phone, set to "Stereo", "LeftOnly" or "RightOnly" -- RightOnly
+    "RadioOffset": "LeftOnly",                              // Offset position of the radio, set to "Stereo", "LeftOnly" or "RightOnly" -- default: LeftOnly
+    "SecondaryRadioOffset": "RightOnly",                    // Offset position of the secondary radio, set to "Stereo", "LeftOnly" or "RightOnly" -- RightOnly
+    "MicClickMode": "ScriptDependent"                       // Overrides PlayMicClick property on radio communications, set to "ScriptDependent", "Never" or "Always" -- default: ScriptDependent
+}

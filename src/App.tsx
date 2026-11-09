@@ -2746,8 +2746,7 @@ const handleInstallTs3 = async () => {
     } catch (err) {
       console.error("Install TS3 failed:", err);
       setTs3StatusText("INSTALLATION FAILED");
-      setTs3HintText(String(err));
-      await refreshTs3Status(true);
+      setTs3HintText(String(err) || "Failed to download voice packages. Click Install to retry.");
     } finally {
       isTs3BusyRef.current = false;
       setIsTs3Busy(false);

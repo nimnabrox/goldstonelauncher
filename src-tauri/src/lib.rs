@@ -6897,7 +6897,12 @@ async fn launch_teamspeak_backend(server: String, nickname: String, custom_path:
                 let key_file = Path::new(&appdata).join(r"TS3Client\goldstone_ptt_key.txt");
                 let _ = fs::write(&key_file, format!("{}:{}", active_lbl, active_vk));
             }
-            let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", active_lbl, active_vk));
+            if let Ok(localappdata) = std::env::var("LOCALAPPDATA") {
+                let gc_dir = Path::new(&localappdata).join("GoldstoneCounty");
+                let _ = fs::create_dir_all(&gc_dir);
+                let _ = fs::write(gc_dir.join("goldstone_ptt_key.txt"), format!("{}:{}", active_lbl, active_vk));
+            }
+            let _ = fs::remove_file("goldstone_ptt_key.txt");
 
             // Automatically clean any dead headless zombies (WINDOWTITLE eq "") before checking or launching
             kill_headless_ts3_zombies();
@@ -7450,13 +7455,19 @@ fn get_goldstone_ptt_dll_bytes() -> Vec<u8> {
 static ACTIVE_PTT_VK: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0x05);
 
 fn start_launcher_ptt_bridge() {
-    if let Ok(appdata) = std::env::var("APPDATA") {
-        let key_file = Path::new(&appdata).join(r"TS3Client\goldstone_ptt_key.txt");
-        if let Ok(content) = fs::read_to_string(&key_file) {
-            let trimmed = content.trim();
-            if let Some(colon) = trimmed.rfind(':') {
-                if let Ok(vk) = trimmed[colon + 1..].parse::<u32>() {
-                    ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
+    let candidates = [
+        std::env::var("APPDATA").ok().map(|a| PathBuf::from(a).join(r"TS3Client\goldstone_ptt_key.txt")),
+        std::env::var("LOCALAPPDATA").ok().map(|l| PathBuf::from(l).join(r"GoldstoneCounty\goldstone_ptt_key.txt")),
+    ];
+    for cand in candidates.into_iter().flatten() {
+        if cand.exists() {
+            if let Ok(content) = fs::read_to_string(&cand) {
+                let trimmed = content.trim();
+                if let Some(colon) = trimmed.rfind(':') {
+                    if let Ok(vk) = trimmed[colon + 1..].parse::<u32>() {
+                        ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
+                        break;
+                    }
                 }
             }
         }
@@ -7650,7 +7661,7 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
     // 1. Check goldstone_ptt_key.txt first (Primary persistence store for Goldstone PTT)
     let candidates = [
         std::env::var("APPDATA").ok().map(|a| PathBuf::from(a).join(r"TS3Client\goldstone_ptt_key.txt")),
-        Some(PathBuf::from("goldstone_ptt_key.txt")),
+        std::env::var("LOCALAPPDATA").ok().map(|l| PathBuf::from(l).join(r"GoldstoneCounty\goldstone_ptt_key.txt")),
     ];
     for cand in candidates.into_iter().flatten() {
         if cand.exists() {
@@ -7744,7 +7755,12 @@ fn read_ts3_proximity_key_from_db(db_path: &Path) -> Option<String> {
                     let key_file = Path::new(&appdata).join(r"TS3Client\goldstone_ptt_key.txt");
                     let _ = fs::write(&key_file, format!("{}:{}", lbl, vk));
                 }
-                let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", lbl, vk));
+                if let Ok(localappdata) = std::env::var("LOCALAPPDATA") {
+                    let gc_dir = Path::new(&localappdata).join("GoldstoneCounty");
+                    let _ = fs::create_dir_all(&gc_dir);
+                    let _ = fs::write(gc_dir.join("goldstone_ptt_key.txt"), format!("{}:{}", lbl, vk));
+                }
+                let _ = fs::remove_file("goldstone_ptt_key.txt");
                 ACTIVE_PTT_VK.store(vk, std::sync::atomic::Ordering::SeqCst);
                 return Some(lbl);
             }
@@ -9733,14 +9749,19 @@ async fn set_ts3_proximity_key_backend(key_name: String) -> Result<String, Strin
         // 2. Immediate in-memory active key update
         ACTIVE_PTT_VK.store(vk_code, std::sync::atomic::Ordering::SeqCst);
 
-        // 3. Persist to goldstone_ptt_key.txt (both APPDATA and local)
+        // 3. Persist to goldstone_ptt_key.txt (APPDATA and LOCALAPPDATA, clean relative)
         if let Ok(appdata) = std::env::var("APPDATA") {
             let client_dir = Path::new(&appdata).join("TS3Client");
             let _ = fs::create_dir_all(&client_dir);
             let key_txt = client_dir.join("goldstone_ptt_key.txt");
             let _ = fs::write(&key_txt, format!("{}:{}", display_label, vk_code));
         }
-        let _ = fs::write("goldstone_ptt_key.txt", format!("{}:{}", display_label, vk_code));
+        if let Ok(localappdata) = std::env::var("LOCALAPPDATA") {
+            let gc_dir = Path::new(&localappdata).join("GoldstoneCounty");
+            let _ = fs::create_dir_all(&gc_dir);
+            let _ = fs::write(gc_dir.join("goldstone_ptt_key.txt"), format!("{}:{}", display_label, vk_code));
+        }
+        let _ = fs::remove_file("goldstone_ptt_key.txt");
 
         // 4. Update settings.db with Goldstone:ptt (Action type 320 Push-to-Talk)
         let candidate_dbs: Vec<PathBuf> = get_ts3_db_candidates()
@@ -11223,153 +11244,140 @@ fn emit_reshade_prog(app: &tauri::AppHandle, percent: u32, step: &str, status: &
 
 
 fn download_file_with_progress<F>(url: &str, dest: &Path, mut on_progress: F) -> Result<(), String>
-
-
-
 where
-
-
-
     F: FnMut(u64, u64),
-
-
-
 {
-
-
-
-    let client = reqwest::blocking::Client::builder()
-
-
-
-        .timeout(Duration::from_secs(300))
-
-
-
-        .build()
-
-
-
-        .map_err(|e| e.to_string())?;
-
-
-
-
-
-
-
-    let mut resp = client.get(url).send().map_err(|e| e.to_string())?;
-
-
-
-    if !resp.status().is_success() {
-
-
-
-        return Err(format!("Download failed: HTTP {}", resp.status()));
-
-
-
+    let tmp_dest = dest.with_extension("download_tmp");
+    let mut candidate_urls = vec![url.to_string()];
+    if url.contains("https://files.teamspeak-services.com") {
+        candidate_urls.push(url.replace("https://", "http://"));
+    } else if url.contains("http://files.teamspeak-services.com") {
+        candidate_urls.push(url.replace("http://", "https://"));
+    } else if url.contains("saltyhub.net") {
+        candidate_urls.push("https://raw.githubusercontent.com/nimnabrox/goldstonelauncher/main/TS3_AutoSetup/saltychat.zip".to_string());
     }
 
+    let mut last_err = String::from("No download attempts succeeded");
 
+    for cand_url in &candidate_urls {
+        let mut downloaded: u64 = if tmp_dest.exists() {
+            fs::metadata(&tmp_dest).map(|m| m.len()).unwrap_or(0)
+        } else {
+            0
+        };
 
+        let client = match reqwest::blocking::Client::builder()
+            .timeout(Duration::from_secs(180))
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .build()
+        {
+            Ok(c) => c,
+            Err(e) => {
+                last_err = e.to_string();
+                continue;
+            }
+        };
 
-
-
-
-    let total_size = resp.content_length().unwrap_or(0);
-
-
-
-    let mut file = File::create(dest).map_err(|e| e.to_string())?;
-
-
-
-
-
-
-
-    let mut downloaded: u64 = 0;
-
-
-
-    let mut buffer = [0u8; 64 * 1024];
-
-
-
-    let mut last_emit = std::time::Instant::now();
-
-
-
-
-
-
-
-    use std::io::{Read, Write};
-
-
-
-    loop {
-
-
-
-        let bytes_read = resp.read(&mut buffer).map_err(|e| e.to_string())?;
-
-
-
-        if bytes_read == 0 {
-
-
-
-            break;
-
-
-
+        let mut req = client.get(cand_url).header("Accept", "*/*");
+        if downloaded > 0 {
+            req = req.header("Range", format!("bytes={}-", downloaded));
         }
 
+        let resp_res = req.send();
+        let mut resp = match resp_res {
+            Ok(r) => r,
+            Err(e) => {
+                last_err = e.to_string();
+                continue;
+            }
+        };
 
+        let status = resp.status();
+        let is_range_resp = status == reqwest::StatusCode::PARTIAL_CONTENT;
+        if !status.is_success() && !is_range_resp {
+            if downloaded > 0 {
+                let _ = fs::remove_file(&tmp_dest);
+                downloaded = 0;
+                let retry = client.get(cand_url).header("Accept", "*/*").send();
+                resp = match retry {
+                    Ok(r) if r.status().is_success() => r,
+                    Ok(r) => {
+                        last_err = format!("HTTP {}", r.status());
+                        continue;
+                    }
+                    Err(e) => {
+                        last_err = e.to_string();
+                        continue;
+                    }
+                };
+            } else {
+                last_err = format!("HTTP {}", status);
+                continue;
+            }
+        }
 
-        file.write_all(&buffer[..bytes_read]).map_err(|e| e.to_string())?;
+        let total_size = if is_range_resp {
+            downloaded + resp.content_length().unwrap_or(0)
+        } else {
+            downloaded = 0;
+            resp.content_length().unwrap_or(0)
+        };
 
+        let mut file = match if downloaded > 0 {
+            fs::OpenOptions::new().create(true).append(true).open(&tmp_dest)
+        } else {
+            File::create(&tmp_dest)
+        } {
+            Ok(f) => f,
+            Err(e) => {
+                last_err = e.to_string();
+                continue;
+            }
+        };
 
+        let mut buffer = [0u8; 64 * 1024];
+        let mut last_emit = std::time::Instant::now();
+        let mut download_ok = true;
 
-        downloaded += bytes_read as u64;
+        use std::io::{Read, Write};
+        loop {
+            match resp.read(&mut buffer) {
+                Ok(0) => break,
+                Ok(n) => {
+                    if let Err(e) = file.write_all(&buffer[..n]) {
+                        last_err = e.to_string();
+                        download_ok = false;
+                        break;
+                    }
+                    downloaded += n as u64;
+                    if last_emit.elapsed() >= Duration::from_millis(100) || (total_size > 0 && downloaded >= total_size) {
+                        on_progress(downloaded, total_size);
+                        last_emit = std::time::Instant::now();
+                    }
+                }
+                Err(e) => {
+                    last_err = e.to_string();
+                    download_ok = false;
+                    break;
+                }
+            }
+        }
 
-
-
-
-
-
-
-        if last_emit.elapsed() >= Duration::from_millis(150) || (total_size > 0 && downloaded >= total_size) {
-
-
-
+        let _ = file.flush();
+        if download_ok {
             on_progress(downloaded, total_size);
-
-
-
-            last_emit = std::time::Instant::now();
-
-
-
+            if dest.exists() {
+                let _ = fs::remove_file(dest);
+            }
+            if let Err(e) = fs::rename(&tmp_dest, dest) {
+                let _ = fs::copy(&tmp_dest, dest);
+                let _ = fs::remove_file(&tmp_dest);
+            }
+            return Ok(());
         }
-
-
-
     }
 
-
-
-    on_progress(downloaded, total_size);
-
-
-
-    Ok(())
-
-
-
+    Err(format!("Download failed: {}", last_err))
 }
 
 
@@ -12470,6 +12478,10 @@ async fn set_reshade_toggle_key_backend(key_code: u32) -> Result<(), String> {
 
 pub fn run() {
     kill_headless_ts3_zombies();
+    let _ = fs::remove_file("goldstone_ptt_key.txt");
+    if let Ok(u) = std::env::var("USERPROFILE") {
+        let _ = fs::remove_file(Path::new(&u).join(r"Desktop\goldstone_ptt_key.txt"));
+    }
     deploy_goldstone_ptt_plugin();
     start_launcher_ptt_bridge();
     
