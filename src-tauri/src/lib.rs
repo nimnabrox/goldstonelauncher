@@ -5716,7 +5716,6 @@ unsafe extern "system" fn enum_ts3_window_proc(hwnd: *mut std::ffi::c_void, lpar
 }
 
 fn kill_headless_ts3_zombies() {
-    send_to_goldstone_pipe("EXIT_TS3");
     unsafe {
         let snapshot = CreateToolhelp32Snapshot(0x00000002, 0);
         if !snapshot.is_null() && snapshot as isize != -1 {
@@ -6904,15 +6903,13 @@ async fn launch_teamspeak_backend(server: String, nickname: String, custom_path:
             }
             let _ = fs::remove_file("goldstone_ptt_key.txt");
 
-            // Automatically clean any dead headless zombies (WINDOWTITLE eq "") before checking or launching
+            // Clean dead headless zombies
             kill_headless_ts3_zombies();
 
-            // If TeamSpeak 3 is already running and has a visible window, bring to front and connect
+            // If TeamSpeak 3 is already running, cleanly disconnect all servers using the force-close method
+            // so we can connect back cleanly to Goldstone County without socket conflicts or nickname errors
             if is_teamspeak_running() {
-                let _ = spawn_gui_process(&ts_str, &[&url_arg]);
-                let cmd = format!("SET_KEY:{}:{}", active_lbl, active_vk);
-                send_to_goldstone_pipe(&cmd);
-                return Ok(());
+                clean_force_close_ts3();
             }
 
             // Launch normal interactive GUI window directly with connection URL
@@ -7540,6 +7537,40 @@ fn send_to_goldstone_pipe(cmd: &str) -> bool {
         std::thread::sleep(std::time::Duration::from_millis(40));
     }
     false
+}
+
+fn clean_force_close_ts3() {
+    // 1. Send DISCONNECT to our live in-process plugin first so all servers disconnect cleanly
+    let _ = send_to_goldstone_pipe("DISCONNECT");
+
+    // 2. ClientQuery disconnect all servers command (if port 25639 is open)
+    if let Ok(mut stream) = std::net::TcpStream::connect_timeout(
+        &std::net::SocketAddr::from(([127, 0, 0, 1], 25639)),
+        std::time::Duration::from_millis(80),
+    ) {
+        use std::io::Write;
+        let _ = stream.write_all(b"serverdisconnect -all\nquit\n");
+    }
+
+    // 3. Gracefully post WM_CLOSE to any TS3 window
+    unsafe {
+        let class_name = to_wide("Qt5QWindowIcon");
+        let hwnd = FindWindowW(class_name.as_ptr(), std::ptr::null());
+        if !hwnd.is_null() && hwnd as isize != -1 {
+            PostMessageW(hwnd, 0x0010 /* WM_CLOSE */, 0, 0);
+        }
+    }
+
+    // 4. Adequate grace period for server disconnect packet transmission over network
+    std::thread::sleep(std::time::Duration::from_millis(600));
+
+    // 5. Signal plugin to exit cleanly
+    let _ = send_to_goldstone_pipe("DISCONNECT_AND_EXIT");
+    std::thread::sleep(std::time::Duration::from_millis(250));
+
+    // 6. Terminate TS3 process only if still lingering
+    kill_processes_by_name(&["ts3client_win64.exe", "ts3client_win32.exe"]);
+    std::thread::sleep(std::time::Duration::from_millis(200));
 }
 
 fn map_key_name_to_label_and_vk(key_name: &str) -> (String, u32) {
@@ -10906,36 +10937,7 @@ async fn kill_processes_backend(app: tauri::AppHandle, kill_redm: Option<bool>, 
         LAST_LAUNCH_TIME.store(now_ts, Ordering::SeqCst);
 
         if do_kill_ts3 {
-            // 1. Send DISCONNECT to our live in-process plugin first so all servers disconnect cleanly
-            let _ = send_to_goldstone_pipe("DISCONNECT");
-
-            // 2. ClientQuery disconnect all servers command (if port 25639 is open)
-            if let Ok(mut stream) = std::net::TcpStream::connect_timeout(
-                &std::net::SocketAddr::from(([127, 0, 0, 1], 25639)),
-                std::time::Duration::from_millis(80)
-            ) {
-                use std::io::Write;
-                let _ = stream.write_all(b"serverdisconnect -all\nquit\n");
-            }
-
-            // 3. Gracefully post WM_CLOSE to any TS3 window
-            unsafe {
-                let class_name = to_wide("Qt5QWindowIcon");
-                let hwnd = FindWindowW(class_name.as_ptr(), std::ptr::null());
-                if !hwnd.is_null() && hwnd as isize != -1 {
-                    PostMessageW(hwnd, 0x0010 /* WM_CLOSE */, 0, 0);
-                }
-            }
-
-            // 4. Adequate grace period for server disconnect packet transmission over network
-            std::thread::sleep(std::time::Duration::from_millis(600));
-
-            // 5. Signal plugin to exit cleanly
-            let _ = send_to_goldstone_pipe("DISCONNECT_AND_EXIT");
-            std::thread::sleep(std::time::Duration::from_millis(250));
-
-            // 6. Terminate TS3 process only if still lingering
-            kill_processes_by_name(&["ts3client_win64.exe"]);
+            clean_force_close_ts3();
         }
 
         if do_kill_redm {
