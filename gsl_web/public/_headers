@@ -3,3 +3,19 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
 
+/downloads/*
+  Content-Type: application/octet-stream
+  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Cache-Control: public, max-age=86400
+
+/downloads/Goldstone%20County.exe
+  Content-Type: application/octet-stream
+  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Cache-Control: public, max-age=86400
+
+/version.json
+  Cache-Control: no-cache
+
+/fonts/*
+  Cache-Control: public, max-age=86400
+

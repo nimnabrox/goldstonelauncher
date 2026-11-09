@@ -10,6 +10,7 @@ build/
 target/
 src-tauri/target/
 src-tauri/gen/schemas/
+gsl_web/public/downloads/
 
 # Environment variables & Secrets (CRITICAL)
 .env

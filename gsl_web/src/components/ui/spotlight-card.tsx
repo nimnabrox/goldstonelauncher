@@ -91,7 +91,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
 
   useEffect(() => {
     const handlePointerMove = (e: PointerEvent) => {
-      if (e.pointerType === 'touch') return;
+      if (e.pointerType === 'touch' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const card = cardRef.current;
       if (!card) return;
 
