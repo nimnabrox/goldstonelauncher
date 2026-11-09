@@ -1032,7 +1032,7 @@ function App() {
 
 
 
-  const CURRENT_VERSION = "0.3.1"; 
+  const CURRENT_VERSION = "0.3.2"; 
 
 
 
