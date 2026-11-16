@@ -6,16 +6,20 @@
 /downloads/*
   Content-Type: application/octet-stream
   Content-Disposition: attachment; filename="Goldstone County.exe"
-  Cache-Control: public, max-age=86400
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /downloads/Goldstone%20County.exe
   Content-Type: application/octet-stream
   Content-Disposition: attachment; filename="Goldstone County.exe"
-  Cache-Control: public, max-age=86400
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/downloads/Goldstone.County.exe
+  Content-Type: application/octet-stream
+  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /version.json
-  Cache-Control: no-cache
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /fonts/*
   Cache-Control: public, max-age=86400
-
