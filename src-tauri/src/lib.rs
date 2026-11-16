@@ -2531,391 +2531,156 @@ async fn clean_redm_cache_backend() -> Result<String, String> {
 
 // --- SERVER PLAYERS COUNTER (ASYNC) ---
 
-
-
-fn fetch_server_players_internal(server_code: String) -> Result<ServerStatusData, String> {
-
-
-
-    let user_agents = [
-
-
-
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-
-
-
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
-
-
-
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
-
-
-
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-
-
-
-    ];
-
-
-
-
-
-
-
-    let seed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().subsec_nanos() as usize;
-
-
-
-    let ua = user_agents[seed % user_agents.len()];
-
-
-
-
-
-
-
-    let mut headers = reqwest::header::HeaderMap::new();
-
-
-
-    headers.insert(reqwest::header::ACCEPT, "application/json, text/plain, */*".parse().unwrap());
-
-
-
-    headers.insert(reqwest::header::ACCEPT_LANGUAGE, "en-US,en;q=0.9".parse().unwrap());
-
-
-
-    headers.insert(reqwest::header::CACHE_CONTROL, "no-cache".parse().unwrap());
-
-
-
-    headers.insert("Sec-Fetch-Dest", "empty".parse().unwrap());
-
-
-
-    headers.insert("Sec-Fetch-Mode", "cors".parse().unwrap());
-
-
-
-    headers.insert("Sec-Fetch-Site", "cross-site".parse().unwrap());
-
-
-
-
-
-
-
-    let client = reqwest::blocking::Client::builder()
-
-
-
-        .user_agent(ua)
-
-
-
-        .default_headers(headers)
-
-
-
-        .timeout(Duration::from_secs(4))
-
-
-
-        .build()
-
-
-
-        .map_err(|e| e.to_string())?;
-
-
-
-
-
-
-
-    // 1. Try CFXR API
-
-
-
-    let cfxr_url = format!("https://cfxr.cc/api/resolve/{}?fields=name,players,maxPlayers", server_code);
-
-
-
-    if let Ok(resp) = client.get(&cfxr_url).send() {
-
-
-
-        if resp.status().is_success() {
-
-
-
-            if let Ok(v) = resp.json::<Value>() {
-
-
-
-                let d = if v.get("data").is_some() { &v["data"] } else { &v };
-
-
-
-                if let Some(p) = d.get("players").and_then(|p| p.as_i64()) {
-
-
-
-                    let name = "GOLDSTONE COUNTY".to_string();
-
-
-
-                    let max_players = d.get("maxPlayers").and_then(|m| m.as_i64()).unwrap_or(128);
-
-
-
-                    let online = d.get("online").and_then(|o| o.as_bool()).unwrap_or(true);
-
-
-
-                    return Ok(ServerStatusData {
-
-
-
-                        name,
-
-
-
-                        players: p,
-
-
-
-                        max_players,
-
-
-
-                        online,
-
-
-
-                        source: "Goldstone Network".to_string(),
-
-
-
-                    });
-
-
-
-                }
-
-
-
-            }
-
-
-
+fn query_server_udp(addr: &str) -> Option<(i64, i64)> {
+    let socket = std::net::UdpSocket::bind("0.0.0.0:0").ok()?;
+    socket.set_read_timeout(Some(Duration::from_millis(1800))).ok()?;
+    socket.set_write_timeout(Some(Duration::from_millis(1800))).ok()?;
+    let packet = b"\xff\xff\xff\xffgetinfo xxx";
+    socket.send_to(packet, addr).ok()?;
+
+    let mut buf = [0u8; 4096];
+    let (amt, _) = socket.recv_from(&mut buf).ok()?;
+    let text = String::from_utf8_lossy(&buf[..amt]);
+
+    let mut clients: Option<i64> = None;
+    let mut max_clients: Option<i64> = None;
+
+    let parts: Vec<&str> = text.split('\\').collect();
+    for i in 0..parts.len() {
+        if parts[i] == "clients" && i + 1 < parts.len() {
+            clients = parts[i + 1].parse::<i64>().ok();
+        } else if parts[i] == "sv_maxclients" && i + 1 < parts.len() {
+            max_clients = parts[i + 1].parse::<i64>().ok();
         }
-
-
-
     }
 
-
-
-
-
-
-
-    // 2. Fallback: CFXFind API
-
-
-
-    let cfxfind_url = format!("https://api.cfxfind.com/v1/servers/{}", server_code);
-
-
-
-    if let Ok(resp) = client.get(&cfxfind_url).send() {
-
-
-
-        if resp.status().is_success() {
-
-
-
-            if let Ok(v) = resp.json::<Value>() {
-
-
-
-                if let Some(data) = v.get("data") {
-
-
-
-                    let name = "GOLDSTONE COUNTY".to_string();
-
-
-
-                    let players_obj = data.get("players");
-
-
-
-                    let p = players_obj.and_then(|p| p.get("count")).and_then(|c| c.as_i64()).unwrap_or(0);
-
-
-
-                    let max_players = players_obj.and_then(|p| p.get("max")).and_then(|m| m.as_i64()).unwrap_or(128);
-
-
-
-                    let available = players_obj.and_then(|p| p.get("available")).and_then(|a| a.as_bool()).unwrap_or(true);
-
-
-
-                    return Ok(ServerStatusData {
-
-
-
-                        name,
-
-
-
-                        players: p,
-
-
-
-                        max_players,
-
-
-
-                        online: available,
-
-
-
-                        source: "Goldstone Network".to_string(),
-
-
-
-                    });
-
-
-
-                }
-
-
-
-            }
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
-    // 3. Fallback: FiveM server list frontend
-
-
-
-    let fivem_url = format!("https://servers-frontend.fivem.net/api/servers/single/{}", server_code);
-
-
-
-    if let Ok(resp) = client.get(&fivem_url).send() {
-
-
-
-        if resp.status().is_success() {
-
-
-
-            if let Ok(v) = resp.json::<Value>() {
-
-
-
-                if let Some(data) = v.get("Data") {
-
-
-
-                    if let Some(count) = data.get("clients").and_then(|c| c.as_i64()) {
-
-
-
-                        let max_players = data.get("sv_maxclients").and_then(|m| m.as_i64()).unwrap_or(128);
-
-
-
-                        let name = "GOLDSTONE COUNTY".to_string();
-
-
-
-                        return Ok(ServerStatusData {
-
-
-
-                            name,
-
-
-
-                            players: count,
-
-
-
-                            max_players,
-
-
-
-                            online: true,
-
-
-
-                            source: "Goldstone Network".to_string(),
-
-
-
-                        });
-
-
-
-                    }
-
-
-
-                }
-
-
-
-            }
-
-
-
-        }
-
-
-
-    }
-
-
-
-
-
-
-
-    Err("Server unreachable".to_string())
-
-
-
+    clients.map(|c| (c, max_clients.unwrap_or(128)))
 }
 
+fn fetch_server_players_internal(server_code: String) -> Result<ServerStatusData, String> {
+    let user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:135.0) Gecko/20100101 Firefox/135.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+    ];
 
+    let seed = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().subsec_nanos() as usize;
+    let ua = user_agents[seed % user_agents.len()];
 
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(reqwest::header::ACCEPT, "application/json, text/plain, */*".parse().unwrap());
+    headers.insert(reqwest::header::ACCEPT_LANGUAGE, "en-US,en;q=0.9".parse().unwrap());
+    headers.insert(reqwest::header::CACHE_CONTROL, "no-cache".parse().unwrap());
+    headers.insert("Sec-Fetch-Dest", "empty".parse().unwrap());
+    headers.insert("Sec-Fetch-Mode", "cors".parse().unwrap());
+    headers.insert("Sec-Fetch-Site", "cross-site".parse().unwrap());
 
+    let client = reqwest::blocking::Client::builder()
+        .user_agent(ua)
+        .default_headers(headers)
+        .timeout(Duration::from_secs(4))
+        .build()
+        .map_err(|e| e.to_string())?;
 
+    // 1. Primary: Official Cfx Services API (modern RedM / FiveM frontend)
+    let cfx_url = format!("https://frontend.cfx-services.net/api/servers/single/{}", server_code);
+    if let Ok(resp) = client.get(&cfx_url).send() {
+        if resp.status().is_success() {
+            if let Ok(v) = resp.json::<Value>() {
+                if let Some(data) = v.get("Data") {
+                    if let Some(count) = data.get("clients").and_then(|c| c.as_i64()) {
+                        let max_players = data.get("sv_maxclients")
+                            .or_else(|| data.get("svMaxclients"))
+                            .and_then(|m| m.as_i64())
+                            .unwrap_or(128);
+                        return Ok(ServerStatusData {
+                            name: "GOLDSTONE COUNTY".to_string(),
+                            players: count,
+                            max_players,
+                            online: true,
+                            source: "Cfx Services".to_string(),
+                        });
+                    }
+                }
+            }
+        }
+    }
 
+    // 2. Direct UDP Query to FXServer engine (zero web dependencies, ultra-fast)
+    let mut server_addrs = vec!["31.58.143.68:30120".to_string()];
+
+    // Dynamically resolve server IP via cfx.re/join/{server_code} header if possible
+    let join_url = format!("https://cfx.re/join/{}", server_code);
+    if let Ok(resp) = client.get(&join_url).send() {
+        if let Some(header_val) = resp.headers().get("x-citizenfx-url") {
+            if let Ok(val_str) = header_val.to_str() {
+                let clean = val_str.trim_start_matches("http://").trim_start_matches("https://").trim_end_matches('/');
+                if !clean.is_empty() && !server_addrs.contains(&clean.to_string()) {
+                    server_addrs.insert(0, clean.to_string());
+                }
+            }
+        }
+    }
+
+    for addr in &server_addrs {
+        if let Some((clients, max_clients)) = query_server_udp(addr) {
+            return Ok(ServerStatusData {
+                name: "GOLDSTONE COUNTY".to_string(),
+                players: clients,
+                max_players: max_clients,
+                online: true,
+                source: "Direct UDP".to_string(),
+            });
+        }
+    }
+
+    // 3. Fallback: CFXFind API (only if source is actually available and reporting)
+    let cfxfind_url = format!("https://api.cfxfind.com/v1/servers/{}", server_code);
+    if let Ok(resp) = client.get(&cfxfind_url).send() {
+        if resp.status().is_success() {
+            if let Ok(v) = resp.json::<Value>() {
+                if let Some(data) = v.get("data") {
+                    let players_obj = data.get("players");
+                    let available = players_obj.and_then(|p| p.get("available")).and_then(|a| a.as_bool()).unwrap_or(false);
+                    if available {
+                        let p = players_obj.and_then(|p| p.get("count")).and_then(|c| c.as_i64()).unwrap_or(0);
+                        let max_players = players_obj.and_then(|p| p.get("max")).and_then(|m| m.as_i64()).unwrap_or(128);
+                        return Ok(ServerStatusData {
+                            name: "GOLDSTONE COUNTY".to_string(),
+                            players: p,
+                            max_players,
+                            online: true,
+                            source: "CFXFind".to_string(),
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    // 4. Fallback: CFXR API
+    let cfxr_url = format!("https://cfxr.cc/api/resolve/{}?fields=name,players,maxPlayers", server_code);
+    if let Ok(resp) = client.get(&cfxr_url).send() {
+        if resp.status().is_success() {
+            if let Ok(v) = resp.json::<Value>() {
+                let d = if v.get("data").is_some() { &v["data"] } else { &v };
+                if let Some(p) = d.get("players").and_then(|p| p.as_i64()) {
+                    let max_players = d.get("maxPlayers").and_then(|m| m.as_i64()).unwrap_or(128);
+                    return Ok(ServerStatusData {
+                        name: "GOLDSTONE COUNTY".to_string(),
+                        players: p,
+                        max_players,
+                        online: true,
+                        source: "CFXR".to_string(),
+                    });
+                }
+            }
+        }
+    }
+
+    Err("Server unreachable".to_string())
+}
 
 #[tauri::command]
 
@@ -11371,7 +11136,7 @@ where
             if dest.exists() {
                 let _ = fs::remove_file(dest);
             }
-            if let Err(e) = fs::rename(&tmp_dest, dest) {
+            if let Err(_e) = fs::rename(&tmp_dest, dest) {
                 let _ = fs::copy(&tmp_dest, dest);
                 let _ = fs::remove_file(&tmp_dest);
             }

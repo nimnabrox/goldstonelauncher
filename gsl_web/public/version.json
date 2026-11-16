@@ -1,9 +1,9 @@
-﻿{
-    "version":  "0.3.2",
-    "name":  "Goldstone County Launcher v0.3.2",
-    "mandatory":  true,
-    "downloadUrl":  "https://gscl.nimnabro.com/downloads/Goldstone%20County.exe",
-    "checksum":  "72dfcb46a9a8792e714d22aaa3dc668041d6a1333191e176018c7afe44d265fb",
-    "sha256":  "72dfcb46a9a8792e714d22aaa3dc668041d6a1333191e176018c7afe44d265fb",
-    "size":  15854088
+{
+    "version": "0.3.2",
+    "name": "Goldstone County Launcher v0.3.2",
+    "mandatory": true,
+    "downloadUrl": "https://gscl.nimnabro.com/downloads/Goldstone%20County.exe",
+    "checksum": "fe45c84948693e8b01145ae3f57af8760a6c0c2e1a13d8dc0cce319ba582f814",
+    "sha256": "fe45c84948693e8b01145ae3f57af8760a6c0c2e1a13d8dc0cce319ba582f814",
+    "size": 15862280
 }
