@@ -4024,9 +4024,12 @@ async fn download_only_backend(url: String) -> Result<(), String> {
 
         let new_exe_path = temp_dir.join("goldstone_update.exe");
 
+        let client = reqwest::blocking::Client::builder()
+            .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+            .build()
+            .map_err(|e| e.to_string())?;
 
-
-        let response = reqwest::blocking::get(&url).map_err(|e| e.to_string())?;
+        let response = client.get(&url).send().map_err(|e| e.to_string())?;
 
 
 

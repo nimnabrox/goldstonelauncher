@@ -1048,7 +1048,7 @@ function App() {
 
 
 
-  const CURRENT_VERSION = "0.3.2"; 
+  const CURRENT_VERSION = "0.3.3"; 
 
 
 
@@ -6321,6 +6321,14 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
             <div className="info-card">
               <div className="info-title">
+                <UserIcon size={14} className="info-svg" />
+                <span>LIVE SERVER PLAYER COUNT</span>
+              </div>
+              <div className="info-desc">Real-time player counter and server connection status fixed and fully restored.</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-title">
                 <SparklesIcon size={14} className="info-svg" />
                 <span>GOLDSTONE RESHADE GRAPHICS</span>
               </div>
@@ -6411,7 +6419,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                <p className="modal-text">A new version of Goldstone Launcher is available. Please update to improve stability and performance.</p>
+                <p className="modal-text">A new version of Goldstone Launcher (v0.3.3) is available. Fixed live server player counter and connection status.</p>
 
 
 

@@ -797,7 +797,7 @@ export default function App() {
                     <Palette className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    v0.3.2 NEW
+                    v0.3.3
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -826,7 +826,7 @@ export default function App() {
                     <Headphones className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    v0.3.2 NEW
+                    v0.3.3
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
