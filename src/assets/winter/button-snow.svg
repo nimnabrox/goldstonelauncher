@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 14" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.96"/>
+      <stop offset="0.55" stop-color="#f0f8ff" stop-opacity="0.90"/>
+      <stop offset="1" stop-color="#c3e1f2" stop-opacity="0.82"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 0H480V6.2C460 4.4 446 9.2 420 7.4C394 5.6 376 10.6 346 7.8C316 5.0 292 9.6 262 7.0C234 4.6 210 10.2 180 7.6C150 5.0 124 9.8 94 7.2C66 4.8 34 9.0 0 6.8Z" fill="url(#snow)"/>
+  <circle cx="48" cy="3.2" r="0.9" fill="#ffffff" fill-opacity="0.9"/>
+  <circle cx="172" cy="3.5" r="1.0" fill="#ffffff" fill-opacity="0.9"/>
+  <circle cx="318" cy="3.1" r="0.9" fill="#ffffff" fill-opacity="0.9"/>
+  <circle cx="432" cy="3.4" r="0.9" fill="#ffffff" fill-opacity="0.9"/>
+</svg>

@@ -2,19 +2,15 @@
 
 static HMODULE g_hLoader = NULL;
 
-static HMODULE get_loader(void) {
-    if (g_hLoader) return g_hLoader;
-
-    // 1. Check LocalAppData\GoldstoneCounty\bin\WebView2Loader.dll
-    WCHAR path[MAX_PATH];
-    if (GetEnvironmentVariableW(L"LOCALAPPDATA", path, MAX_PATH)) {
-        wcscat(path, L"\\GoldstoneCounty\\bin\\WebView2Loader.dll");
-        g_hLoader = LoadLibraryW(path);
-        if (g_hLoader) return g_hLoader;
+// Called only after Rust verifies every byte and holds a write/delete-denying file lock.
+int goldstone_load_verified_webview2(PCWSTR path) {
+    if (!g_hLoader) {
+        g_hLoader = LoadLibraryExW(path, NULL, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
     }
+    return g_hLoader != NULL;
+}
 
-    // 2. Fall back to application directory / search path
-    g_hLoader = LoadLibraryW(L"WebView2Loader.dll");
+static HMODULE get_loader(void) {
     return g_hLoader;
 }
 

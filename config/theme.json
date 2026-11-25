@@ -1,0 +1,15 @@
+{
+  "active_event": "winter",
+  "theme_name": "Goldstone Winter & Christmas 2026",
+  "snow": {
+    "enabled": true,
+    "density": 32
+  },
+  "ice_frame": {
+    "enabled": true
+  },
+  "badge": {
+    "enabled": true,
+    "text": "❄️ WINTER"
+  }
+}

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="532" viewBox="0 0 980 532">
+  <defs>
+    <radialGradient id="sky"><stop stop-color="#17483d"/><stop offset=".62" stop-color="#0b2c31"/><stop offset="1" stop-color="#061820"/></radialGradient>
+    <linearGradient id="pine" x2="1" y2="1"><stop stop-color="#215947"/><stop offset="1" stop-color="#082c27"/></linearGradient>
+    <linearGradient id="snow" x2="0" y2="1"><stop stop-color="#e3eff1"/><stop offset="1" stop-color="#8eb0b7"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#fff4c4"/><stop offset=".3" stop-color="#ffd47a"/><stop offset="1" stop-color="#ffd47a" stop-opacity="0"/></radialGradient>
+    <g id="tree">
+      <path d="M-9 0H9V-68H-9Z" fill="#6f4b35"/>
+      <path d="M0-326-56-234H-32L-87-152H-57L-114-60H-76L-137 0H137L76-60H114L57-152H87L32-234H56Z" fill="url(#pine)"/>
+      <path d="m0-326-43 75 25-7 18 6 17-7 26 8Zm-43 121-32 45 31-8 23 9 21-7 22 7 23-9 30 8-32-45 10 13-23-5-30 7-28-7-25 5ZM-77-100l-27 34 25-6 28 9 28-8 23 6 25-6 27 8 27-9 25 6-27-34 5 12-25-5-25 8-32-5-30 5-24-8-26 5Z" fill="#d7e9e8"/>
+      <path d="M-41-226Q4-193 45-218M-74-144Q5-100 79-132M-107-53Q2-11 113-48" fill="none" stroke="#d1ac61" stroke-width="2.5"/>
+      <g fill="#e3b75e"><circle cx="-26" cy="-214" r="4"/><circle cx="19" cy="-210" r="4"/><circle cx="-55" cy="-133" r="4"/><circle cx="-7" cy="-119" r="4"/><circle cx="48" cy="-121" r="4"/><circle cx="-82" cy="-44" r="4"/><circle cx="-29" cy="-32" r="4"/><circle cx="31" cy="-31" r="4"/><circle cx="86" cy="-41" r="4"/></g>
+      <g fill="#b84346" stroke="#dc7a64" stroke-width="1"><circle cx="-15" cy="-180" r="8"/><circle cx="43" cy="-158" r="9"/><circle cx="-48" cy="-94" r="9"/><circle cx="15" cy="-66" r="8"/><circle cx="80" cy="-16" r="10"/></g>
+      <path d="m0-351 6 16 17 1-13 11 4 17-14-9-15 9 5-17-14-11 18-1Z" fill="#f8d58c"/>
+    </g>
+    <g id="bulb"><circle r="14" fill="url(#light)"/><circle r="3" fill="#ffe3a3"/></g>
+    <g id="gift"><rect width="54" height="42" rx="3" fill="#ab3842"/><rect x="22" width="10" height="42" fill="#ddb769"/><path d="M0 11H54" stroke="#e5bf76" stroke-width="6"/><path d="M27 1C-4-20 13-30 27-6 43-30 61-17 27 1Z" fill="none" stroke="#dfbd7b" stroke-width="5"/></g>
+  </defs>
+  <path fill="url(#sky)" d="M0 0H980V532H0Z"/>
+  <g fill="#c5dedc" opacity=".38"><circle cx="71" cy="110" r="1.5"/><circle cx="183" cy="56" r="1"/><circle cx="261" cy="178" r="1.2"/><circle cx="357" cy="73" r="1"/><circle cx="449" cy="29" r="1.3"/><circle cx="654" cy="67" r="1.5"/><circle cx="754" cy="154" r="1"/><circle cx="899" cy="93" r="1.3"/><circle cx="847" cy="235" r="1"/><circle cx="120" cy="315" r="1.3"/><circle cx="271" cy="377" r="1"/><circle cx="713" cy="348" r="1.2"/></g>
+  <path d="M-24 0Q210 110 490 18 758 108 1004 0" fill="none" stroke="#274c3c" stroke-width="18"/>
+  <path d="M-24 4Q210 110 490 22 758 108 1004 4" fill="none" stroke="#8d794b" stroke-width="1.5"/>
+  <g><use href="#bulb" x="35" y="26"/><use href="#bulb" x="116" y="48"/><use href="#bulb" x="205" y="61"/><use href="#bulb" x="294" y="61"/><use href="#bulb" x="382" y="46"/><use href="#bulb" x="490" y="22"/><use href="#bulb" x="594" y="46"/><use href="#bulb" x="686" y="61"/><use href="#bulb" x="776" y="61"/><use href="#bulb" x="864" y="48"/><use href="#bulb" x="945" y="26"/></g>
+  <g stroke="#bda16a" stroke-width="1"><path d="M116 48V91M864 48V94M205 61V100M776 61V103"/></g>
+  <g fill="#a93942" stroke="#d47168"><circle cx="116" cy="105" r="14"/><circle cx="864" cy="108" r="14"/><circle cx="205" cy="110" r="10"/><circle cx="776" cy="113" r="10"/></g>
+  <path d="M0 474Q120 439 265 478T530 476 780 465 980 474V532H0Z" fill="#163d3d"/>
+  <use href="#tree" transform="translate(92 488) scale(1.04)"/>
+  <use href="#tree" transform="translate(895 491) scale(1.12)"/>
+  <use href="#tree" transform="translate(225 491) scale(.57)" opacity=".75"/>
+  <use href="#tree" transform="translate(760 494) scale(.58)" opacity=".72"/>
+  <path d="M0 490Q145 469 285 492T537 495 786 484 980 489V532H0Z" fill="url(#snow)"/>
+  <path d="M0 515Q220 483 433 517T980 510V532H0Z" fill="#eff6f4" opacity=".65"/>
+  <use href="#gift" transform="translate(125 461) rotate(-5)"/>
+  <use href="#gift" transform="translate(180 472) scale(.7) rotate(4)"/>
+  <use href="#gift" transform="translate(803 464) rotate(5)"/>
+  <use href="#gift" transform="translate(857 479) scale(.7) rotate(-5)"/>
+  <rect x="15" y="15" width="950" height="502" rx="17" fill="none" stroke="#ddbf7b" stroke-opacity=".27"/>
+</svg>

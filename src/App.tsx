@@ -14,7 +14,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 
 
 
-import loopVideo from "./gdl_bv_v1_loop.webm"; 
+ 
 
 
 
@@ -30,7 +30,25 @@ import nbLogo from "./assets/nb_logo.jpg";
 
 
 
-import "./App.css"; 
+import { WinterFestiveCanopy } from "./WinterFestiveCanopy";
+import { WinterWelcome } from "./WinterWelcome";
+import { WinterBackground } from "./WinterBackground";
+import { WinterForegroundSnow } from "./WinterForegroundSnow";
+import { WinterButtonFeedback } from "./WinterButtonFeedback";
+import { WinterCursorEffects } from "./WinterCursorEffects";
+import winterLandscapeImg from "./assets/winter/background/winter-background-poster.jpg";
+
+import bundledMusic from "../config/music.json";
+import { mergePrivateManifest, promoteNewTracks, mergeCachedTracks, preserveTrackIndex, startupTrackIndex, isFolderTrack, retainFolderTracks } from "./music-catalog";
+
+import { MusicBlobCache } from "./music-resources";
+import { useMusicRefresh } from "./useMusicRefresh";
+import { useWinterMotion } from "./useWinterMotion";
+
+import { isNewerVersion } from "./release-version";
+import "./App.css";
+import "./winter.css"; 
+import "./winter-palette.css";
 
 
 
@@ -202,80 +220,7 @@ export interface AudioTrack {
 
 
 
-export const DEFAULT_TRACKS: AudioTrack[] = [
-  {
-    id: 'gs_rp_mv',
-    title: 'Goldstone Roleplay - Music Video (KRJ & EMD)',
-    filename: 'Goldstone-Roleplay-Music-Video.mp3',
-    url: 'https://www.dropbox.com/scl/fi/467n94nsuq8ujpn75l4ii/Goldstone-Roleplay-_-_-Music-Video-KRJ_EMD-Copyright-Free.mp3?rlkey=720xjl4dnifn2s2ub1exgn75b&st=asqd08o7&dl=0',
-  },
-  {
-    id: 'gs_journey',
-    title: 'Goldstone - Our Journey',
-    filename: 'Goldstone-Our-Journey.mp3',
-    url: 'https://www.dropbox.com/scl/fi/krwj9kf10q4k98k0osqhd/Goldstone-Our-Journey.mp3?rlkey=s2uxtoy6rhxhqf60jrfmuscj4&st=yefpfc7t&dl=0',
-  },
-  {
-    id: 'gs_halloween',
-    title: 'Goldstone - Halloween Music',
-    filename: 'Goldstone-Halloween-Music.mp3',
-    url: 'https://www.dropbox.com/scl/fi/gs3vp6iuyfp9ec4d63ayy/Goldstone-Halloween-Music.mp3?rlkey=ph75rad9s9sgnxw97jakhjajf&st=jesn2wb1&dl=0',
-  },
-  {
-    id: 'gs_remix01',
-    title: 'Goldstone - Horizen Remix 01',
-    filename: 'Goldstone-Horizen-Remix-01.mp3',
-    url: 'https://www.dropbox.com/scl/fi/6aagi9y0s5b9ezc3h347l/Goldstone-Horizen-Remix-01.mp3?rlkey=vq61er3ycvalg7rorhte26kfa&st=uvv7fowe&dl=0',
-  },
-  {
-    id: 'gs_remix02',
-    title: 'Goldstone - Horizen Remix 02',
-    filename: 'Goldstone-Horizen-Remix-02.mp3',
-    url: 'https://www.dropbox.com/scl/fi/itk7bzl85fjy66ddg0oof/Goldstone-Horizen-Remix-02.mp3?rlkey=5ktr4sks489v8bs7uyfznscpd&st=8oks9194&dl=0',
-  },
-  {
-    id: 'gs_remix03',
-    title: 'Goldstone - Horizen Remix 03',
-    filename: 'Goldstone-Horizen-Remix-03.mp3',
-    url: 'https://www.dropbox.com/scl/fi/jykwezt2xgj12u5obcgt9/Goldstone-Horizen-Remix-03.mp3?rlkey=8ei6c9j728ukpwnx07j6hlwg2&st=xbfyyneh&dl=0',
-  },
-  {
-    id: 'gs_remix04',
-    title: 'Goldstone - Horizen Remix 04',
-    filename: 'Goldstone-Horizen-Remix-04.mp3',
-    url: 'https://www.dropbox.com/scl/fi/7r6c5ulmis872rua9b375/Goldstone-Horizen-Remix-04.MP3?rlkey=y9cwi2jgi7n5lp23rjhqthuwz&st=zoh1ijfs&dl=0',
-  },
-  {
-    id: 'gs_remix05',
-    title: 'Goldstone - Horizen Remix 05',
-    filename: 'Goldstone-Horizen-Remix-05.mp3',
-    url: 'https://www.dropbox.com/scl/fi/agjvrrsshfx1s5g062ixy/Goldstone-Horizen-Remix-05.mp3?rlkey=prxjws599b4mjqx21c7fdh25z&st=xujukx7n&dl=0',
-  },
-  {
-    id: 'gs_remix06',
-    title: 'Goldstone - Horizen Remix 06',
-    filename: 'Goldstone-Horizen-Remix-06.mp3',
-    url: 'https://www.dropbox.com/scl/fi/01zhktl6a8oknt7dh7jhl/Goldsone-Horizen-Remix-06.MP3?rlkey=gpwf5l4coq4bn6hruxo6h1q6z&st=1cqbmdwp&dl=0',
-  },
-  {
-    id: 'gs_remix_aurudu',
-    title: 'Goldstone - Horizen Remix Aurudu 2026',
-    filename: 'Goldstone-Horizen-Remix-Aurudu-2026.mp3',
-    url: 'https://www.dropbox.com/scl/fi/84cyib4e3i5642l6fp3z2/Goldstone-Horizen-Remix-Aurudu-2026.MP3?rlkey=c85k3fcu9s55ukylfq57tcvxq&st=un93jdx3&dl=0',
-  },
-  {
-    id: 'gs01',
-    title: 'Goldstone Ambience 01',
-    filename: 'gs01.mp3',
-    url: 'https://www.dropbox.com/scl/fi/s4yitjmtdv4r8fewxxixb/gs01.mp3?rlkey=dth64zun910oef7r8lr494fgc&st=al1ibalv&dl=0',
-  },
-  {
-    id: 'gs02',
-    title: 'Goldstone Ambience 02',
-    filename: 'gs02.mp3',
-    url: 'https://www.dropbox.com/scl/fi/3pb2sdysjwnh5k8k0tfhl/gs02.mp3?rlkey=gomh5fn8wdy4hsylfornieups&st=m2abmr4r&dl=0',
-  },
-];
+export const DEFAULT_TRACKS: AudioTrack[] = mergePrivateManifest<AudioTrack>(bundledMusic, []).reverse();
 
 
 
@@ -459,7 +404,56 @@ function formatKeyName(code: number): string {
 
 
 
+
+// --- WINTER & CHRISTMAS HOLIDAY SNOW SYSTEM (32 PRECOMPUTED HARDWARE-ACCELERATED PARTICLES) ---
 function App() {
+  const winterMotion=useWinterMotion();
+  const [winterWindowShown, setWinterWindowShown] = useState(false);
+  useEffect(() => {
+    const fitWinterShell = () => document.documentElement.style.setProperty(
+      "--winter-scale", String(Math.min(window.innerWidth / 1024, window.innerHeight / 576))
+    );
+    fitWinterShell();
+    window.addEventListener("resize", fitWinterShell);
+    return () => window.removeEventListener("resize", fitWinterShell);
+  }, []);
+
+  // Show the native window only after the scaled shell and its local artwork are ready.
+  useEffect(() => {
+    let cancelled = false;
+    const artwork = [winterLandscapeImg, goldstoneLogo].map(src => {
+      const image = new Image();
+      image.src = src;
+      return image.decode().catch(() => undefined);
+    });
+    const timeout = new Promise<void>(resolve => window.setTimeout(resolve, 2500));
+    Promise.race([Promise.all(artwork), timeout]).then(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (!cancelled) invoke("show_winter_window").then(() => {
+          if (!cancelled) setWinterWindowShown(true);
+        }).catch(console.error);
+      }));
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // --- WINTER & CHRISTMAS HOLIDAY THEME STATES ---
+  const [isGameActive, setIsGameActive] = useState(false);
+  const [isWindowHidden, setIsWindowHidden] = useState(false);
+  const [isUserInteracting, setIsUserInteracting] = useState(false);
+  const interactionTimerRef = useRef<any>(null);
+
+  const notifyUserInteraction = () => {
+    setIsWindowHidden(false);
+    setIsUserInteracting(true);
+    if (interactionTimerRef.current) clearTimeout(interactionTimerRef.current);
+    interactionTimerRef.current = setTimeout(() => {
+      setIsUserInteracting(false);
+    }, 8000);
+  };
+
+  const isEffectsPaused = isWindowHidden || (isGameActive && !isUserInteracting);
+
 
 
 
@@ -475,7 +469,6 @@ function App() {
 
 
 
-  const bgVideoRef = useRef<HTMLVideoElement | null>(null);
 
 
 
@@ -487,11 +480,17 @@ function App() {
 
 
 
-  const [playerCount, setPlayerCount] = useState<number | null>(null);
+  const [playerCount, setPlayerCount] = useState<number | null>(() => {
+    const saved = localStorage.getItem("last_known_player_count");
+    return saved !== null && !isNaN(Number(saved)) ? Number(saved) : null;
+  });
 
 
 
-  const [maxPlayers, setMaxPlayers] = useState<number>(128);
+  const [maxPlayers, setMaxPlayers] = useState<number>(() => {
+    const saved = localStorage.getItem("last_known_max_players");
+    return saved !== null && !isNaN(Number(saved)) ? Number(saved) : 128;
+  });
 
 
 
@@ -499,7 +498,9 @@ function App() {
 
 
 
-  const [isOnline, setIsOnline] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(() => {
+    return localStorage.getItem("goldstone_server_online") !== "false";
+  });
 
 
 
@@ -520,6 +521,7 @@ function App() {
 
 
   const [updateLink, setUpdateLink] = useState("");
+  const [availableVersion, setAvailableVersion] = useState("");
 
 
 
@@ -736,11 +738,12 @@ function App() {
 
 
 
-  const [duration, setDuration] = useState(198);
+  const [duration, setDuration] = useState(0);
 
 
 
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [musicSyncing, setMusicSyncing] = useState(false);
 
 
 
@@ -781,6 +784,56 @@ function App() {
   // Auto-hide NEW badge on music player after 30 minutes of first launch on this PC
 
 
+
+  // --- WINTER SNOW ZERO-LAG MONITOR (AUTO-PAUSES/UNMOUNTS ON GAME OR BACKGROUND) ---
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsWindowHidden(document.hidden);
+    };
+    const handleFocus = () => {
+      setIsWindowHidden(document.hidden);
+    };
+    const handleBlur = () => {
+      if (interactionTimerRef.current) clearTimeout(interactionTimerRef.current);
+      setIsUserInteracting(false);
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("blur", handleBlur);
+
+    let active = true;
+    const checkGame = async () => {
+      if (document.hidden) return;
+      try {
+        const running = await invoke<boolean>("is_game_running_backend");
+        if (active) {
+          setIsGameActive(prev => {
+            const next = !!running;
+            if (!prev && next) {
+              setIsUserInteracting(false);
+            }
+            return next;
+          });
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    // The separate Winter Test edition always uses its bundled seasonal theme.
+
+    checkGame();
+    const interval = setInterval(checkGame, 4000);
+
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("blur", handleBlur);
+      if (interactionTimerRef.current) clearTimeout(interactionTimerRef.current);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
 
@@ -906,6 +959,47 @@ function App() {
 
   }, [monitorEnabled]);
 
+  const onlyRedmFallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const redmLogSeenInSessionRef = useRef(false);
+  const clearOnlyRedmFallback = () => {
+    if (onlyRedmFallbackTimerRef.current) {
+      clearTimeout(onlyRedmFallbackTimerRef.current);
+      onlyRedmFallbackTimerRef.current = null;
+    }
+  };
+  const triggerGoldstoneConnectOn67 = (statusText: string) => {
+    // Auto-pause ambient queue music when RedM hits 67% loading screen
+    if (audioRef.current) {
+      fadeAudio(0, 400).then(() => {
+        if (audioRef.current) {
+          try { audioRef.current.pause(); } catch {}
+          audioRef.current.volume = parseFloat(localStorage.getItem("music_volume") || "0.5");
+          setIsPlaying(false);
+        }
+      });
+    }
+
+    // If 67% Stuck Fix is active, auto-connect to the server now that the engine is ready
+    const is67Fix = monitorEnabledRef.current || localStorage.getItem("ts_monitor_enabled") === "true";
+    if (is67Fix) {
+      setTargetHit(true);
+      setStatus(statusText);
+      const customRedm = redmPathRef.current || null;
+      invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm })
+        .then(() => {
+          setStatus("CONNECTED");
+          setTimeout(() => {
+            setStatus("READY TO CONNECT");
+            setTargetHit(false);
+          }, 4000);
+        })
+        .catch((err) => {
+          console.log("67% auto-connect error:", err);
+          setTargetHit(false);
+        });
+    }
+  };
+
 
 
   const redmPathRef = useRef<string>(redmPath);
@@ -966,7 +1060,36 @@ function App() {
 
 
 
-  const blobUrlCache = useRef<Map<string, string>>(new Map());
+  const musicAliveRef = useRef(true);
+  const musicEpochRef = useRef(0);
+  const musicFetchRef = useRef<AbortController | null>(null);
+  const audioFetchesRef = useRef(new Set<AbortController>());
+  const musicSyncRef = useRef<Promise<AudioTrack[]> | null>(null);
+  const musicManifestRef = useRef("");
+  const musicPathRef = useRef(musicPath);
+  musicPathRef.current=musicPath;
+  const musicProgressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const musicProgressRef = useRef<{songId:string;title:string;progress:number}|null>(null);
+  const musicProgressTimeRef = useRef(0);
+  const musicLoadEpochRef = useRef(0);
+  const musicAutoPlayAllowedRef = useRef(false);
+  musicAutoPlayAllowedRef.current=musicEnabled&&!isEffectsPaused;
+  const blobUrlCache = useRef<MusicBlobCache>(null!);
+  if(!blobUrlCache.current)blobUrlCache.current=new MusicBlobCache(()=>audioRef.current?.src||"");
+  useEffect(()=>{
+    musicAliveRef.current=true;
+    if(blobUrlCache.current.isDisposed)blobUrlCache.current=new MusicBlobCache(()=>audioRef.current?.src||"");
+    const audio=audioRef.current;
+    return ()=>{
+      musicAliveRef.current=false;musicEpochRef.current++;musicLoadEpochRef.current++;
+      musicFetchRef.current?.abort();audioFetchesRef.current.forEach(c=>c.abort());audioFetchesRef.current.clear();
+      if(musicProgressTimerRef.current)clearTimeout(musicProgressTimerRef.current);
+      if(fadeIntervalRef.current)clearInterval(fadeIntervalRef.current);
+      if(seekTimeoutRef.current)clearTimeout(seekTimeoutRef.current);
+      audio?.pause();if(audio){audio.removeAttribute('src');audio.load();}
+      blobUrlCache.current.dispose();
+    };
+  },[]);
 
 
 
@@ -1054,7 +1177,7 @@ function App() {
 
 
 
-  const CURRENT_VERSION = "0.3.3"; 
+  const CURRENT_VERSION = "0.3.4"; 
 
 
 
@@ -1126,11 +1249,17 @@ function App() {
 
 
 
-        setIsOnline(data.online !== false);
+        const onlineState = data.online !== false;
+        setIsOnline(onlineState);
 
 
 
         setServerName("GOLDSTONE COUNTY");
+        try {
+          localStorage.setItem("goldstone_server_online", String(onlineState));
+          localStorage.setItem("last_known_player_count", String(data.players));
+          if (data.max_players) localStorage.setItem("last_known_max_players", String(data.max_players));
+        } catch {}
 
 
 
@@ -1209,6 +1338,7 @@ function App() {
 
 
     } else {
+      clearOnlyRedmFallback();
 
 
 
@@ -1256,10 +1386,11 @@ function App() {
 
 
 
-      if (data.version !== CURRENT_VERSION) {
+      if (isNewerVersion(data.version, CURRENT_VERSION)) {
 
 
 
+        setAvailableVersion(data.version);
         setUpdateLink(data.downloadUrl); 
 
 
@@ -3046,7 +3177,8 @@ const handleInstallTs3 = async () => {
 
     const customRedm = redmPath || null;
 
-
+    clearOnlyRedmFallback();
+    redmLogSeenInSessionRef.current = false;
 
     setStatus("STARTING GOLDSTONE...");
 
@@ -3142,7 +3274,8 @@ const handleInstallTs3 = async () => {
 
     const customRedm = redmPath || null;
 
-
+    clearOnlyRedmFallback();
+    redmLogSeenInSessionRef.current = false;
 
     invoke('start_log_watcher'); 
 
@@ -3169,6 +3302,17 @@ const handleInstallTs3 = async () => {
         await invoke('launch_redm_plain', { customPath: customRedm });
 
         setStatus("REDM ENGINE LOADED (WAITING FOR 67%)...");
+
+        clearOnlyRedmFallback();
+        onlyRedmFallbackTimerRef.current = setTimeout(async () => {
+          onlyRedmFallbackTimerRef.current = null;
+          if (redmLogSeenInSessionRef.current) return;
+          try {
+            const running = await invoke<boolean>('is_game_running_backend');
+            if (!running || redmLogSeenInSessionRef.current) return;
+            triggerGoldstoneConnectOn67("CONNECTING TO GOLDSTONE...");
+          } catch {}
+        }, 78000);
 
       } else {
 
@@ -3416,111 +3560,70 @@ const handleInstallTs3 = async () => {
 
 
 
-    const syncAndLoadMusic = async (autoPlay: boolean = false) => {
+  const commitMusicPlaylist = (incoming: AudioTrack[], autoPlay: boolean = false) => {
+    if(!musicAliveRef.current)return;
+    const previous = playlistRef.current;
+    const ordered = promoteNewTracks(incoming, previous);
+    if (!ordered.length) return;
+    const oldIndex = currentTrackIndexRef.current;
+    const index = autoPlay ? 0 : preserveTrackIndex(previous, oldIndex, ordered);
+    const audio = audioRef.current;
+    const wasPlaying = !!audio && !audio.paused && musicAutoPlayAllowedRef.current;
+    const changedSong = previous[oldIndex]?.id !== ordered[index]?.id;
+    setPlaylist(ordered);
+    playlistRef.current = ordered;
+    currentTrackIndexRef.current = index;
+    setCurrentTrackIndex(index);
     try {
-      let songsManifest = DEFAULT_TRACKS;
-
-      try {
-
-        let resp = await fetch("https://raw.githubusercontent.com/nimnabrox/goldstonelauncher/main/config/music.json", { cache: "no-store" });
-
-        if (!resp.ok) {
-
-          resp = await fetch("https://raw.githubusercontent.com/nimnabrox/goldstonelauncher/main/music.json", { cache: "no-store" });
-
-        }
-
-        if (resp.ok) {
-
-          const remoteSongs = await resp.json();
-
-          if (Array.isArray(remoteSongs) && remoteSongs.length > 0) {
-
-            songsManifest = remoteSongs;
-
-          }
-
-        }
-
-      } catch {
-
-        // Fallback to DEFAULT_TRACKS if offline
-
-      }
-
-
-
-      const synced = await invoke<Array<{
-
-        id: string;
-
-        title: string;
-
-        filename: string;
-
-        local_path: string;
-
-        is_downloaded: boolean;
-
-      }>>("sync_music_songs_backend", {
-
-        songs: songsManifest.map((s) => ({
-
-          id: s.id,
-
-          title: s.title,
-
-          filename: s.filename,
-
-          url: s.url,
-
-        }))
-
-      });
-
-
-
-      const newTracks: AudioTrack[] = synced.map((s) => ({
-
-        id: s.id,
-
-        title: s.title,
-
-        filename: s.filename,
-
-        localPath: s.local_path,
-
-        url: s.local_path,
-
-      }));
-
-
-
-      if (newTracks.length > 0) {
-        setPlaylist(newTracks);
-        playlistRef.current = newTracks;
-        try { localStorage.setItem("goldstone_saved_playlist", JSON.stringify(newTracks)); } catch {}
-
-        if (autoPlay) {
-
-          loadTrack(0, true);
-
-        }
-
-      }
-
-      return newTracks;
-
-    } catch (err) {
-
-      console.error("Failed to sync music songs:", err);
-
-      return DEFAULT_TRACKS;
-
-    }
-
+      localStorage.setItem("goldstone_saved_playlist", JSON.stringify(ordered));
+      localStorage.setItem("music_track_index", String(index));
+    } catch {}
+    if (autoPlay || changedSong || !audio?.src || audio.error) loadTrack(index, (autoPlay || wasPlaying) && musicAutoPlayAllowedRef.current);
   };
 
+  const runMusicSync = async (autoPlay=false, force=false):Promise<AudioTrack[]> => {
+    const epoch=musicEpochRef.current;
+    const controller=new AbortController();musicFetchRef.current=controller;
+    const timeout=window.setTimeout(()=>controller.abort(),10000);
+    if(musicAliveRef.current)setMusicSyncing(true);
+    try {
+      let songsManifest:AudioTrack[]=bundledMusic;
+      let remoteLoaded=false;
+      try {
+        let response=await fetch("https://raw.githubusercontent.com/nimnabrox/goldstonelauncher/main/config/music.json",{cache:"no-store",signal:controller.signal});
+        if(!response.ok)response=await fetch("https://raw.githubusercontent.com/nimnabrox/goldstonelauncher/main/music.json",{cache:"no-store",signal:controller.signal});
+        if(response.ok){const songs=await response.json();if(Array.isArray(songs)&&songs.length){songsManifest=songs;remoteLoaded=true;}}
+      } catch { /* Keep the current catalog when offline; retry on the next check. */ }
+      finally {window.clearTimeout(timeout);}
+      if(!musicAliveRef.current||epoch!==musicEpochRef.current)return [];
+      if(!remoteLoaded&&musicManifestRef.current&&!force)return playlistRef.current;
+      if(!remoteLoaded){const known=new Set(bundledMusic.map(t=>t.id));songsManifest=[...playlistRef.current.filter(t=>!known.has(t.id)&&!isFolderTrack(t)),...bundledMusic];}
+      const orderedManifest=promoteNewTracks(mergePrivateManifest<AudioTrack>(songsManifest,[]).reverse(),playlistRef.current);
+      const fingerprint=JSON.stringify(orderedManifest.map(t=>[t.id,t.filename,t.url,t.title]));
+      if(!force&&fingerprint===musicManifestRef.current)return playlistRef.current;
+      const synced=await invoke<Array<{id:string;title:string;filename:string;local_path:string;is_downloaded:boolean}>>("sync_music_songs_backend",{
+        songs:orderedManifest.map(t=>({id:t.id,title:t.title,filename:t.filename,url:t.url}))
+      });
+      if(!musicAliveRef.current||epoch!==musicEpochRef.current)return [];
+      const sources=new Map(orderedManifest.map(t=>[t.id,t]));
+      const tracks:AudioTrack[]=synced.map(t=>({id:t.id,title:t.title,filename:t.filename,
+        localPath:t.is_downloaded?t.local_path:undefined,url:t.is_downloaded?t.local_path:(sources.get(t.id)?.url||t.local_path)}));
+      if(tracks.length){
+        commitMusicPlaylist(retainFolderTracks(tracks,playlistRef.current,!!musicPathRef.current),autoPlay);
+      }
+      if(synced.length&&synced.every(t=>t.is_downloaded))musicManifestRef.current=fingerprint;
+      return tracks;
+    } catch(error){if(musicAliveRef.current)console.error("Music refresh failed:",error);return playlistRef.current;}
+    finally {window.clearTimeout(timeout);if(musicFetchRef.current===controller)musicFetchRef.current=null;
+      if(musicAliveRef.current&&epoch===musicEpochRef.current)setMusicSyncing(false);}
+  };
+  const syncAndLoadMusic = (autoPlay=false,force=false):Promise<AudioTrack[]> => {
+    if(musicSyncRef.current)return musicSyncRef.current;
+    const operation=runMusicSync(autoPlay,force);musicSyncRef.current=operation;
+    void operation.finally(()=>{if(musicSyncRef.current===operation)musicSyncRef.current=null;}).catch(()=>{});
+    return operation;
+  };
+  useMusicRefresh(musicEnabled&&!isEffectsPaused,()=>syncAndLoadMusic(false));
 
 
 const loadPlaylist = async (dirPath: string) => {
@@ -3563,7 +3666,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      const customTracks: AudioTrack[] = files.map((f, i) => {
+      const customTracks: AudioTrack[] = files.map((f) => {
 
 
 
@@ -3583,7 +3686,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-          id: `custom-${i}-${f}`,
+          id: `custom:${cleanDir.toLowerCase()}/${f.toLowerCase()}`,
 
 
 
@@ -3611,15 +3714,12 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      const merged = [...DEFAULT_TRACKS, ...customTracks];
+      const managedTracks=playlistRef.current.filter(t=>!isFolderTrack(t));
+      const merged = [...customTracks.reverse(), ...(managedTracks.length?managedTracks:DEFAULT_TRACKS)];
 
 
 
-      setPlaylist(merged);
-
-
-
-      playlistRef.current = merged;
+      commitMusicPlaylist(merged);
 
 
 
@@ -3659,85 +3759,26 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-  const getAudioBlobUrl = async (track: AudioTrack): Promise<string> => {
-
-    const key = track.id || track.filename || track.url;
-
-    if (blobUrlCache.current.has(key)) {
-
-      return blobUrlCache.current.get(key)!;
-
-    }
-
-
-
-    const filePath = track.localPath || track.url;
-
-    let blob: Blob;
-
+  const getAudioBlobUrl = (track:AudioTrack):Promise<string> => blobUrlCache.current.get(track.id||track.filename||track.url,async()=>{
+    const filePath=track.localPath||track.url;
     try {
-
-      const base64DataUri = await invoke<string>('read_audio_file_backend', { path: filePath });
-
-      const parts = base64DataUri.split(',');
-
-      const mime = parts[0].match(/:(.*?);/)?.[1] || 'audio/mpeg';
-
-      const binary = atob(parts[1]);
-
-      const bytes = new Uint8Array(binary.length);
-
-      for (let i = 0; i < binary.length; i++) {
-
-        bytes[i] = binary.charCodeAt(i);
-
-      }
-
-      blob = new Blob([bytes], { type: mime });
-
-    } catch {
-
-      // Fallback: direct fetch if url is web-based
-
-      const res = await fetch(track.url.replace('dl=0', 'dl=1'));
-
-      blob = await res.blob();
-
+      const data=await invoke<string>('read_audio_file_backend',{path:filePath});
+      const parts=data.split(',');const mime=parts[0].match(/:(.*?);/)?.[1]||'audio/mpeg';
+      const binary=atob(parts[1]);const bytes=new Uint8Array(binary.length);
+      for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      return new Blob([bytes],{type:mime});
+    } catch(error) {
+      if(!musicAliveRef.current)throw error;
+      const controller=new AbortController();audioFetchesRef.current.add(controller);
+      const timeout=window.setTimeout(()=>controller.abort(),90000);
+      try {const response=await fetch(track.url.replace('dl=0','dl=1'),{signal:controller.signal});
+        if(!response.ok)throw new Error('Audio download failed');return await response.blob();}
+      finally {window.clearTimeout(timeout);audioFetchesRef.current.delete(controller);}
     }
-
-
-
-    // Prevent memory leaks: limit cache size
-
-    if (blobUrlCache.current.size >= 10) {
-
-      for (const [, oldUrl] of blobUrlCache.current.entries()) {
-
-        URL.revokeObjectURL(oldUrl);
-
-      }
-
-      blobUrlCache.current.clear();
-
-    }
-
-
-
-    const blobUrl = URL.createObjectURL(blob);
-
-    blobUrlCache.current.set(key, blobUrl);
-
-    return blobUrl;
-
-  };
-
-
-
-
-
-
+  });
 
   const loadTrack = async (index: number, autoPlay: boolean = false) => {
+    const loadEpoch=++musicLoadEpochRef.current;
 
 
 
@@ -3770,6 +3811,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
       const audioSrc = await getAudioBlobUrl(track);
+      if(!musicAliveRef.current||loadEpoch!==musicLoadEpochRef.current){blobUrlCache.current.trim();return;}
 
 
 
@@ -3782,6 +3824,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
         audioRef.current.src = audioSrc;
+        blobUrlCache.current.trim();
 
 
 
@@ -3805,7 +3848,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-        if (autoPlay) { 
+        if (autoPlay && musicAutoPlayAllowedRef.current) { 
 
 
 
@@ -3841,6 +3884,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
+      if(!musicAliveRef.current||loadEpoch!==musicLoadEpochRef.current)return;
       console.error("Failed to load track:", e); 
 
 
@@ -3862,6 +3906,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
             const fallbackSrc = await getAudioBlobUrl(DEFAULT_TRACKS[0]);
+            if(!musicAliveRef.current||loadEpoch!==musicLoadEpochRef.current)return;
 
 
 
@@ -3873,7 +3918,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-            if (autoPlay) audioRef.current.play().catch(() => {});
+            if (autoPlay && musicAutoPlayAllowedRef.current) audioRef.current.play().catch(() => {});
 
 
 
@@ -5043,7 +5088,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-    const sIndex = parseInt(localStorage.getItem("music_track_index") || "0"); setCurrentTrackIndex(sIndex);
+    currentTrackIndexRef.current=0;setCurrentTrackIndex(0);
 
 
 
@@ -5055,7 +5100,7 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-      loadPlaylist(sMusicPath);
+      void loadPlaylist(sMusicPath).then(()=>syncAndLoadMusic(false));
 
 
 
@@ -5064,18 +5109,27 @@ const loadPlaylist = async (dirPath: string) => {
 
 
       let initialTracks = DEFAULT_TRACKS;
+      let cachedTracks: AudioTrack[] = [];
       try {
         const localSaved = localStorage.getItem("goldstone_saved_playlist");
         if (localSaved) {
           const parsed = JSON.parse(localSaved);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            initialTracks = parsed;
+            cachedTracks = parsed;
+            initialTracks = mergeCachedTracks(DEFAULT_TRACKS, cachedTracks);
           }
         }
       } catch {}
       setPlaylist(initialTracks);
       playlistRef.current = initialTracks;
-      loadTrack(0, false);
+      const initialIndex = startupTrackIndex(initialTracks);
+      currentTrackIndexRef.current = initialIndex;
+      setCurrentTrackIndex(initialIndex);
+      try {
+        localStorage.setItem("goldstone_saved_playlist", JSON.stringify(initialTracks));
+        localStorage.setItem("music_track_index", String(initialIndex));
+      } catch {}
+      if (initialTracks[initialIndex]?.localPath) loadTrack(initialIndex, false);
       syncAndLoadMusic(false);
 
 
@@ -5122,27 +5176,20 @@ const loadPlaylist = async (dirPath: string) => {
 
 
 
-    const unlistenMusicDl = listen<{ song_id: string; title: string; progress: number }>("music-download-progress", (event) => {
-
-      setMusicDownloadProgress({
-
-        songId: event.payload.song_id,
-
-        title: event.payload.title,
-
-        progress: event.payload.progress,
-
-      });
-
-      if (event.payload.progress >= 100) {
-
-        setTimeout(() => setMusicDownloadProgress(null), 1200);
-
+    const unlistenMusicDl=listen<{song_id:string;title:string;progress:number}>("music-download-progress",event=>{
+      if(!musicAliveRef.current||!Number.isFinite(event.payload.progress))return;
+      if(musicProgressTimerRef.current){clearTimeout(musicProgressTimerRef.current);musicProgressTimerRef.current=null;}
+      const next={songId:event.payload.song_id,title:event.payload.title,progress:Math.max(0,Math.min(100,Math.floor(event.payload.progress)))};
+      const previous=musicProgressRef.current;musicProgressRef.current=next;
+      const now=Date.now();
+      if(!previous||previous.songId!==next.songId||next.progress===100||now-musicProgressTimeRef.current>=150){
+        musicProgressTimeRef.current=now;setMusicDownloadProgress(next);
       }
-
+      if(next.progress===100)musicProgressTimerRef.current=setTimeout(()=>{
+        if(musicAliveRef.current&&musicProgressRef.current?.songId===next.songId){musicProgressRef.current=null;setMusicDownloadProgress(null);}
+        musicProgressTimerRef.current=null;
+      },1200);
     });
-
-
 
 const unlistenReShade = listen<{ percent: number; step: string; status: string; completed?: boolean; done?: boolean; error?: string }>('reshade-progress', (event) => {
 
@@ -5302,42 +5349,20 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-    const unlistenTrigger = listen('trigger-67', () => {
-      // Auto-pause ambient queue music when RedM hits 67% loading screen
-      if (audioRef.current) { 
-        fadeAudio(0, 400).then(() => {
-          if (audioRef.current) {
-            try { audioRef.current.pause(); } catch {}
-            audioRef.current.volume = parseFloat(localStorage.getItem("music_volume") || "0.5");
-            setIsPlaying(false);
-          }
-        });
-      }
-
-      // If 67% Stuck Fix is active, auto-connect to the server now that the engine is ready
-      const is67Fix = monitorEnabledRef.current || localStorage.getItem("ts_monitor_enabled") === "true";
-      if (is67Fix) {
-        setTargetHit(true);
-        setStatus("67% HIT — CONNECTING TO GOLDSTONE...");
-        const customRedm = redmPathRef.current || null;
-        invoke('launch_redm_fresh', { serverCode: SERVER_CODE, customPath: customRedm })
-          .then(() => {
-            setStatus("CONNECTED");
-            setTimeout(() => {
-              setStatus("READY TO CONNECT");
-              setTargetHit(false);
-            }, 4000);
-          })
-          .catch((err) => {
-            console.log("67% auto-connect error:", err);
-            setTargetHit(false);
-          });
-      }
+    const unlistenLogProgress = listen('log-progress', () => {
+      redmLogSeenInSessionRef.current = true;
+      clearOnlyRedmFallback();
     });
 
-    const unlistenReset = listen('reset-trigger', (event) => { 
+    const unlistenTrigger = listen('trigger-67', () => {
+      redmLogSeenInSessionRef.current = true;
+      clearOnlyRedmFallback();
+      triggerGoldstoneConnectOn67("67% HIT — CONNECTING TO GOLDSTONE...");
+    });
 
-
+    const unlistenReset = listen('reset-trigger', (event) => {
+      redmLogSeenInSessionRef.current = false;
+      clearOnlyRedmFallback();
 
       setTargetHit(false); 
 
@@ -5385,7 +5410,9 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
       if (pollTimeout) clearTimeout(pollTimeout);
 
+      clearOnlyRedmFallback();
 
+      unlistenLogProgress.then(f => f());
 
       unlistenTrigger.then(f => f()); 
 
@@ -5395,7 +5422,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-      unlistenMusicDl.then(f => f());
+      unlistenMusicDl.then(f => f()).catch(()=>{});
 
       unlistenReShade.then(f => f());
 
@@ -5417,7 +5444,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-  // --- ROCK-SOLID AMBIENT BACKGROUND VIDEO ENGINE ---
+  // Keep the welcome screen visible for 2.5s after the native window opens.
 
 
 
@@ -5425,326 +5452,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-    const video = bgVideoRef.current;
-
-
-
-    if (!video) return;
-
-
-
-
-
-
-
-    let isDestroyed = false;
-
-
-
-
-
-
-
-    const safePlay = () => {
-
-
-
-      if (isDestroyed || !video) return;
-
-
-
-      if (document.hidden) return; // Only pause when window is minimized
-
-
-
-      if (video.paused || video.ended) {
-
-
-
-        const promise = video.play();
-
-
-
-        if (promise !== undefined) {
-
-
-
-          promise.catch(() => {});
-
-
-
-        }
-
-
-
-      }
-
-
-
-    };
-
-
-
-
-
-
-
-    const safePause = () => {
-
-
-
-      if (!video) return;
-
-
-
-      if (!video.paused) {
-
-
-
-        try { video.pause(); } catch {}
-
-
-
-      }
-
-
-
-    };
-
-
-
-
-
-
-
-    // 1. Pause when minimized to taskbar, play when visible
-
-
-
-    const handleVisibility = () => {
-
-
-
-      if (document.hidden) {
-
-
-
-        safePause();
-
-
-
-      } else {
-
-
-
-        safePlay();
-
-
-
-      }
-
-
-
-    };
-
-
-
-
-
-
-
-    // 2. Resume when launcher window gains focus or is restored
-
-
-
-    const handleFocus = () => {
-
-
-
-      if (!document.hidden) safePlay();
-
-
-
-    };
-
-
-
-
-
-
-
-    // 3. Failsafe loop recovery (never halts on end or decode stall)
-
-
-
-    const handleEnded = () => {
-
-
-
-      if (video && !document.hidden) {
-
-
-
-        video.currentTime = 0;
-
-
-
-        safePlay();
-
-
-
-      }
-
-
-
-    };
-
-
-
-
-
-
-
-    const handleWaiting = () => {
-
-
-
-      if (!document.hidden) {
-
-
-
-        setTimeout(safePlay, 150);
-
-
-
-      }
-
-
-
-    };
-
-
-
-
-
-
-
-    // 4. Watchdog: keeps video playing whenever app is visible
-
-
-
-    const watchdog = setInterval(() => {
-
-
-
-      if (!document.hidden && video && (video.paused || video.ended)) {
-
-
-
-        safePlay();
-
-
-
-      }
-
-
-
-    }, 2000);
-
-
-
-
-
-
-
-    document.addEventListener("visibilitychange", handleVisibility);
-
-
-
-    window.addEventListener("focus", handleFocus);
-
-
-
-    video.addEventListener("ended", handleEnded);
-
-
-
-    video.addEventListener("waiting", handleWaiting);
-
-
-
-
-
-
-
-    // Initial start
-
-
-
-    safePlay();
-
-
-
-
-
-
-
-    return () => {
-
-
-
-      isDestroyed = true;
-
-
-
-      clearInterval(watchdog);
-
-
-
-      document.removeEventListener("visibilitychange", handleVisibility);
-
-
-
-      window.removeEventListener("focus", handleFocus);
-
-
-
-      if (video) {
-
-
-
-        video.removeEventListener("ended", handleEnded);
-
-
-
-        video.removeEventListener("waiting", handleWaiting);
-
-
-
-      }
-
-
-
-    };
-
-
-
-  }, []);
-
-
-
-
-
-
-
-  // Failsafe auto-dismiss welcome screen (light band animates ~1.6s, total splash 2.5s, never gets stuck)
-
-
-
-  useEffect(() => {
-
-
-
+    if (!winterWindowShown) return;
     const splashTimer = setTimeout(() => {
 
 
@@ -5761,7 +5469,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-  }, []);
+  }, [winterWindowShown]);
 
 
 
@@ -5849,99 +5557,22 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-    <div className="app-container">
-
+    <div onPointerDown={notifyUserInteraction} className={`app-container winter-theme-active ${winterMotion.enabled ? "winter-motion-enabled" : "winter-motion-reduced"} ${isEffectsPaused ? "winter-effects-paused" : ""}`}>
+      <WinterButtonFeedback enabled={winterMotion.enabled} />
+      <WinterCursorEffects active={winterMotion.enabled && !isLoading && !isEffectsPaused} />
 
 
       {/* --- AMBIENT LOOP BACKGROUND VIDEO (PERMANENT 1PX BLUR) --- */}
 
 
 
+      <div className="launcher-viewport">
+      <WinterForegroundSnow active={winterMotion.enabled && !isLoading && !isEffectsPaused} />
       <div className="ambient-bg-wrapper">
-
-
-
-        <video
-
-
-
-          ref={bgVideoRef}
-
-
-
-          src={loopVideo}
-
-
-
-          autoPlay
-
-
-
-          loop
-
-
-
-          muted
-
-
-
-          playsInline
-
-
-
-          className="ambient-bg-video"
-
-
-
-          style={{
-
-
-
-            filter: "blur(1px) brightness(0.88) saturate(1.18)"
-
-
-
-          }}
-
-
-
-          onEnded={(e) => {
-
-
-
-            const v = e.currentTarget;
-
-
-
-            if (!document.hidden) {
-
-
-
-              v.currentTime = 0;
-
-
-
-              v.play().catch(() => {});
-
-
-
-            }
-
-
-
-          }}
-
-
-
-        />
-
-
-
+        <WinterBackground active={winterMotion.enabled && !isLoading && !isEffectsPaused && !showSettings && !showIntro && !showUpdateModal && !showReShadeModal && !showTs3Modal && !showTs3UninstallConfirm} />
         <div className="ambient-bg-overlay"></div>
-
-
-
       </div>
+      <WinterFestiveCanopy animated={winterMotion.enabled && !isLoading && !isEffectsPaused} />
 
 
 
@@ -6113,6 +5744,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
+
           <button className="titlebar-btn settings-btn" onClick={openSettings} title="Settings">
 
 
@@ -6129,7 +5761,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-          <button className="titlebar-btn min-btn" onClick={minimizeWindow} title="Minimize">
+          <button className="titlebar-btn min-btn" onClick={minimizeWindow} aria-label="Minimize">
 
 
 
@@ -6141,7 +5773,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-          <button className="titlebar-btn close-btn" onClick={closeWindow} title="Close">
+          <button className="titlebar-btn close-btn" onClick={closeWindow} aria-label="Close">
 
 
 
@@ -6165,133 +5797,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-      {/* --- CINEMATIC LOGO WELCOME OVERLAY (BAND OF LIGHT SHIMMER, LOW-SPEC, NEVER STUCK) --- */}
-
-
-
-      <div 
-
-
-
-        className={`welcome-overlay ${!isLoading ? 'fade-out' : ''}`}
-
-
-
-        onClick={() => setIsLoading(false)}
-
-
-
-      >
-
-
-
-        <div className="welcome-content" onClick={(e) => e.stopPropagation()}>
-
-
-
-          {/* Logo with ambient glow aura and light band sweep */}
-
-
-
-          <div className="welcome-logo-box">
-
-
-
-            <div className="welcome-logo-halo" />
-
-
-
-            <img src={goldstoneLogo} alt="Goldstone Logo" className="welcome-logo-img" />
-
-
-
-            <div 
-
-
-
-              className="welcome-light-band" 
-
-
-
-              style={{
-
-
-
-                WebkitMaskImage: `url(${goldstoneLogo})`,
-
-
-
-                maskImage: `url(${goldstoneLogo})`
-
-
-
-              }} 
-
-
-
-            />
-
-
-
-          </div>
-
-
-
-
-
-
-
-          {/* Cinematic Title & Subtitle */}
-
-
-
-          <div className="welcome-text-wrap">
-
-
-
-            <h1 className="welcome-title">GOLDSTONE COUNTY</h1>
-
-
-
-            <p className="welcome-subtitle">COMMUNITY REDM LAUNCHER</p>
-
-
-
-          </div>
-
-
-
-
-
-
-
-          {/* Golden Progress Bar */}
-
-
-
-          <div className="welcome-progress-wrap">
-
-
-
-            <div className="welcome-progress-bar" />
-
-
-
-          </div>
-
-
-
-        </div>
-
-
-
-      </div>
-
-
-
-
-
-
+      <WinterWelcome loading={isLoading} onDismiss={() => setIsLoading(false)} />
 
       {/* --- INTRO / WHAT'S NEW MODAL --- */}
 
@@ -6328,33 +5834,33 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
             <div className="info-card">
               <div className="info-title">
                 <UserIcon size={14} className="info-svg" />
-                <span>LIVE SERVER PLAYER COUNT</span>
+                <span>LIVE PLAYER COUNTER</span>
               </div>
-              <div className="info-desc">Real-time player counter and server connection status fixed and fully restored.</div>
+              <div className="info-desc">Live player counts and connection status, with the existing server lookup and fallback.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <SparklesIcon size={14} className="info-svg" />
-                <span>GOLDSTONE RESHADE GRAPHICS</span>
+                <span>CHRISTMAS WINTER UPDATE</span>
               </div>
-              <div className="info-desc">Enhanced vintage 1940s graphics and cinematic visual presets with easy one-click install and in-game toggle.</div>
+              <div className="info-desc">Festive pine and warm lights, softly falling snow, and the Christmas cabin video. Visual effects pause while gaming or minimized.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <HeadphonesIcon size={14} className="info-svg" />
-                <span>TS3 & SALTYCHAT EASY INSTALLER</span>
+                <span>SAME REDM & TEAMSPEAK TOOLS</span>
               </div>
-              <div className="info-desc">One-click easy installation with live progress for TeamSpeak 3 and SaltyChat plugin. No complicated manual setup needed.</div>
+              <div className="info-desc">Your familiar connection, TeamSpeak, SaltyChat, ReShade and recovery tools remain available.</div>
             </div>
 
             <div className="info-card">
               <div className="info-title">
                 <MusicIcon size={14} className="info-svg" />
-                <span>OFFICIAL SONGS & MUSIC PLAYER</span>
+                <span>CHRISTMAS REMIX & NEW SONGS</span>
               </div>
-              <div className="info-desc">Official Goldstone songs, music video by KRJ & EMD, remixes, and queue music player with instant offline playback.</div>
+              <div className="info-desc">Christmas Remix 01 loads first. New catalog songs download automatically without interrupting the current track. Cached songs work offline.</div>
             </div>
 
             <div className="info-card">
@@ -6362,7 +5868,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
                 <RocketIcon size={14} className="info-svg" />
                 <span>GOLDSTONE COUNTY STANDALONE</span>
               </div>
-              <div className="info-desc">Official standalone portable release (Goldstone County.exe). Zero installation required — just download, run, and play.</div>
+              <div className="info-desc">Goldstone.County.exe includes its winter media. WebView2 setup may need internet on first use; RedM and TeamSpeak require their installed apps.</div>
             </div>
 
             <button className="save-settings-btn" onClick={handleIntroClose}>ENTER LAUNCHER</button>
@@ -6425,7 +5931,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                <p className="modal-text">A new version of Goldstone Launcher (v0.3.3) is available. Fixed live server player counter and connection status.</p>
+                <p className="modal-text">A new version of Goldstone Launcher (v{availableVersion}) is available. Download and install the latest Goldstone County release.</p>
 
 
 
@@ -6658,6 +6164,15 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
               <div className="help-text">Auto-pauses music when RedM starts and auto-plays your selected album/tracks if RedM crashes or closes (ideal for streamers).</div>
+              <label className="winter-motion-setting">
+                <span>WINTER ANIMATIONS</span>
+                <select aria-label="Winter animations" value={winterMotion.preference}
+                  onChange={event=>winterMotion.setPreference(event.target.value as 'on'|'system'|'off')}>
+                  <option value="on">On</option>
+                  <option value="system">Follow Windows</option>
+                  <option value="off">Off</option>
+                </select>
+              </label>
 
 
 
@@ -8599,11 +8114,11 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-            <label className="hero-input-label">
+            <label className="hero-input-label" htmlFor="teamspeak-username">
 
 
 
-              <UserIcon size={14} />
+              <HeadphonesIcon size={14} />
 
 
 
@@ -8623,6 +8138,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
+                id="teamspeak-username"
                 type="text" 
 
 
@@ -8704,6 +8220,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
             <button className="btn-hero-launch-mid" onClick={launchAll}>
+              <span className="btn-hero-snow-cap" aria-hidden="true" />
 
 
 
@@ -9118,6 +8635,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
+
           {musicEnabled && (
 
 
@@ -9151,6 +8669,10 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
                   <div ref={marqueeBoxRef} className="track-marquee-box">
+                    <div className="music-now-playing-label" title={musicDownloadProgress?.title}>
+                      <span>{musicDownloadProgress ? `ADDING: ${musicDownloadProgress.title}` : musicSyncing ? "CHECKING MUSIC" : isPlaying ? "NOW PLAYING" : duration>0 ? "READY TO PLAY" : "WAITING FOR MUSIC"}</span>
+                      {musicDownloadProgress && <b>{musicDownloadProgress.progress}%</b>}
+                    </div>
 
 
 
@@ -9218,6 +8740,10 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
+                  <button className="music-refresh-btn" onClick={()=>void (musicPath?loadPlaylist(musicPath).then(()=>syncAndLoadMusic(false,true)):syncAndLoadMusic(false,true))} disabled={musicSyncing}
+                    title="Refresh songs" aria-label="Refresh songs" aria-busy={musicSyncing}>
+                    <RefreshIcon size={13} className={musicSyncing?"spin-animation":""} />
+                  </button>
                   {showMusicNewTag && (
 
 
@@ -9246,7 +8772,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                  const totalDuration = duration > 0 ? duration : (currentTrackIndex === 0 ? 198 : 213);
+                  const totalDuration = duration > 0 ? duration : 0;
 
 
 
@@ -9350,7 +8876,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                      <span className="time-text">{formatTime(totalDuration)}</span>
+                      <span className="time-text">{(totalDuration>0?formatTime(totalDuration):"--:--")}</span>
 
 
 
@@ -9374,29 +8900,10 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
-                {musicDownloadProgress && (
-
-                  <div className="music-download-banner">
-
-                    <div className="dl-info">
-
-                      <span>DOWNLOADING: {musicDownloadProgress.title}</span>
-
-                      <span>{musicDownloadProgress.progress}%</span>
-
-                    </div>
-
-                    <div className="dl-track">
-
-                      <div className="dl-fill" style={{ width: `${musicDownloadProgress.progress}%` }}></div>
-
-                    </div>
-
-                  </div>
-
-                )}
-
-
+                {musicDownloadProgress && <div className="music-download-banner" role="progressbar"
+                  aria-label={`Downloading ${musicDownloadProgress.title}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={musicDownloadProgress.progress}>
+                  <div className="dl-track"><div className="dl-fill" style={{width:`${musicDownloadProgress.progress}%`}} /></div>
+                </div>}
 
                 <div className="music-actions">
 
@@ -9427,6 +8934,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
                       className="ctrl-btn play-btn" 
+                      disabled={musicSyncing && duration<=0}
 
 
 
@@ -9911,6 +9419,7 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
       </main>
+      </div>
 
 
 
@@ -9918,6 +9427,8 @@ const unlistenReShade = listen<{ percent: number; step: string; status: string; 
 
 
 
+
+          
     </div>
 
 

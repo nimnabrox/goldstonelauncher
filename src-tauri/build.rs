@@ -1,5 +1,4 @@
 use std::env;
-use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use tauri_build::{Attributes, WindowsAttributes};
@@ -8,39 +7,10 @@ fn main() {
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
 
-    // 1. Mask WebView2Loader.dll with 0x5B so no raw PE header triggers heuristics
-    let dll_candidates = [
-        manifest_dir.join("WebView2Loader.dll"),
-        PathBuf::from("WebView2Loader.dll"),
-        PathBuf::from("../WebView2Loader.dll"),
-        PathBuf::from("../../WebView2Loader.dll"),
-    ];
-    for p in &dll_candidates {
-        if p.exists() {
-            if let Ok(bytes) = fs::read(p) {
-                let masked: Vec<u8> = bytes.into_iter().map(|b| b ^ 0x5B).collect();
-                let _ = fs::write(out_dir.join("webview2_loader.bin"), masked);
-                break;
-            }
-        }
-    }
-
-    // 2. Mask MicrosoftEdgeWebview2Setup.exe with 0x5C for offline/self-contained fallback
-    let setup_candidates = [
-        manifest_dir.join("MicrosoftEdgeWebview2Setup.exe"),
-        PathBuf::from("scratch/MicrosoftEdgeWebview2Setup.exe"),
-        PathBuf::from("../scratch/MicrosoftEdgeWebview2Setup.exe"),
-        PathBuf::from("../../scratch/MicrosoftEdgeWebview2Setup.exe"),
-    ];
-    for p in &setup_candidates {
-        if p.exists() {
-            if let Ok(bytes) = fs::read(p) {
-                let masked: Vec<u8> = bytes.into_iter().map(|b| b ^ 0x5C).collect();
-                let _ = fs::write(out_dir.join("webview2_setup.bin"), masked);
-                break;
-            }
-        }
-    }
+    // Bundle the original Microsoft-signed helpers without transforming their bytes.
+    println!("cargo:rerun-if-changed=WebView2Loader.dll");
+    println!("cargo:rerun-if-changed=MicrosoftEdgeWebview2Setup.exe");
+    println!("cargo:rerun-if-changed=webview2_thunk.c");
 
     // 3. Compile webview2_thunk.c to provide direct dynamic-forwarding stubs
     let c_file = manifest_dir.join("webview2_thunk.c");
@@ -65,7 +35,7 @@ fn main() {
     let manifest = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity
-    version="0.3.1.0"
+    version="0.3.4.0"
     processorArchitecture="*"
     name="Nimnabro.GoldstoneCounty.Launcher"
     type="win32"

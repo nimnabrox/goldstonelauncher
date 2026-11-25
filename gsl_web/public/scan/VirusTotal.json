@@ -1,0 +1,29 @@
+{
+  "sha256": "5ad969d75d77d2d4991b21916a69ead77bf95c77508071053e4a306a13b43c74",
+  "filename": "Goldstone.County.exe",
+  "report_url": "https://www.virustotal.com/gui/file/5ad969d75d77d2d4991b21916a69ead77bf95c77508071053e4a306a13b43c74",
+  "scope": "Exact final signed executable requested by the owner; no source tree or API credentials uploaded.",
+  "status": "completed",
+  "analysis_id": "NTlmYjE5NTg4N2MyNzRhODBlZjlkNjRjZjUwMjQxNzU6MTc5NTYyMDkyMQ==",
+  "stats": {
+    "malicious": 0,
+    "suspicious": 0,
+    "undetected": 70,
+    "harmless": 0,
+    "timeout": 0,
+    "confirmed-timeout": 0,
+    "failure": 0,
+    "type-unsupported": 4
+  },
+  "flagged_engines": [],
+  "timed_out_engines": [],
+  "microsoft_result": {
+    "method": "blacklist",
+    "engine_name": "Microsoft",
+    "engine_version": "1.26100",
+    "engine_update": "20261125",
+    "category": "undetected",
+    "result": null
+  },
+  "checked_at_utc": "2026-11-25T15:36:51.868083+00:00"
+}

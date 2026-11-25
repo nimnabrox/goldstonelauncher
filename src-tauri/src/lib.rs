@@ -1,3 +1,4 @@
+mod winter_window;
 use std::process::Command;
 
 
@@ -5045,7 +5046,55 @@ async fn auto_detect_paths() -> DetectedPaths {
 
 
 
+fn detect_active_redm_graphics_api() -> String {
+    let mut candidates = Vec::new();
+
+    // 1. RedM primary settings directory (%APPDATA%\CitizenFX\rdr3_settings\system.xml)
+    if let Ok(appdata) = std::env::var("APPDATA") {
+        candidates.push(Path::new(&appdata).join(r"CitizenFX\rdr3_settings\system.xml"));
+    }
+
+    // 2. Personal folder from registry
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    if let Ok(key) = hkcu.open_subkey(r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders") {
+        if let Ok(val) = key.get_value::<String, _>("Personal") {
+            let path_str = if val.contains("%USERPROFILE%") {
+                if let Ok(up) = std::env::var("USERPROFILE") {
+                    val.replace("%USERPROFILE%", &up)
+                } else {
+                    val
+                }
+            } else {
+                val
+            };
+            candidates.push(Path::new(&path_str).join(r"Rockstar Games\Red Dead Redemption 2\Settings\system.xml"));
+        }
+    }
+
+    // 3. Common userprofile documents locations
+    if let Ok(userprofile) = std::env::var("USERPROFILE") {
+        candidates.push(Path::new(&userprofile).join(r"OneDrive\Documents\Rockstar Games\Red Dead Redemption 2\Settings\system.xml"));
+        candidates.push(Path::new(&userprofile).join(r"Documents\Rockstar Games\Red Dead Redemption 2\Settings\system.xml"));
+    }
+
+    for path in candidates {
+        if path.exists() {
+            if let Ok(content) = fs::read_to_string(&path) {
+                if content.contains("<API>kSettingAPI_Vulkan</API>") {
+                    return "Vulkan".to_string();
+                } else if content.contains("<API>kSettingAPI_DX12</API>") {
+                    return "DX12".to_string();
+                }
+            }
+        }
+    }
+
+    "DX12".to_string()
+}
+
 fn ensure_goldstone_reshade_configured(custom_toggle_vk: Option<u32>) {
+    let active_api = detect_active_redm_graphics_api();
+
     let mut candidate_sub_dirs = Vec::new();
     if let Some(sub) = get_redm_subprocess_dir() {
         candidate_sub_dirs.push(sub);
@@ -5059,10 +5108,68 @@ fn ensure_goldstone_reshade_configured(custom_toggle_vk: Option<u32>) {
 
     for sub_dir in candidate_sub_dirs {
         if !sub_dir.exists() { continue; }
-        let has_reshade = sub_dir.join("dxgi.dll").exists() 
-            || sub_dir.join("ReShade64.dll").exists() 
+        let dxgi_dll = sub_dir.join("dxgi.dll");
+        let dxgi_disabled = sub_dir.join("dxgi.dll.disabled");
+        let reshade64_dll = sub_dir.join("ReShade64.dll");
+
+        let has_reshade = dxgi_dll.exists() 
+            || reshade64_dll.exists() 
+            || dxgi_disabled.exists()
             || sub_dir.join("ReShade.ini").exists();
         if !has_reshade { continue; }
+
+        if !reshade64_dll.exists() {
+            if dxgi_dll.exists() {
+                let _ = fs::copy(&dxgi_dll, &reshade64_dll);
+            } else if dxgi_disabled.exists() {
+                let _ = fs::copy(&dxgi_disabled, &reshade64_dll);
+            }
+        }
+
+        if reshade64_dll.exists() {
+            let sub_json = sub_dir.join("ReShade64.json");
+            let json_content = format!(r#"{{
+	"file_format_version": "1.0.0",
+	"layer": {{
+		"name": "VK_LAYER_reshade",
+		"type": "GLOBAL",
+		"library_path": "{}",
+		"api_version": "1.3.0",
+		"implementation_version": "1",
+		"description": "Goldstone ReShade Graphics Layer",
+		"disable_environment": {{
+			"DISABLE_VK_LAYER_reshade_1": "1"
+		}}
+	}}
+}}"#, reshade64_dll.to_string_lossy().replace('\\', "\\\\"));
+            let _ = fs::write(&sub_json, json_content);
+
+            let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+            if let Ok((key, _)) = hkcu.create_subkey(r"Software\Khronos\Vulkan\ImplicitLayers") {
+                let json_path_str = sub_json.to_string_lossy().to_string();
+                let _ = key.set_value(&json_path_str, &0u32);
+            }
+        }
+
+        if active_api == "Vulkan" {
+            // For Vulkan: dxgi.dll must not be in subprocess to avoid blocking the Vulkan layer hook
+            if dxgi_dll.exists() {
+                let _ = fs::rename(&dxgi_dll, &dxgi_disabled);
+                if dxgi_dll.exists() {
+                    let _ = fs::remove_file(&dxgi_dll);
+                }
+            }
+        } else {
+            // For DX12: dxgi.dll must be present for DXGI/DX12 injection
+            if !dxgi_dll.exists() {
+                if dxgi_disabled.exists() {
+                    let _ = fs::rename(&dxgi_disabled, &dxgi_dll);
+                }
+                if !dxgi_dll.exists() && reshade64_dll.exists() {
+                    let _ = fs::copy(&reshade64_dll, &dxgi_dll);
+                }
+            }
+        }
 
         let preset_name = "Goldstone Enhanced (SZ).ini";
         let preset_path = sub_dir.join(preset_name);
@@ -5232,6 +5339,10 @@ TutorialProgress=4
                 }
             }
             let _ = fs::write(&ini_path, lines.join("\n"));
+        }
+
+        if let Some(parent_app) = sub_dir.parent().and_then(|p| p.parent()).and_then(|p| p.parent()) {
+            let _ = fs::copy(&ini_path, parent_app.join("ReShade.ini"));
         }
     }
 }
@@ -11172,7 +11283,7 @@ fn download_file_to(url: &str, dest: &Path) -> Result<(), String> {
 
 
 
-fn install_reshade_core_and_shaders(app: &tauri::AppHandle, graphics_api: &str, toggle_key_code: u32) -> Result<(), String> {
+fn install_reshade_core_and_shaders(app: &tauri::AppHandle, _graphics_api: &str, toggle_key_code: u32) -> Result<(), String> {
 
 
 
@@ -11306,6 +11417,16 @@ fn install_reshade_core_and_shaders(app: &tauri::AppHandle, graphics_api: &str, 
 
     }
 
+    let target_disabled = sub_dir.join("dxgi.dll.disabled");
+    let _ = fs::copy(&target_reshade64, &target_disabled);
+
+    let active_api = detect_active_redm_graphics_api();
+    if active_api == "Vulkan" {
+        let _ = fs::remove_file(&target_dxgi);
+    } else {
+        let _ = fs::copy(&target_reshade64, &target_dxgi);
+    }
+
 
 
     emit_reshade_prog(app, 35, "1/4", "RESHADE CORE READY.", false, None);
@@ -11333,93 +11454,26 @@ fn install_reshade_core_and_shaders(app: &tauri::AppHandle, graphics_api: &str, 
 
 
     let sub_json = sub_dir.join("ReShade64.json");
-
-
-
-    if graphics_api == "DX12" {
-
-
-
-        let _ = fs::remove_file(&sub_json);
-
-
-
-    } else {
-
-
-
-        let json_content = format!(r#"{{
-
-
-
+    let json_content = format!(r#"{{
 	"file_format_version": "1.0.0",
-
-
-
 	"layer": {{
-
-
-
 		"name": "VK_LAYER_reshade",
-
-
-
 		"type": "GLOBAL",
-
-
-
 		"library_path": "{}",
-
-
-
-		"api_version": "1.3.268",
-
-
-
+		"api_version": "1.3.0",
 		"implementation_version": "1",
-
-
-
-		"description": "Goldstone ReShade Graphics Layer"
-
-
-
+		"description": "Goldstone ReShade Graphics Layer",
+		"disable_environment": {{
+			"DISABLE_VK_LAYER_reshade_1": "1"
+		}}
 	}}
-
-
-
 }}"#, target_reshade64.to_string_lossy().replace('\\', "\\\\"));
+    let _ = fs::write(&sub_json, json_content);
 
-
-
-        let _ = fs::write(&sub_json, json_content);
-
-
-
-
-
-
-
-        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-
-
-
-        if let Ok((key, _)) = hkcu.create_subkey(r"Software\Khronos\Vulkan\ImplicitLayers") {
-
-
-
-            let json_path_str = sub_json.to_string_lossy().to_string();
-
-
-
-            let _ = key.set_value(&json_path_str, &0u32);
-
-
-
-        }
-
-
-
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    if let Ok((key, _)) = hkcu.create_subkey(r"Software\Khronos\Vulkan\ImplicitLayers") {
+        let json_path_str = sub_json.to_string_lossy().to_string();
+        let _ = key.set_value(&json_path_str, &0u32);
     }
 
 
@@ -11721,7 +11775,7 @@ fn clean_uninstall_reshade(app: &tauri::AppHandle) -> Result<(), String> {
 
 
 
-        "dxgi.dll", "dxgi.dll.bak", "dxgi.log",
+        "dxgi.dll", "dxgi.dll.bak", "dxgi.dll.disabled", "dxgi.log",
 
 
 
@@ -12258,6 +12312,7 @@ pub fn run() {
 
 
     tauri::Builder::default()
+        .setup(winter_window::configure)
 
 
 
@@ -12285,7 +12340,7 @@ pub fn run() {
 
 
 
-            close_app_backend, minimize_app_backend, start_log_watcher, read_audio_dir_backend, read_audio_file_backend,
+            winter_window::show_winter_window, close_app_backend, minimize_app_backend, start_log_watcher, read_audio_dir_backend, read_audio_file_backend,
 
 
 

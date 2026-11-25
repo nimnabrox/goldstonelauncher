@@ -1,0 +1,102 @@
+/* Midnight Frost & Champagne Hearth website theme — matches the Windows launcher shell. */
+.winter-website {
+  background: #0b0f14;
+  color: #f3f7fb;
+}
+.winter-website .scene-shade {
+  background:
+    radial-gradient(ellipse 82% 66% at 50% 42%, rgba(16, 18, 26, 0.14) 0%, rgba(7, 10, 15, 0.64) 100%),
+    linear-gradient(180deg, rgba(11, 14, 20, 0.42) 0%, rgba(9, 12, 18, 0.14) 45%, rgba(8, 10, 15, 0.80) 100%);
+}
+.winter-website .hero-shell {
+  border-bottom-color: rgba(235, 206, 148, 0.18);
+}
+.winter-website .hero-marquee {
+  background: rgba(11, 15, 21, 0.84) !important;
+  border-color: rgba(236, 204, 142, 0.22) !important;
+}
+.winter-website .footer-giant-bg-text {
+  -webkit-text-stroke: 1.5px rgba(240, 194, 100, 0.30);
+  background-image: linear-gradient(180deg, rgba(250, 227, 162, 0.20), rgba(234, 178, 72, 0.04) 70%, transparent);
+  filter: drop-shadow(0 0 26px rgba(240, 194, 100, 0.16));
+}
+.winter-website .text-light-sweep {
+  background-image: linear-gradient(115deg, #fffdf8, #e6edf5 28%, #ffffff 40%, #fae3a2 50%, #ffffff 58%, #eab248 66%, #eef4fa 78%, #fffdf8);
+  filter: drop-shadow(0 3px 18px rgba(0, 0, 0, 0.78));
+}
+.winter-website :is(.feature-card, .security-card) {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(168, 34, 52, 0.08), transparent 54%),
+    radial-gradient(circle at 90% 90%, rgba(34, 118, 76, 0.08), transparent 54%),
+    linear-gradient(155deg, rgba(16, 23, 32, 0.88) 0%, rgba(10, 14, 21, 0.94) 100%);
+  border-color: rgba(235, 202, 138, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 234, 0.10),
+    0 16px 40px -16px rgba(2, 5, 10, 0.85);
+}
+@media (hover: hover) and (pointer: fine) {
+  .winter-website .feature-card:hover {
+    border-color: rgba(242, 202, 124, 0.56);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 248, 234, 0.14),
+      0 18px 42px -14px rgba(228, 162, 46, 0.24);
+  }
+}
+.winter-website .footer-glass-pill {
+  background: rgba(15, 21, 30, 0.84);
+  border-color: rgba(220, 232, 246, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.winter-website .footer-glass-pill:hover {
+  background: rgba(24, 33, 46, 0.92);
+  border-color: rgba(242, 202, 124, 0.58);
+}
+.winter-website .btn-primary-download {
+  background: linear-gradient(118deg, #fae3a2 0%, #eab248 48%, #c97f18 100%) !important;
+  color: #140d05 !important;
+  border-color: rgba(255, 240, 192, 0.82) !important;
+  box-shadow:
+    inset 0 2px 2px rgba(255, 250, 234, 0.78),
+    inset 0 -2px 6px rgba(140, 68, 8, 0.26),
+    0 10px 32px rgba(228, 162, 46, 0.38) !important;
+}
+.winter-website .btn-primary-download:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.86),
+    0 12px 38px rgba(238, 178, 62, 0.52) !important;
+}
+.winter-website .btn-secondary-site {
+  background: linear-gradient(148deg, rgba(16, 23, 32, 0.86), rgba(11, 16, 23, 0.92)) !important;
+  border-color: rgba(235, 202, 138, 0.38) !important;
+  color: #f4f7fb !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 234, 0.14),
+    0 8px 26px rgba(4, 7, 12, 0.56) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+.winter-website .btn-secondary-site:hover {
+  background: linear-gradient(148deg, rgba(28, 38, 50, 0.94), rgba(16, 23, 32, 0.96)) !important;
+  border-color: rgba(242, 202, 124, 0.72) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 28px rgba(235, 180, 72, 0.22) !important;
+}
+.winter-website .footer-aurora {
+  background: radial-gradient(circle, rgba(240, 194, 100, 0.10), rgba(168, 34, 52, 0.05) 45%, transparent 70%);
+}
+.winter-website .ambience-controls {
+  padding: 5px 10px;
+  border: 1px solid rgba(235, 202, 138, 0.24);
+  border-radius: 24px;
+  background: rgba(12, 17, 25, 0.84);
+}
+.winter-website :is(a, button):focus-visible {
+  outline-color: #f0c264;
+}
+@media (max-width: 480px) {
+  .winter-website .ambience-controls {
+    padding: 4px;
+  }
+}

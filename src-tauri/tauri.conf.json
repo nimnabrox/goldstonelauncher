@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Goldstone Launcher",
-  "version": "0.3.3",
-  "identifier": "com.goldstone.launcher",
+  "productName": "Goldstone County Launcher",
+  "version": "0.3.4",
+  "identifier": "com.goldstone.launcher.snowtest",
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
@@ -11,15 +11,18 @@
   "app": {
     "windows": [
       {
-        "title": "Goldstone Launcher",
-        "width": 960,
-        "height": 540,
+        "title": "Goldstone County Launcher",
+        "width": 1024,
+        "height": 576,
         "resizable": false,
         "maximizable": false,
         "fullscreen": false,
         "decorations": false,
         "transparent": true,
-        "center": true
+        "center": true,
+        "shadow": false,
+        "backgroundColor": "#00000000",
+        "visible": false
       }
     ],
     "security": {
@@ -27,7 +30,7 @@
     }
   },
   "bundle": {
-    "active": true,
+    "active": false,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -36,7 +39,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "copyright": "Copyright © 2026 Nimnabro",
+    "copyright": "Copyright \u00a9 2026 Nimnabro",
     "shortDescription": "Goldstone County Launcher",
     "publisher": "Nimnabro",
     "windows": {

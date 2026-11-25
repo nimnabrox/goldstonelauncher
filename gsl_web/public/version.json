@@ -1,9 +1,15 @@
 {
-    "version": "0.3.3",
-    "name": "Goldstone County Launcher v0.3.3",
-    "mandatory": true,
-    "downloadUrl": "https://github.com/nimnabrox/goldstonelauncher/releases/download/0.3.3/Goldstone.County.exe",
-    "checksum": "45b77c9a8c8fdc8ed99ae6772a4601a222f8f7f5598cc7ae04bf6cd0f446790f",
-    "sha256": "45b77c9a8c8fdc8ed99ae6772a4601a222f8f7f5598cc7ae04bf6cd0f446790f",
-    "size": 15863304
+  "version": "0.3.4",
+  "name": "Goldstone County Launcher v0.3.4 — Winter Update",
+  "mandatory": true,
+  "downloadUrl": "https://gscl.nimnabro.com/downloads/Goldstone.County.exe",
+  "checksum": "5ad969d75d77d2d4991b21916a69ead77bf95c77508071053e4a306a13b43c74",
+  "sha256": "5ad969d75d77d2d4991b21916a69ead77bf95c77508071053e4a306a13b43c74",
+  "size": 14813192,
+  "trackCount": 13,
+  "virusTotal": {
+    "reportUrl": "https://www.virustotal.com/gui/file/5ad969d75d77d2d4991b21916a69ead77bf95c77508071053e4a306a13b43c74",
+    "checkedAt": "2026-11-25T15:36:51.868083+00:00",
+    "status": "completed"
+  }
 }

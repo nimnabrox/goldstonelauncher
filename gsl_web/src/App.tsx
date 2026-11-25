@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -21,6 +21,11 @@ import {
 } from "lucide-react";
 import { GlowCard } from "./components/ui/spotlight-card";
 import release from "../version.json";
+import "./winter.css";
+import "./christmas-polish.css";
+import { ChristmasDecorations } from "./ChristmasDecorations";
+import { ChristmasSoundtrack } from "./ChristmasSoundtrack";
+import { WebsiteWelcome } from "./WebsiteWelcome";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -29,7 +34,7 @@ if (typeof window !== "undefined") {
 const STYLES = `
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 2rem;
+  scroll-padding-top: 88px;
 }
 
 *, *::before, *::after {
@@ -312,7 +317,12 @@ export const MagneticButton = React.forwardRef<
 MagneticButton.displayName = "MagneticButton";
 
 const MarqueeDot = () => (
-  <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)] mx-1" />
+  <span
+    className="inline-block text-[10px] leading-none text-amber-300 drop-shadow-[0_0_6px_rgba(240,194,100,0.75)] mx-1"
+    aria-hidden="true"
+  >
+    ❄
+  </span>
 );
 
 const MarqueeBlock = () => (
@@ -341,13 +351,11 @@ const MarqueeBlock = () => (
 export default function App() {
   const [copiedHash, setCopiedHash] = useState(false);
   const [copyError, setCopyError] = useState("");
-  const [playing, setPlaying] = useState(false);
-  const [track, setTrack] = useState(0);
-  const [audioError, setAudioError] = useState("");
   const [scenePaused, setScenePaused] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [welcomeVisible, setWelcomeVisible] = useState(true);
+  const finishWelcome = useCallback(() => setWelcomeVisible(false), []);
+  const [sceneHidden, setSceneHidden] = useState(document.hidden);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const resumeTrack = useRef(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
@@ -357,8 +365,8 @@ export default function App() {
   const linksRef = useRef<HTMLDivElement>(null);
 
   const SHA256_HASH = release.sha256.toUpperCase();
-  const VT_URL = `https://www.virustotal.com/gui/file/${SHA256_HASH.toLowerCase()}`;
-  const DOWNLOAD_URL = release.downloadUrl;
+  const VT_URL = release.virusTotal.reportUrl;
+  const DOWNLOAD_URL = new URL(release.downloadUrl).pathname;
   const OFFICIAL_GOLDSTONE_SITE = "https://www.goldstonerp.com/";
   const GITHUB_URL = "https://github.com/nimnabrox/goldstonelauncher";
   const GITHUB_RELEASES_URL =
@@ -376,32 +384,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (scenePaused) videoRef.current?.pause();
-    else videoRef.current?.play().catch(() => {});
-  }, [scenePaused]);
-
-  useEffect(() => {
-    if (resumeTrack.current) {
-      resumeTrack.current = false;
-      void playMusic();
-    }
-  }, [track]);
-
-  async function playMusic() {
-    setAudioError("");
-    try {
-      await audioRef.current?.play();
-    } catch {
-      setAudioError("Music unavailable. Please try again.");
-    }
-  }
-
-  function nextTrack() {
-    resumeTrack.current = playing;
-    setTrack((current) => (current + 1) % 2);
-    setPlaying(false);
-    setAudioError("");
-  }
+    const update = () => {
+      setSceneHidden(document.hidden);
+      if (welcomeVisible || scenePaused || document.hidden) videoRef.current?.pause();
+      else videoRef.current?.play().catch(() => {});
+    };
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, [scenePaused, welcomeVisible]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !containerRef.current) return;
@@ -528,30 +519,35 @@ export default function App() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
+      {welcomeVisible && <WebsiteWelcome onDone={finishWelcome} />}
 
       <div
         ref={containerRef}
-        className="relative w-full min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-100 cinematic-wrapper selection:bg-amber-500 selection:text-black bg-[#07090e]"
+        inert={welcomeVisible || undefined}
+        className="winter-website relative w-full min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-100 cinematic-wrapper selection:bg-amber-500 selection:text-black bg-[#07090e]"
       >
+        <ChristmasSoundtrack ready={!welcomeVisible} />
+        <ChristmasDecorations snowActive={!welcomeVisible && !scenePaused && !sceneHidden} />
         {/* =========================================================================
             --- LIVING FRONTIER VIDEO BACKGROUND (CLEARLY VISIBLE WITH 2PX BLUR) ---
             ========================================================================= */}
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
           <video
             ref={videoRef}
-            poster="/bg.jpg"
+            poster="/winter/cabin-poster.jpg"
             preload="metadata"
             aria-hidden="true"
-            autoPlay
+            autoPlay={!welcomeVisible}
             muted
             loop
             playsInline
             className="w-full h-full object-cover scale-105 pointer-events-none"
             style={{
-              filter: "blur(1px) brightness(0.82) saturate(1.1)",
+              filter: "blur(3px) brightness(0.86) saturate(0.95)",
             }}
           >
-            <source src="/gdl_bv_v1_loop.webm" type="video/webm" />
+            <source src="/winter/cabin.mp4" type="video/mp4" />
+            <source src="/winter/cabin.webm" type="video/webm" />
           </video>
           {/* Dark vignette overlay: deep rich contrast so cards and text are crisp while living video remains clear */}
           <div className="scene-shade absolute inset-0 pointer-events-none" />
@@ -569,7 +565,7 @@ export default function App() {
           className="hero-shell relative z-10 w-full min-h-[100dvh] flex flex-col justify-between pt-2 pb-6 sm:pb-10 overflow-hidden"
         >
           {/* Top Marquee Bar (Angled Frosted Glass Ribbon with Infinite Animated Loop) */}
-          <div className="relative top-2 sm:top-3 left-0 w-full overflow-hidden border-y border-white/10 bg-slate-950/40 backdrop-blur-xl py-2.5 sm:py-3 z-10 -rotate-1 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <div className="hero-marquee relative left-0 overflow-hidden border-y border-white/10 bg-slate-950/40 backdrop-blur-xl py-2.5 sm:py-3 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <div className="flex w-max animate-footer-scroll-marquee text-[11px] sm:text-xs md:text-sm font-extrabold tracking-[0.25em] text-slate-200 uppercase">
               <MarqueeBlock />
               <MarqueeBlock />
@@ -585,7 +581,7 @@ export default function App() {
           {/* Grand Server Name Watermark: Proudly Positioned in Mountain Sky (Zero Interference & Perfectly Centered) */}
           <div
             ref={giantTextRef}
-            className="absolute top-24 sm:top-28 md:top-32 left-0 right-0 w-full flex justify-center items-center pointer-events-none select-none z-0 overflow-hidden"
+            className="absolute top-40 left-0 right-0 w-full flex justify-center items-center pointer-events-none select-none z-0 overflow-hidden"
           >
             <div className="footer-giant-bg-text text-center select-none whitespace-nowrap">
               GOLDSTONE
@@ -596,7 +592,7 @@ export default function App() {
           <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 sm:px-6 pt-36 sm:pt-44 md:pt-48 lg:pt-52 pb-6 sm:pb-8 w-full max-w-4xl lg:max-w-5xl mx-auto text-center my-auto">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-widest mb-3 sm:mb-4 shadow-[0_0_25px_rgba(245,158,11,0.3)]">
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-              <span>1940s ERA TIMELINE • NEW UPDATE NOW LIVE</span>
+              <span>MERRY CHRISTMAS • WINTER v{release.version}</span>
             </div>
 
             <h1
@@ -604,15 +600,14 @@ export default function App() {
               className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-black tracking-tight uppercase mb-3 sm:mb-4 font-['Outfit'] leading-[1.08]"
             >
               <span className="text-light-sweep">
-                Goldstone County <span className="text-amber-400">•</span> 1940s
-                Era
+                Goldstone County <span className="text-amber-400">•</span> Winter
               </span>
             </h1>
 
             <p className="text-slate-200 text-xs sm:text-sm md:text-base max-w-xl sm:max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed font-semibold px-2">
-              Step into the 1940s vintage timeline. Download the official
-              community launcher with instant dual-sync connection for RedM and
-              TeamSpeak 3 SaltyChat.
+              A quieter winter in the County. Step into our 1940s world with
+              festive pine lights and snowfall, a new Christmas soundtrack, and
+              the same one-click connection for RedM and TeamSpeak 3 SaltyChat.
             </p>
 
             {/* Main Action Buttons (High Contrast & Glowing) */}
@@ -624,7 +619,7 @@ export default function App() {
                 <MagneticButton
                   as="a"
                   href={DOWNLOAD_URL}
-                  download="Goldstone County.exe"
+                  download="Goldstone.County.exe"
                   className="btn-primary-download w-full sm:w-auto px-7 py-3.5 sm:px-9 sm:py-4 rounded-full text-xs sm:text-sm md:text-base flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer"
                 >
                   <Rocket className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
@@ -682,7 +677,7 @@ export default function App() {
               <a
                 className="download-mirror"
                 href={`${GITHUB_URL}/releases/download/${release.version}/Goldstone.County.exe`}
-                download="Goldstone County.exe"
+                download="Goldstone.County.exe"
               >
                 GitHub download mirror <ExternalLink className="w-3 h-3" />
               </a>
@@ -692,48 +687,12 @@ export default function App() {
               >
                 <button
                   className="ambience-button"
-                  onClick={() =>
-                    playing ? audioRef.current?.pause() : void playMusic()
-                  }
-                  aria-label={
-                    playing ? "Pause county music" : "Play county music"
-                  }
-                  aria-pressed={playing}
-                >
-                  <Music className="w-3.5 h-3.5" />
-                  <span>{playing ? "PAUSE MUSIC" : "COUNTY SOUNDTRACK"}</span>
-                </button>
-                <button
-                  className="ambience-next"
-                  onClick={nextTrack}
-                  aria-label="Next music track"
-                >
-                  {String(track + 1).padStart(2, "0")} →
-                </button>
-                <span className="ambience-divider" aria-hidden="true" />
-                <button
-                  className="ambience-button"
                   onClick={() => setScenePaused((current) => !current)}
                   aria-pressed={scenePaused}
                 >
                   <span>{scenePaused ? "PLAY SCENERY" : "PAUSE SCENERY"}</span>
                 </button>
-                <audio
-                  ref={audioRef}
-                  src={`/gscs_${track + 1}.mp3`}
-                  preload="none"
-                  onPlay={() => setPlaying(true)}
-                  onPause={() => setPlaying(false)}
-                  onEnded={nextTrack}
-                  onError={() => {
-                    setPlaying(false);
-                    setAudioError("Music unavailable. Please try again.");
-                  }}
-                />
               </div>
-              <p className="ambience-status" role="status">
-                {audioError}
-              </p>
             </div>
           </div>
         </section>
@@ -797,7 +756,7 @@ export default function App() {
                     <Palette className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    v0.3.3
+                    v{release.version}
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -826,7 +785,7 @@ export default function App() {
                     <Headphones className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    v0.3.3
+                    v{release.version}
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -855,7 +814,7 @@ export default function App() {
                     <Music className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
-                    12 TRACKS
+                    {release.trackCount} TRACKS
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -888,12 +847,12 @@ export default function App() {
                   </span>
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
-                  Goldstone County.exe
+                  Goldstone.County.exe
                 </h3>
                 <p className="text-slate-300 text-sm leading-relaxed">
-                  Official standalone single-file binary. Runs instantly on any
-                  clean Windows 10/11 PC with no installer, WebView2, or runtime
-                  dependencies needed.
+                  One Windows x64 EXE with its winter artwork and video included.
+                  WebView2 setup may need internet on first use. RedM and
+                  TeamSpeak require their installed clients.
                 </p>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">

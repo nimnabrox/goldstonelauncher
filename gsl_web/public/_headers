@@ -5,20 +5,26 @@
 
 /downloads/*
   Content-Type: application/octet-stream
-  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Content-Disposition: attachment; filename="Goldstone.County.exe"
   Cache-Control: no-cache, no-store, must-revalidate
 
 /downloads/Goldstone%20County.exe
   Content-Type: application/octet-stream
-  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Content-Disposition: attachment; filename="Goldstone.County.exe"
   Cache-Control: no-cache, no-store, must-revalidate
 
 /downloads/Goldstone.County.exe
   Content-Type: application/octet-stream
-  Content-Disposition: attachment; filename="Goldstone County.exe"
+  Content-Disposition: attachment; filename="Goldstone.County.exe"
   Cache-Control: no-cache, no-store, must-revalidate
 
 /version.json
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/scan/*
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/winter/media.json
   Cache-Control: no-cache, no-store, must-revalidate
 
 /fonts/*

@@ -1,0 +1,26 @@
+{
+  "source": "christmas_v2_loop.webm",
+  "source_sha256": "4541179dea67d9f686ecb7d2a167629b3927e458842659db4bb6e721308fe449",
+  "width": 836,
+  "height": 480,
+  "fps": 25,
+  "frames": 252,
+  "duration_seconds": 10.08,
+  "audio_tracks": 0,
+  "snow_baked_offline": true,
+  "snow_particles_in_render": 64,
+  "outputs": {
+    "winter-background-poster.jpg": {
+      "bytes": 166906,
+      "sha256": "289df5bdb3863017a857b74a300a68abe966274538c3767e7d99bc387834ed48"
+    },
+    "winter-background.mp4": {
+      "bytes": 2823106,
+      "sha256": "47461366144ae0fdf234897f1c70c4b57584013199550e3ac9750f03111d26b3"
+    },
+    "winter-background.webm": {
+      "bytes": 1165079,
+      "sha256": "41dafbf42b66027273fe4a8c84644465158fedf29b2432aceb5e36a87652d83c"
+    }
+  }
+}

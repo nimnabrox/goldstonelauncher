@@ -1,0 +1,128 @@
+.winter-website .hero-shell{padding-top:92px;}
+.winter-website .hero-marquee{
+  position:relative;
+  left:0;
+  width:100%;
+  margin:0;
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+  border-left:0!important;
+  border-right:0!important;
+  border-radius:0;
+  border-top:1.5px solid rgba(232,246,255,.52)!important;
+  border-bottom:1px solid rgba(240,204,142,.24)!important;
+  background:
+    radial-gradient(ellipse 65% 100% at 50% 0%,rgba(225,244,255,.08),transparent 70%),
+    linear-gradient(180deg,rgba(14,20,30,.86) 0%,rgba(9,13,20,.90) 100%)!important;
+  box-shadow:
+    inset 0 1px 4px rgba(240,250,255,.18),
+    0 8px 26px rgba(3,6,12,.55)!important;
+  -webkit-mask-image:none;
+  mask-image:none;
+}
+.winter-website .hero-marquee .animate-footer-scroll-marquee{
+  letter-spacing:.22em;
+}
+/* Full-width pine garland canopy with bokeh holiday bulbs & ornaments cleanly above the banner. */
+.winter-celebration{position:absolute;top:0;left:0;right:0;height:68px;z-index:36;pointer-events:none;}
+.winter-light-cord{position:absolute;inset:0;width:100%;height:52px;overflow:visible;filter:drop-shadow(0 2px 5px rgba(0,0,0,.45));}
+.winter-fairy-light{position:absolute;width:6px;height:8px;margin-left:-3px;border-radius:45% 45% 55% 55%;background:radial-gradient(circle at 42% 35%,#ffffff 0%,#ffe69a 52%,#e89f2c 100%);box-shadow:0 0 12px 3px rgba(246,198,86,.62),0 0 22px 6px rgba(240,165,58,.24);animation:winter-lights 3.4s ease-in-out infinite alternate;}
+.winter-fairy-light::before{content:'';position:absolute;left:1.5px;top:-2px;width:3px;height:2px;border-radius:1px;background:#c5a864;}
+.winter-fairy-light-red{background:radial-gradient(circle at 42% 35%,#fff2f2 0%,#ff5260 50%,#cc1828 100%);box-shadow:0 0 12px 3px rgba(245,56,70,.68),0 0 22px 6px rgba(218,28,44,.26);}
+.winter-fairy-light-gold{background:radial-gradient(circle at 42% 35%,#fffef4 0%,#ffd86f 50%,#e59b1e 100%);box-shadow:0 0 12px 3px rgba(250,208,92,.68),0 0 22px 6px rgba(235,168,42,.26);}
+.winter-fairy-light-green{background:radial-gradient(circle at 42% 35%,#f0fff5 0%,#52ea8a 50%,#17944c 100%);box-shadow:0 0 12px 3px rgba(68,224,130,.62),0 0 22px 6px rgba(28,164,84,.24);}
+.winter-fairy-light-warm{background:radial-gradient(circle at 42% 35%,#ffffff 0%,#fff1c9 58%,#edd08c 100%);box-shadow:0 0 12px 3px rgba(255,236,184,.68),0 0 22px 6px rgba(245,208,124,.26);}
+.winter-pine{position:absolute;top:0;width:96px;height:46px;overflow:visible;}
+.winter-pine-0{left:4px;}.winter-pine-1{right:62px;transform:scaleX(-1);}
+.winter-hanging-ornament{position:absolute;top:24px;width:26px;height:40px;margin-left:-13px;transform-origin:50% 0;animation:winter-ornament-sway 4.4s ease-in-out infinite alternate;filter:drop-shadow(0 3px 7px rgba(0,0,0,.55));}
+.winter-celebration:not(.is-animated) :is(.winter-fairy-light,.winter-hanging-ornament){animation-play-state:paused;}
+@keyframes winter-lights{from{opacity:.44}to{opacity:1}}
+@keyframes winter-ornament-sway{from{transform:rotate(-4.5deg)}to{transform:rotate(4.5deg)}}
+/* Two repeated textures create visible depth without particle timers or frame loops. */
+.christmas-snow{position:fixed;inset:0;z-index:35;pointer-events:none;overflow:hidden;contain:layout paint;}
+.christmas-snow-sheet{position:absolute;top:0;left:-24px;width:calc(100% + 48px);height:calc(100% + 850px);background-repeat:repeat;pointer-events:none;}
+.christmas-snow-near{background-size:900px 600px;opacity:.92;animation:county-christmas-snow-near 14s linear infinite;}
+.christmas-snow-far{background-size:1200px 800px;background-position:173px 0;opacity:.38;animation:county-christmas-snow-far 32s linear infinite;}
+@keyframes county-christmas-snow-near{from{transform:translate3d(0,-600px,0)}to{transform:translate3d(0,0,0)}}
+@keyframes county-christmas-snow-far{from{transform:translate3d(0,-800px,0)}to{transform:translate3d(0,0,0)}}
+.winter-website :is(.btn-primary-download,.btn-secondary-site)::before{content:none;}
+.winter-website .footer-glass-pill{box-shadow:inset 0 1px 0 rgba(255,248,234,.10),0 6px 18px rgba(4,7,12,.45);border-color:rgba(220,232,246,.16);}
+.winter-website .ambience-controls{display:flex;justify-content:center;width:100%;padding:0;gap:0;margin-top:8px;border:0;border-radius:0;background:none;box-shadow:none;}
+.winter-website .ambience-button{min-height:34px;padding:7px 14px;font-size:8px;font-weight:700;border:1px solid rgba(235,202,138,.28);background:rgba(14,20,29,.84);border-radius:18px;color:#e4ecf4;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);}
+.winter-website .ambience-button:hover,.winter-website .ambience-button[aria-pressed='true']{background:rgba(26,35,48,.92);border-color:rgba(242,202,124,.58);color:#fae3a2;}
+.winter-website .security-card button{background:linear-gradient(148deg,rgba(24,33,46,.92),rgba(14,20,29,.96));border-color:rgba(240,194,100,.38);color:#fae3a2;box-shadow:inset 0 1px 0 rgba(255,248,234,.12);}
+.winter-website .security-card button:hover{background:linear-gradient(148deg,rgba(36,48,66,.96),rgba(20,28,40,.98));border-color:rgba(245,208,126,.70);color:#ffffff;}
+/* Obsidian & Champagne Gold Jingle Bell Music Control */
+.christmas-player{position:fixed;top:max(12px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:80;width:44px;height:44px;}
+.christmas-player.has-controls::after{content:"";position:absolute;top:100%;right:0;width:224px;height:12px;}
+.christmas-player-toggle{position:relative;display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(238,202,134,.42);border-radius:50%;background:linear-gradient(145deg,#171e2b,#0c1018);color:#f7d992;box-shadow:inset 0 1px 0 rgba(255,248,234,.18),0 4px 16px rgba(0,0,0,.62);cursor:pointer;}
+.christmas-player-toggle:hover,.christmas-player-toggle[aria-expanded='true']{background:linear-gradient(145deg,#222b3d,#111622);border-color:rgba(245,208,126,.78);color:#fff2c8;}
+.christmas-jingle-bell{transform-origin:50% 20%;}
+.jingle-ring{opacity:0;}
+.christmas-player.is-playing .christmas-jingle-bell{animation:christmas-jingle 2.2s ease-in-out infinite;}
+.christmas-player.is-playing .jingle-ring{opacity:.75;}
+@keyframes christmas-jingle{0%,48%,100%{transform:rotate(0)}8%,24%{transform:rotate(-11deg)}16%,32%{transform:rotate(11deg)}40%{transform:rotate(-5deg)}}
+.christmas-mini-state{position:absolute;right:5px;bottom:6px;width:5px;height:5px;border:1px solid #0c1018;border-radius:50%;background:#6b7c90;}
+.christmas-mini-state.is-playing{background:#f0c264;box-shadow:0 0 6px rgba(240,194,100,.85);}
+.christmas-mini-title{margin:0 0 10px;font-size:12px;font-weight:750;color:#f4f7fb;}
+.christmas-mini-title>span{display:block;margin-top:3px;font-size:9px;font-weight:500;color:#9eb0c2;}
+.christmas-audio-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.christmas-audio-controls{position:absolute;top:calc(100% + 10px);right:0;width:224px;max-width:calc(100vw - 32px);padding:14px;border:1px solid rgba(240,198,120,.42);border-radius:14px;background:linear-gradient(148deg,#151c28 0%,#0b0f17 100%);box-shadow:inset 0 1px 0 rgba(255,248,234,.16),0 16px 36px rgba(2,5,10,.82);}
+.christmas-mute{display:grid;place-items:center;flex:0 0 30px;width:30px;height:32px;border:1px solid rgba(235,200,134,.22);border-radius:7px;background:rgba(255,255,255,.06);color:#f2dfb8;cursor:pointer;}
+.christmas-mute:hover{background:rgba(240,194,100,.18);color:#fff;}
+.christmas-volume{display:flex;align-items:center;gap:8px;flex:1;min-width:0;font-size:10px;color:#c2ceda;}
+.christmas-volume input{appearance:none;-webkit-appearance:none;min-width:0;width:100%;height:24px;background:transparent;cursor:pointer;}
+.christmas-volume input::-webkit-slider-runnable-track{height:3px;border-radius:4px;background:linear-gradient(to right,#eab248 var(--volume-level),#2b3648 var(--volume-level));}
+.christmas-volume input::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;margin-top:-4px;background:#fae3a2;border:1px solid #f0c264;}
+.christmas-volume input::-moz-range-track{height:3px;border-radius:4px;background:#2b3648;}
+.christmas-volume input::-moz-range-progress{height:3px;border-radius:4px;background:#eab248;}
+.christmas-volume input::-moz-range-thumb{width:11px;height:11px;border:1px solid #f0c264;border-radius:50%;background:#fae3a2;}
+.christmas-volume-value{margin-left:auto;text-align:right;font-size:10px;font-weight:700;color:#f7d992;}
+/* Opaque, bounded Midnight Hearth startup welcome; matches the Windows launcher splash. */
+.christmas-welcome{position:fixed;inset:0;z-index:200;display:grid;place-items:center;overflow:hidden;padding:24px;background-color:#070f12;background-image:radial-gradient(ellipse at 50% 42%,rgba(242,186,82,.16) 0%,rgba(148,28,44,.10) 34%,#000000 76%);color:#f3f7fb;transition:opacity .18s ease;}
+.christmas-welcome.is-leaving{opacity:0;pointer-events:none;}
+.website-welcome-content{position:relative;text-align:center;max-width:420px;width:100%;}
+.website-welcome-logo{position:relative;display:grid;place-items:center;width:94px;height:94px;margin:0 auto 26px;}
+.website-welcome-logo img{width:66px;height:66px;object-fit:contain;}
+.website-welcome-logo>span{position:absolute;inset:0;border:1px solid rgba(240,194,100,.16);border-top-color:#f0c264;border-radius:50%;animation:county-welcome-ring 3s linear infinite;}
+.website-welcome-season{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 0 14px;color:#f0c264;font-size:10px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;}
+.website-welcome-content h1{margin:0;font-family:Outfit,sans-serif;font-size:clamp(23px,5vw,32px);font-weight:400;line-height:1.3;letter-spacing:-.3px;}
+.website-welcome-content h1 strong{font-weight:750;}
+.website-welcome-caption{margin:14px 0 24px;color:#9eb0c2;font-size:12px;}
+.website-welcome-progress{width:96px;height:2px;overflow:hidden;margin:0 auto;border-radius:2px;background:rgba(240,194,100,.16);}
+.website-welcome-progress span{display:block;width:45%;height:100%;background:linear-gradient(90deg,#c93b4b,#f0c264);animation:county-welcome-progress 1.2s ease-in-out infinite;}
+.welcome-snow-dust{position:absolute;inset:0;pointer-events:none;}
+.welcome-snow-dust span{position:absolute;top:-8px;width:2px;height:2px;border-radius:50%;background:#fff7e2;opacity:.38;animation:county-welcome-dust 6s linear infinite;}
+@keyframes county-welcome-ring{to{transform:rotate(360deg)}}
+@keyframes county-welcome-progress{from{transform:translateX(-110%)}to{transform:translateX(330%)}}
+@keyframes county-welcome-dust{to{transform:translate3d(12px,100vh,0)}}
+@media(max-width:600px){.winter-pine{width:64px;height:38px;}}
+@media(hover:hover) and (pointer:fine){
+  .winter-website,.winter-website *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%23146c3b' stroke='%2307120b' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%231d9652' stroke='%23b7f5cc' stroke-width='.65' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.8L13.5 20.8L6.6 24.4Z' fill='%232cc76f' fill-opacity='.48'/%3E%3Cpath d='M6.6 13.8Q12 15.8 16.2 14.2M6.6 19.6Q13.5 21.4 21.2 19.2' fill='none' stroke='%23f6d57a' stroke-opacity='.75' stroke-width='.75' stroke-linecap='round'/%3E%3Cpath d='M6 .8L7 2.9L9.3 3.3L7.6 4.9L8 7.2L6 6.1L4 7.2L4.4 4.9L2.7 3.3L5 2.9Z' fill='%23ffd447' stroke='%2309120c' stroke-width='.75' stroke-linejoin='round'/%3E%3Ccircle cx='9.6' cy='11.4' r='1.5' fill='%23b8861b'/%3E%3Ccircle cx='13.8' cy='14.6' r='1.65' fill='%23ff4d6d'/%3E%3Ccircle cx='13.3' cy='14.2' r='.55' fill='%23fff'/%3E%3Ccircle cx='9.4' cy='16.8' r='1.5' fill='%230f766e'/%3E%3Ccircle cx='16.8' cy='18.2' r='1.65' fill='%23c084fc'/%3E%3Ccircle cx='16.3' cy='17.8' r='.55' fill='%23fff'/%3E%3Ccircle cx='11.8' cy='20.4' r='1.5' fill='%23a11d33'/%3E%3Ccircle cx='8' cy='21.8' r='1.45' fill='%23b8861b'/%3E%3C/svg%3E") 6 2,default;}
+  .winter-website[data-cursor-frame='1'],.winter-website[data-cursor-frame='1'] *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0' stop-color='%23ffe680' stop-opacity='.55'/%3E%3Cstop offset='1' stop-color='%23ffe680' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='6' cy='4.2' r='5.2' fill='url(%23g)'/%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%23146c3b' stroke='%2307120b' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%231d9652' stroke='%23b7f5cc' stroke-width='.65' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.8L13.5 20.8L6.6 24.4Z' fill='%232cc76f' fill-opacity='.48'/%3E%3Cpath d='M6.6 13.8Q12 15.8 16.2 14.2M6.6 19.6Q13.5 21.4 21.2 19.2' fill='none' stroke='%23ffe596' stroke-opacity='.88' stroke-width='.75' stroke-linecap='round'/%3E%3Cpath d='M6 .8L7 2.9L9.3 3.3L7.6 4.9L8 7.2L6 6.1L4 7.2L4.4 4.9L2.7 3.3L5 2.9Z' fill='%23fff7b2' stroke='%2309120c' stroke-width='.75' stroke-linejoin='round'/%3E%3Ccircle cx='9.6' cy='11.4' r='1.65' fill='%23ffe46b'/%3E%3Ccircle cx='9.1' cy='11' r='.55' fill='%23fff'/%3E%3Ccircle cx='13.8' cy='14.6' r='1.5' fill='%23a11d33'/%3E%3Ccircle cx='9.4' cy='16.8' r='1.5' fill='%230f766e'/%3E%3Ccircle cx='16.8' cy='18.2' r='1.5' fill='%236b21a8'/%3E%3Ccircle cx='11.8' cy='20.4' r='1.65' fill='%23ff4d6d'/%3E%3Ccircle cx='11.3' cy='20' r='.55' fill='%23fff'/%3E%3Ccircle cx='8' cy='21.8' r='1.45' fill='%23b8861b'/%3E%3C/svg%3E") 6 2,default;}
+  .winter-website[data-cursor-frame='2'],.winter-website[data-cursor-frame='2'] *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%23146c3b' stroke='%2307120b' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%231d9652' stroke='%23b7f5cc' stroke-width='.65' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.8L13.5 20.8L6.6 24.4Z' fill='%232cc76f' fill-opacity='.48'/%3E%3Cpath d='M6.6 13.8Q12 15.8 16.2 14.2M6.6 19.6Q13.5 21.4 21.2 19.2' fill='none' stroke='%23f6d57a' stroke-opacity='.75' stroke-width='.75' stroke-linecap='round'/%3E%3Cpath d='M6 .8L7 2.9L9.3 3.3L7.6 4.9L8 7.2L6 6.1L4 7.2L4.4 4.9L2.7 3.3L5 2.9Z' fill='%23ffd447' stroke='%2309120c' stroke-width='.75' stroke-linejoin='round'/%3E%3Ccircle cx='9.6' cy='11.4' r='1.5' fill='%23b8861b'/%3E%3Ccircle cx='13.8' cy='14.6' r='1.5' fill='%23a11d33'/%3E%3Ccircle cx='9.4' cy='16.8' r='1.65' fill='%235eead4'/%3E%3Ccircle cx='8.9' cy='16.4' r='.55' fill='%23fff'/%3E%3Ccircle cx='16.8' cy='18.2' r='1.5' fill='%236b21a8'/%3E%3Ccircle cx='11.8' cy='20.4' r='1.5' fill='%23a11d33'/%3E%3Ccircle cx='8' cy='21.8' r='1.6' fill='%23ffe46b'/%3E%3Ccircle cx='7.5' cy='21.4' r='.55' fill='%23fff'/%3E%3C/svg%3E") 6 2,default;}
+  .winter-website :is(a,button,summary,[role='button'],input[type='range'],select){cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%23168246' stroke='%2307120b' stroke-width='2.1' stroke-linejoin='round'/%3E%3Cpath d='M6 5.5L23.5 20L15.4 20.6L18.8 28.4L14.8 30L11.4 22L6 25.5Z' fill='%2323ad5f' stroke='%23ffe78a' stroke-width='1.15' stroke-linejoin='round'/%3E%3Cpath d='M6.6 6.8L13.5 20.8L6.6 24.4Z' fill='%233be382' fill-opacity='.52'/%3E%3Cpath d='M6.6 13.8Q12 15.8 16.2 14.2M6.6 19.6Q13.5 21.4 21.2 19.2' fill='none' stroke='%23ffe898' stroke-opacity='.9' stroke-width='.8' stroke-linecap='round'/%3E%3Cpath d='M6 .6L7.2 2.9L9.7 3.3L7.8 5L8.3 7.6L6 6.3L3.7 7.6L4.2 5L2.3 3.3L4.8 2.9Z' fill='%23fff6b8' stroke='%23991b28' stroke-width='.75' stroke-linejoin='round'/%3E%3Ccircle cx='9.6' cy='11.4' r='1.6' fill='%23ffe46b'/%3E%3Ccircle cx='13.8' cy='14.6' r='1.6' fill='%23ff4d6d'/%3E%3Ccircle cx='9.4' cy='16.8' r='1.6' fill='%235eead4'/%3E%3Ccircle cx='16.8' cy='18.2' r='1.6' fill='%23c084fc'/%3E%3Ccircle cx='11.8' cy='20.4' r='1.6' fill='%23ff4d6d'/%3E%3Ccircle cx='8' cy='21.8' r='1.55' fill='%23ffe46b'/%3E%3C/svg%3E") 6 2,pointer!important;}
+  .winter-website :is(input[type='text'],input[type='search'],textarea){cursor:text!important;}
+}
+.christmas-touch-layer{position:fixed;inset:0;z-index:90;pointer-events:none;overflow:hidden;}
+.christmas-cursor-glint{position:fixed;pointer-events:none;animation:christmas-glint-fade 460ms cubic-bezier(.16,1,.3,1) both;}
+.christmas-cursor-glint.is-orb{width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;}
+.christmas-cursor-glint.is-star{width:10px;height:10px;margin:-5px 0 0 -5px;font:9px/10px 'Segoe UI',sans-serif;text-align:center;}
+.christmas-cursor-glint.is-star::before{content:'\2726';}
+.christmas-cursor-glint-gold.is-orb{background:#ffe48f;box-shadow:0 0 7px #f5c352;}
+.christmas-cursor-glint-gold.is-star{color:#ffe89e;text-shadow:0 0 6px #f2be4a;}
+.christmas-cursor-glint-red.is-orb{background:#ff5d6c;box-shadow:0 0 7px #e83244;}
+.christmas-cursor-glint-red.is-star{color:#ff8e98;text-shadow:0 0 6px #e63948;}
+.christmas-cursor-glint-green.is-orb{background:#5be896;box-shadow:0 0 7px #2cc26e;}
+.christmas-cursor-glint-green.is-star{color:#8af5b6;text-shadow:0 0 6px #32c973;}
+.christmas-cursor-glint-ice.is-orb{background:#eef8ff;box-shadow:0 0 7px #b8e4ff;}
+.christmas-cursor-glint-ice.is-star{color:#ffffff;text-shadow:0 0 6px #cdeaff;}
+@keyframes christmas-glint-fade{0%{opacity:.95;transform:translate3d(0,0,0) scale(.9);}100%{opacity:0;transform:translate3d(var(--glint-dx,0px),10px,0) scale(.3);}}
+.christmas-touch-spark{position:fixed;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:1.5px solid #f7d67ea8;box-shadow:0 0 12px #f5ce6b66;animation:christmas-touch-burst 460ms cubic-bezier(.16,1,.3,1) both;pointer-events:none;}
+.christmas-touch-spark::after{content:'\2744';position:absolute;inset:0;display:grid;place-items:center;font-size:10px;color:#fff4d0;animation:christmas-touch-star 460ms ease-out both;}
+@keyframes christmas-touch-burst{from{opacity:.95;transform:scale(.35);}to{opacity:0;transform:scale(2.1);}}
+@keyframes christmas-touch-star{from{opacity:1;transform:rotate(0deg) scale(.8);}to{opacity:0;transform:rotate(55deg) scale(1.25);}}
+.winter-website :is(.btn-primary-download,.btn-secondary-site,.ambience-button,.christmas-player-toggle,.feature-card,.security-card){transition:transform 160ms cubic-bezier(.22,1,.36,1),border-color 180ms ease,box-shadow 180ms ease;}
+.winter-website :is(.btn-secondary-site,.ambience-button,.christmas-player-toggle):hover{transform:translateY(-1px);}
+.winter-website :is(.btn-primary-download,.btn-secondary-site,.ambience-button,.christmas-player-toggle):active{transform:scale(.975);}
+@media(prefers-reduced-motion:reduce){.christmas-snow,.christmas-touch-layer{display:none;}.website-welcome-logo>span,.website-welcome-progress span,.welcome-snow-dust span,.winter-fairy-light,.winter-hanging-ornament,.christmas-player.is-playing .christmas-jingle-bell{animation:none!important;}.winter-website *{transition:none!important;}.christmas-welcome{transition:none;}}

@@ -1,0 +1,559 @@
+/* Midnight Frost & Champagne Hearth theme: sleek dark obsidian glass with tasteful Christmas accents. */
+.winter-theme-active {
+  --winter-pine: #193a2e;
+  --winter-crimson: #8e2131;
+  --winter-text: #f3f7fb;
+  --winter-muted: #9eb0c2;
+  --winter-gold: #f0c264;
+  background: #0b0f14 !important;
+  border-color: rgba(235, 206, 148, 0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.16),
+    inset 0 -1px 0 rgba(214, 72, 86, 0.10),
+    0 24px 60px rgba(0, 0, 0, 0.72) !important;
+}
+.winter-theme-active .launcher-viewport {
+  background: #0b0f14;
+}
+.winter-theme-active .ambient-bg-overlay {
+  background:
+    radial-gradient(ellipse 80% 64% at 50% 44%, rgba(18, 18, 26, 0.12) 0%, rgba(7, 10, 15, 0.54) 100%),
+    linear-gradient(180deg, rgba(11, 14, 20, 0.34) 0%, rgba(9, 12, 18, 0.10) 48%, rgba(8, 10, 15, 0.48) 100%) !important;
+}
+
+/* Titlebar: Sleek Obsidian Slate with Subtle Holiday Gold Trim */
+.winter-theme-active .custom-titlebar {
+  background: rgba(11, 15, 21, 0.88);
+  border-bottom: 1px solid rgba(236, 204, 142, 0.20);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+.winter-theme-active .titlebar-title {
+  color: #f4f7fb;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+}
+.winter-theme-active .titlebar-pill {
+  background: linear-gradient(135deg, rgba(24, 68, 49, 0.88), rgba(15, 42, 31, 0.92));
+  border-color: rgba(124, 212, 166, 0.36);
+  color: #e2faec;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.winter-theme-active :is(.titlebar-btn, .titlebar-update-btn) {
+  color: #dbe4ef;
+  border-color: rgba(255, 255, 255, 0.10);
+  background: rgba(18, 25, 34, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.winter-theme-active :is(.titlebar-btn, .titlebar-update-btn):hover {
+  background: rgba(30, 40, 54, 0.92);
+  color: #ffffff;
+  border-color: rgba(242, 202, 124, 0.56);
+}
+.winter-theme-active .close-btn:hover {
+  background: linear-gradient(135deg, #c62839, #8d1724);
+  color: #ffffff;
+  border-color: #ffb8bd;
+}
+
+/* Unified Fast Composition */
+.winter-theme-active :is(.hud-card, .hero-input-card, .tools-card) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: var(--winter-text);
+}
+
+/* Left Server Card: Sleek Obsidian Frost Glass + Pine & Snowflake Accent */
+.winter-theme-active .hud-card,
+.winter-theme-active .server-card.compact {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(40, 128, 86, 0.12), transparent 56%),
+    linear-gradient(155deg, rgba(16, 23, 32, 0.78) 0%, rgba(10, 14, 21, 0.86) 100%) !important;
+  border-color: rgba(220, 232, 244, 0.14) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 240, 0.12),
+    0 10px 26px rgba(3, 6, 10, 0.50) !important;
+}
+.winter-theme-active .server-card.compact::after {
+  content: '\2744';
+  position: absolute;
+  right: 12px;
+  bottom: 4px;
+  font-size: 44px;
+  line-height: 1;
+  color: rgba(226, 240, 252, 0.07);
+  pointer-events: none;
+}
+.winter-theme-active .hud-card:hover {
+  border-color: rgba(240, 200, 122, 0.42) !important;
+}
+.winter-theme-active .server-card.compact .badge-online {
+  background: rgba(20, 92, 58, 0.80);
+  border-color: rgba(96, 224, 152, 0.50);
+  color: #d6ffea;
+  box-shadow: 0 0 12px rgba(48, 198, 118, 0.22);
+}
+
+/* Center Hero: Clean Emblem, Obsidian Frost Input & Champagne Gold Primary CTA */
+.winter-theme-active .hero-emblem-wrap {
+  position: relative;
+}
+.winter-theme-active .hero-emblem-wrap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 28px;
+  width: 112px;
+  height: 112px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244, 192, 88, 0.24) 0%, rgba(176, 36, 52, 0.12) 48%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+.winter-theme-active .hero-emblem-img {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 6px 20px rgba(240, 174, 72, 0.34));
+}
+.winter-theme-active .brand-tag {
+  background: rgba(15, 22, 31, 0.82);
+  border-color: rgba(224, 234, 246, 0.16);
+  color: #e2ebf4;
+}
+.winter-theme-active .brand-tag.highlight {
+  background: linear-gradient(135deg, #9c1f2e, #6b121e);
+  border-color: rgba(242, 202, 126, 0.52);
+  color: #fff2d6;
+  box-shadow: 0 2px 10px rgba(156, 31, 46, 0.34);
+}
+.winter-theme-active .hero-title {
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.78);
+}
+.winter-theme-active .hero-sub {
+  color: #dce5ef;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.82);
+}
+.winter-theme-active .hero-input-card {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(240, 194, 102, 0.08), transparent 54%),
+    linear-gradient(150deg, rgba(17, 24, 34, 0.80) 0%, rgba(11, 16, 23, 0.88) 100%) !important;
+  border-color: rgba(235, 202, 138, 0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 234, 0.14), 0 8px 24px rgba(4, 7, 12, 0.48) !important;
+}
+.winter-theme-active .hero-input-card:focus-within {
+  border-color: rgba(245, 208, 126, 0.72) !important;
+}
+.winter-theme-active .hero-input-label {
+  color: #e9eff6 !important;
+}
+.winter-theme-active .hero-input-label svg {
+  color: #f0c264;
+}
+.winter-theme-active .hero-input-wrapper::after {
+  color: rgba(240, 202, 124, 0.62);
+}
+.winter-theme-active :is(.hero-custom-input, .settings-box input[type='text']) {
+  background: rgba(7, 10, 15, 0.86) !important;
+  border-color: rgba(220, 232, 246, 0.16) !important;
+  color: #f8fafc;
+}
+.winter-theme-active .hero-custom-input:focus {
+  border-color: #f0c264 !important;
+  background: rgba(10, 14, 20, 0.94) !important;
+  box-shadow: 0 0 0 2px rgba(240, 194, 100, 0.18);
+}
+.winter-theme-active :is(.hero-custom-input, .playlist-search-input)::placeholder {
+  color: #7d8fa2;
+}
+.winter-theme-active .hero-status-card .status-badge {
+  background: rgba(14, 20, 28, 0.84) !important;
+  border-color: rgba(235, 202, 138, 0.28) !important;
+  color: #eef4fa;
+}
+
+/* Primary Hero CTA: Brushed Champagne Gold with Subtle Frost Glaze */
+.winter-theme-active .btn-hero-launch-mid {
+  background: linear-gradient(118deg, #fae3a2 0%, #eab248 48%, #c97f18 100%) !important;
+  color: #140d05 !important;
+  border: 1px solid rgba(255, 240, 192, 0.78) !important;
+  text-shadow: 0 1px 0 rgba(255, 246, 214, 0.35);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 250, 230, 0.75),
+    inset 0 -2px 6px rgba(140, 68, 8, 0.28),
+    0 8px 28px rgba(228, 162, 46, 0.36) !important;
+}
+.winter-theme-active .btn-hero-launch-mid > svg {
+  color: #1c1006;
+  filter: none;
+}
+.winter-theme-active .btn-hero-launch-mid:hover {
+  filter: brightness(1.06);
+  border-color: #fff2c4 !important;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.85),
+    0 10px 32px rgba(238, 178, 62, 0.48) !important;
+}
+.winter-theme-active .btn-hero-snow-cap {
+  opacity: 0.94;
+}
+
+/* Secondary Launch & Stuck Fix: Clean Obsidian Frost Glass */
+.winter-theme-active .btn-hero-sub {
+  background: linear-gradient(148deg, rgba(16, 23, 32, 0.82), rgba(11, 16, 23, 0.88));
+  border-color: rgba(220, 232, 246, 0.18);
+  color: #eef4fa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 4px 14px rgba(4, 7, 12, 0.42);
+}
+.winter-theme-active .btn-hero-sub:hover {
+  background: linear-gradient(148deg, rgba(28, 38, 50, 0.90), rgba(16, 23, 32, 0.94));
+  border-color: rgba(242, 202, 124, 0.58);
+  color: #ffffff;
+}
+.winter-theme-active .hero-stuck-fix-card {
+  background: linear-gradient(148deg, rgba(15, 22, 31, 0.82), rgba(10, 15, 22, 0.88));
+  border-color: rgba(220, 232, 246, 0.16);
+  color: #eef4fa;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 4px 14px rgba(4, 7, 12, 0.42);
+}
+.winter-theme-active .hero-stuck-fix-card:hover {
+  border-color: rgba(242, 202, 124, 0.52);
+}
+.winter-theme-active .hero-stuck-fix-card.active {
+  background: linear-gradient(135deg, rgba(24, 64, 46, 0.88), rgba(14, 34, 28, 0.92));
+  border-color: rgba(242, 202, 124, 0.72);
+}
+
+/* Right Column: Obsidian Frost Utilities + Subtle Mulled-Crimson Music Card */
+.winter-theme-active .reshade-dash-pill {
+  background: linear-gradient(148deg, rgba(16, 23, 32, 0.80), rgba(10, 15, 22, 0.88)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(220, 232, 246, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 6px 18px rgba(4, 7, 12, 0.44) !important;
+}
+.winter-theme-active .reshade-dash-pill:hover {
+  border-color: rgba(242, 202, 124, 0.52) !important;
+}
+.winter-theme-active .reshade-dash-pill.is-active {
+  border-color: rgba(124, 218, 166, 0.36) !important;
+}
+.winter-theme-active .tools-card {
+  background:
+    radial-gradient(circle at 90% 12%, rgba(240, 194, 100, 0.07), transparent 55%),
+    linear-gradient(155deg, rgba(16, 23, 32, 0.80), rgba(10, 14, 21, 0.88)) !important;
+  border-color: rgba(220, 232, 246, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 8px 24px rgba(3, 6, 10, 0.48) !important;
+}
+.winter-theme-active .tools-title {
+  color: #e6dcc8 !important;
+}
+.winter-theme-active :is(.card-label, .stat-label, .quick-tools-title) {
+  color: #c5d1de !important;
+}
+.winter-theme-active :is(.tool-btn, .fc-two-tier-card) {
+  background: rgba(12, 18, 26, 0.84);
+  border-color: rgba(220, 232, 246, 0.14);
+  color: #eef4fa;
+}
+.winter-theme-active .fc-two-tier-card {
+  background: rgba(28, 16, 22, 0.84);
+  border-color: rgba(224, 108, 118, 0.26);
+}
+.winter-theme-active .amber-tool {
+  color: #f5cd78;
+  border-color: rgba(235, 184, 92, 0.34);
+  background: rgba(34, 24, 14, 0.82);
+}
+.winter-theme-active .gray-tool {
+  color: #e4f2ea;
+  border-color: rgba(126, 206, 162, 0.26);
+  background: rgba(14, 32, 26, 0.82);
+}
+
+/* Music Player: Refined Smoked Obsidian with Warm Holiday Hearth Undertone */
+.winter-theme-active .music-card-ai {
+  overflow: visible !important;
+  z-index: 60;
+}
+.winter-theme-active .music-card-ai {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(168, 34, 52, 0.18), transparent 56%),
+    radial-gradient(circle at 90% 90%, rgba(34, 118, 76, 0.12), transparent 56%),
+    linear-gradient(142deg, rgba(20, 21, 30, 0.84) 0%, rgba(12, 16, 24, 0.90) 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(238, 202, 134, 0.34) !important;
+  color: var(--winter-text);
+  box-shadow: inset 0 1px 0 rgba(255, 248, 234, 0.16), 0 8px 26px rgba(4, 7, 12, 0.52) !important;
+}
+.winter-theme-active .music-playlist-popover {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(168, 34, 52, 0.14), transparent 52%),
+    radial-gradient(circle at 90% 90%, rgba(34, 118, 76, 0.10), transparent 54%),
+    linear-gradient(148deg, #131823 0%, #0b0f17 100%) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: rgba(240, 198, 120, 0.44) !important;
+  color: var(--winter-text);
+  box-shadow: inset 0 1px 0 rgba(255, 248, 234, 0.18), 0 16px 36px rgba(2, 5, 10, 0.82) !important;
+}
+.winter-theme-active .music-icon-bubble {
+  background: linear-gradient(135deg, rgba(242, 198, 114, 0.20), rgba(132, 26, 42, 0.52));
+  color: #ffe8bd;
+  border-color: rgba(240, 200, 124, 0.38);
+}
+.winter-theme-active .music-now-playing-label {
+  color: #c2ceda;
+}
+.winter-theme-active .music-now-playing-label > b {
+  color: #f7d992;
+}
+.winter-theme-active .music-refresh-btn {
+  color: #d6e0ea;
+  background: rgba(255, 255, 255, 0.08);
+}
+.winter-theme-active .music-refresh-btn:hover {
+  color: #ffffff;
+  background: rgba(242, 198, 112, 0.22);
+}
+.winter-theme-active .music-ctrls-left {
+  background: rgba(8, 12, 18, 0.62);
+  border-color: rgba(232, 200, 140, 0.20);
+}
+.winter-theme-active .music-card-ai .ctrl-btn {
+  background: transparent;
+  color: #dce5ef;
+}
+.winter-theme-active .music-card-ai .ctrl-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.winter-theme-active .music-card-ai .play-btn {
+  background: linear-gradient(140deg, #fae3a2, #eab248);
+  color: #1c1006;
+  border-color: #fff2c4;
+  box-shadow: 0 2px 10px rgba(238, 178, 62, 0.32);
+}
+.winter-theme-active .music-card-ai .play-btn:hover {
+  background: linear-gradient(140deg, #fff2c8, #f4c25e);
+  color: #120902;
+}
+.winter-theme-active .music-card-ai .ctrl-btn.active {
+  background: linear-gradient(140deg, #1d5c3e, #8c1e2e);
+  border-color: #f0c978;
+  color: #fff6dc;
+}
+.winter-theme-active .music-timeline-fill {
+  background: linear-gradient(90deg, #c93b4b, #f0c264);
+}
+.winter-theme-active .music-timeline-thumb {
+  background: #fff9ed;
+  border-color: #f0c264;
+  box-shadow: 0 0 6px rgba(240, 194, 100, 0.56);
+}
+.winter-theme-active .track-title-wrapper,
+.winter-theme-active .track-title-static,
+.winter-theme-active .track-marquee-content .marquee-text {
+  color: #f8fafc;
+}
+.winter-theme-active .music-track-status,
+.winter-theme-active .music-card-ai .time-text {
+  color: #9fb0c2;
+}
+.winter-theme-active .playlist-dropdown-head {
+  background: rgba(22, 28, 39, 0.92);
+  border-bottom: 1px solid rgba(235, 200, 134, 0.16);
+}
+.winter-theme-active .p-head-left {
+  color: #f4dca8;
+}
+.winter-theme-active .playlist-close-x {
+  color: #b7c6d6;
+}
+.winter-theme-active .playlist-close-x:hover {
+  background: rgba(240, 194, 100, 0.16);
+  color: #fff8e6;
+}
+.winter-theme-active .playlist-search-wrap {
+  background: rgba(7, 10, 16, 0.94);
+  border-color: rgba(235, 200, 134, 0.28);
+}
+.winter-theme-active .playlist-search-wrap:focus-within {
+  border-color: rgba(240, 194, 100, 0.74);
+  box-shadow: 0 0 0 2px rgba(240, 194, 100, 0.14);
+}
+.winter-theme-active .playlist-search-icon {
+  color: #c9b58c;
+}
+.winter-theme-active .playlist-search-input {
+  background: transparent !important;
+  border: 0 !important;
+  color: #f8fafc;
+}
+.winter-theme-active .playlist-dropdown-list::-webkit-scrollbar-thumb {
+  background: rgba(240, 194, 100, 0.38);
+}
+.winter-theme-active .playlist-dropdown-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 194, 100, 0.65);
+}
+.winter-theme-active .playlist-dropdown-item {
+  color: #dce4ee;
+}
+.winter-theme-active .playlist-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+.winter-theme-active .playlist-dropdown-item.active {
+  background: linear-gradient(110deg, rgba(240, 194, 100, 0.22), rgba(188, 44, 62, 0.14));
+  color: #fff6de;
+  box-shadow: inset 2px 0 #f0c264;
+}
+.winter-theme-active .p-num {
+  color: #8ea0b4;
+}
+.winter-theme-active .playlist-dropdown-item.active .p-num {
+  color: #f0c264;
+}
+
+/* Modals (Settings, ReShade & TS3 Managers) */
+.app-container.winter-theme-active:has(:is(.settings-modal, .reshade-modal-backdrop, .ts3-modal-backdrop, .ts3-confirm-backdrop))::after {
+  background: rgba(6, 9, 14, 0.74);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.winter-theme-active :is(.settings-box, .reshade-win, .ts3-win, .ts3-confirm-box) {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(162, 34, 52, 0.12), transparent 50%),
+    radial-gradient(circle at 88% 92%, rgba(28, 102, 66, 0.12), transparent 50%),
+    linear-gradient(155deg, rgba(16, 22, 31, 0.95), rgba(10, 14, 21, 0.96)) !important;
+  border-color: rgba(238, 202, 134, 0.34) !important;
+  color: #f4f7fb;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 234, 0.14), 0 22px 54px rgba(0, 0, 0, 0.76) !important;
+}
+.winter-theme-active :is(.reshade-bar, .ts3-bar, .ts3-confirm-header) {
+  background: rgba(18, 25, 36, 0.78) !important;
+  border-bottom-color: rgba(238, 202, 134, 0.22) !important;
+}
+.winter-theme-active .reshade-brand b span,
+.winter-theme-active .ts3-brand b span,
+.winter-theme-active .modal-header h2 {
+  color: #f4cb72 !important;
+}
+.winter-theme-active .reshade-brand::after,
+.winter-theme-active .ts3-brand::after {
+  color: #f0c264;
+  text-shadow: 0 0 8px rgba(240, 194, 100, 0.45);
+}
+.winter-theme-active .reshade-win .glass-card,
+.winter-theme-active .ts3-win .glass-card,
+.winter-theme-active .ts3-win .voice-key-card {
+  background: rgba(12, 18, 26, 0.72) !important;
+  border-color: rgba(220, 232, 246, 0.14) !important;
+}
+.winter-theme-active .reshade-win .card-label,
+.winter-theme-active .ts3-win .card-label {
+  color: #e8cf96 !important;
+}
+.winter-theme-active .reshade-win select,
+.winter-theme-active .ts3-win select,
+.winter-theme-active .settings-box input[type='text'] {
+  color: #f8fafc !important;
+  background-color: rgba(8, 11, 16, 0.90) !important;
+  border-color: rgba(220, 232, 246, 0.20) !important;
+}
+.winter-theme-active .reshade-btn:not(.main):not(.warn),
+.winter-theme-active .voice-btn:not(.main):not(.warn) {
+  background: rgba(22, 30, 42, 0.88);
+  border-color: rgba(220, 232, 246, 0.22);
+  color: #e6eef7;
+}
+.winter-theme-active :is(.settings-box .primary-btn, .settings-box .save-btn, .save-settings-btn, .reshade-btn.main, .voice-btn.main) {
+  background: linear-gradient(118deg, #fae3a2, #eab248 52%, #c97f18);
+  color: #160e05;
+  border: 1px solid rgba(255, 240, 192, 0.78);
+  box-shadow: 0 4px 16px rgba(234, 178, 72, 0.30);
+}
+.winter-motion-setting {
+  color: #dbe4ef;
+}
+.winter-motion-setting select {
+  color: #f8fafc;
+  background: rgba(8, 11, 16, 0.90);
+  border-color: rgba(220, 232, 246, 0.22);
+}
+
+/* Welcome Screen: Preserves rgb(0,0,0) backgroundColor with calm Midnight Frost & Gold Hearth */
+.winter-theme-active .welcome-overlay.winter-welcome {
+  background-color: #000000;
+  background-image:
+    radial-gradient(circle at 50% 42%, rgba(28, 76, 56, 0.16) 0%, rgba(142, 32, 46, 0.12) 28%, rgba(8, 12, 18, 0.45) 56%, transparent 80%);
+}
+.winter-welcome .welcome-logo-halo {
+  inset: -44px;
+  background:
+    radial-gradient(circle, rgba(244, 194, 96, 0.22) 0%, rgba(168, 34, 52, 0.12) 44%, transparent 74%);
+}
+.winter-welcome-snow span {
+  background: #f8fafc;
+  box-shadow: 0 0 6px rgba(255, 248, 228, 0.55);
+}
+.winter-welcome .welcome-title {
+  color: #f8fafc;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.65);
+}
+.winter-welcome .welcome-title span {
+  color: #f2c464;
+}
+.winter-welcome .welcome-subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #e4ba9c;
+}
+.winter-welcome .welcome-subtitle::before,
+.winter-welcome .welcome-subtitle::after {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242, 196, 100, 0.68));
+}
+.winter-welcome .welcome-subtitle::after {
+  background: linear-gradient(90deg, rgba(242, 196, 100, 0.68), transparent);
+}
+.winter-welcome-loading {
+  color: #a6b4c4;
+}
+.winter-welcome .welcome-progress-wrap {
+  background: rgba(255, 255, 255, 0.10);
+}
+.winter-welcome .welcome-progress-bar {
+  background: linear-gradient(90deg, #b83242, #f2c96c, #2f8c5c);
+  box-shadow: 0 0 10px rgba(242, 201, 108, 0.35);
+}
+
+/* Foreground snowfall */
+.winter-foreground-snow {
+  position: absolute;
+  inset: 0;
+  z-index: 2050;
+  overflow: hidden;
+  border-radius: 12px;
+  pointer-events: none;
+  contain: layout paint;
+}
+.winter-foreground-snow-sheet {
+  position: absolute;
+  left: -16px;
+  top: 0;
+  width: calc(100% + 32px);
+  height: 200%;
+  pointer-events: none;
+  background-repeat: repeat-y;
+  background-size: 100% 50%;
+  animation: winter-foreground-fall 22s steps(660) infinite;
+}
+@keyframes winter-foreground-fall {
+  from { transform: translate3d(0, -50%, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}

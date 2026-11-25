@@ -1,3 +1,0 @@
-[target.x86_64-pc-windows-gnu]
-rustflags = ["-C", "link-arg=-Wl,--delayload=WebView2Loader.dll"]
-
