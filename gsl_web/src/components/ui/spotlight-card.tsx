@@ -10,6 +10,8 @@ interface GlowCardProps {
   width?: string | number;
   height?: string | number;
   customSize?: boolean;
+  /** Decorative layer rendered at the card edge, outside the padded content. */
+  decor?: ReactNode;
 }
 
 interface GlowColorConfig {
@@ -84,6 +86,7 @@ const GlowCard: React.FC<GlowCardProps> = ({
   width,
   height,
   customSize = false,
+  decor,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const glowLayerRef = useRef<HTMLDivElement>(null);
@@ -175,6 +178,8 @@ const GlowCard: React.FC<GlowCardProps> = ({
           zIndex: 2,
         }}
       />
+
+      {decor}
 
       {/* 3. Card Content (Solid dark interior, 100% crystal-clear text, never covered by glow) */}
       <div className="relative z-10 w-full h-full flex flex-col justify-between">

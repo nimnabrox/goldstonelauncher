@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import snow from './assets/website-snow.svg';
+import { BokehSnow } from './ChristmasScene';
 
-const TRAIL_TONES = ['gold', 'red', 'green', 'ice'] as const;
+const TRAIL_TONES = ['gold', 'ice'] as const;
 
 const SWAG_TUFTS = [
   { x: 10, y: 6, scale: 1.05, rot: -6 },
@@ -220,6 +221,7 @@ export function ChristmasDecorations({ snowActive }: { snowActive: boolean }) {
         <div className="christmas-snow" aria-hidden="true">
           <div className="christmas-snow-sheet christmas-snow-far" style={{ backgroundImage: `url("${snow}")` }} />
           <div className="christmas-snow-sheet christmas-snow-near" style={{ backgroundImage: `url("${snow}")` }} />
+          <BokehSnow />
         </div>
       )}
       <div ref={sparkLayerRef} className="christmas-touch-layer" aria-hidden="true" />

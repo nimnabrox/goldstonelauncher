@@ -23,9 +23,23 @@ import { GlowCard } from "./components/ui/spotlight-card";
 import release from "../version.json";
 import "./winter.css";
 import "./christmas-polish.css";
+import "./christmas-scene.css";
 import { ChristmasDecorations } from "./ChristmasDecorations";
 import { ChristmasSoundtrack } from "./ChristmasSoundtrack";
 import { WebsiteWelcome } from "./WebsiteWelcome";
+import { SantaSleigh } from "./SantaSleigh";
+import {
+  CandyScrollBar,
+  ChristmasCountdown,
+  ChristmasSky,
+  ChristmasSvgDefs,
+  GiftRibbon,
+  HollyDivider,
+  Icicles,
+  SantaHat,
+  SnowCap,
+  SnowDrift,
+} from "./ChristmasScene";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -526,6 +540,8 @@ export default function App() {
         inert={welcomeVisible || undefined}
         className="winter-website relative w-full min-h-screen flex flex-col justify-between overflow-x-hidden text-slate-100 cinematic-wrapper selection:bg-amber-500 selection:text-black bg-[#07090e]"
       >
+        <ChristmasSvgDefs />
+        <CandyScrollBar />
         <ChristmasSoundtrack ready={!welcomeVisible} />
         <ChristmasDecorations snowActive={!welcomeVisible && !scenePaused && !sceneHidden} />
         {/* =========================================================================
@@ -552,7 +568,8 @@ export default function App() {
           {/* Dark vignette overlay: deep rich contrast so cards and text are crisp while living video remains clear */}
           <div className="scene-shade absolute inset-0 pointer-events-none" />
           {/* Theme Grid */}
-          <div className="footer-bg-grid absolute inset-0 pointer-events-none opacity-25" />
+          <div className="footer-bg-grid absolute inset-0 pointer-events-none opacity-[0.12]" />
+          <ChristmasSky active={!welcomeVisible && !scenePaused && !sceneHidden} />
           {/* Aurora Glow: Soft warm atmospheric accent restricted to mountain horizon, never blowing out cards */}
           <div className="footer-aurora absolute left-1/2 top-1/4 h-[45vh] w-[65vw] -translate-x-1/2 -translate-y-1/2 rounded-[50%] blur-[120px] pointer-events-none" />
         </div>
@@ -577,6 +594,7 @@ export default function App() {
               <MarqueeBlock />
             </div>
           </div>
+          <Icicles />
 
           {/* Grand Server Name Watermark: Proudly Positioned in Mountain Sky (Zero Interference & Perfectly Centered) */}
           <div
@@ -588,19 +606,27 @@ export default function App() {
             </div>
           </div>
 
+          {/* Santa's sleigh flies above the watermark but stays below the title and buttons */}
+          <SantaSleigh active={!welcomeVisible && !scenePaused && !sceneHidden} />
+
           {/* Hero Main Center Content: Perfectly Fitted for 100% Zoom and Fully Responsive on Mobile */}
           <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 sm:px-6 pt-36 sm:pt-44 md:pt-48 lg:pt-52 pb-6 sm:pb-8 w-full max-w-4xl lg:max-w-5xl mx-auto text-center my-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-widest mb-3 sm:mb-4 shadow-[0_0_25px_rgba(245,158,11,0.3)]">
+            <div className="hero-badge-xmas inline-flex items-center gap-2 px-4 py-1.5 sm:px-5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] sm:text-xs md:text-sm font-black uppercase tracking-widest mb-3 sm:mb-4 shadow-[0_0_25px_rgba(245,158,11,0.3)]">
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
               <span>MERRY CHRISTMAS • WINTER v{release.version}</span>
             </div>
 
             <h1
               ref={headingRef}
+              aria-label="Goldstone County • Winter"
               className="text-3xl sm:text-5xl md:text-6xl lg:text-[4.2rem] font-black tracking-tight uppercase mb-3 sm:mb-4 font-['Outfit'] leading-[1.08]"
             >
               <span className="text-light-sweep">
-                Goldstone County <span className="text-amber-400">•</span> Winter
+                <span className="xmas-hat-letter" aria-hidden="true">
+                  G
+                  <SantaHat />
+                </span>
+                <span aria-hidden="true">oldstone County</span> <span className="text-amber-400">•</span> Winter
               </span>
             </h1>
 
@@ -695,7 +721,10 @@ export default function App() {
               </div>
             </div>
           </div>
+          <SnowDrift />
         </section>
+
+        <ChristmasCountdown />
 
         {/* =========================================================================
             --- 2. SIX CORE FEATURES (MATCHING CINEMATIC THEME) ---
@@ -716,6 +745,7 @@ export default function App() {
               Jump into Goldstone County quickly and easily with built-in fixes
               and recovery tools.
             </p>
+            <HollyDivider />
           </div>
 
           {/* 6 Feature Glow Cards (All with Goldstone Amber Glow) */}
@@ -725,9 +755,10 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group"
+              decor={<SnowCap variant={1} />}
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
                   <Rocket className="w-6 h-6" />
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -749,10 +780,11 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group relative overflow-hidden"
+              decor={<SnowCap variant={2} />}
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                     <Palette className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
@@ -778,10 +810,11 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group relative overflow-hidden"
+              decor={<SnowCap variant={3} />}
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                     <Headphones className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
@@ -807,10 +840,11 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group relative overflow-hidden"
+              decor={<SnowCap variant={4} />}
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                     <Music className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
@@ -836,10 +870,11 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group relative overflow-hidden"
+              decor={<SnowCap variant={5} />}
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                  <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
                     <ShieldCheck className="w-6 h-6" />
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/25 border border-amber-500/60 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]">
@@ -866,9 +901,10 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group"
+              decor={<SnowCap variant={6} />}
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
                   <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -890,9 +926,10 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group"
+              decor={<SnowCap variant={7} />}
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
                   <Trash2 className="w-6 h-6" />
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -914,9 +951,10 @@ export default function App() {
               customSize={true}
               glowColor="gold"
               className="feature-card p-7 rounded-2xl flex flex-col justify-between group"
+              decor={<SnowCap variant={8} />}
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+                <div className="card-icon w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-5 group-hover:scale-110 transition-transform">
                   <HardDrive className="w-6 h-6" />
                 </div>
                 <h3 className="font-['Outfit'] text-xl font-black text-white mb-2">
@@ -946,6 +984,12 @@ export default function App() {
             customSize={true}
             glowColor="gold"
             className="security-card p-8 sm:p-12 text-center relative overflow-hidden"
+            decor={
+              <>
+                <GiftRibbon />
+                <SnowCap variant={2} />
+              </>
+            }
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-bold uppercase tracking-wider mb-4 mx-auto">
               <ShieldCheck className="w-4 h-4 text-amber-400" />
@@ -1020,6 +1064,12 @@ export default function App() {
         {/* =========================================================================
             --- 4. BOTTOM BAR / CREDITS ---
             ========================================================================= */}
+        <div className="xmas-footer-greeting">
+          <HollyDivider />
+          <p className="xmas-script mt-3">Merry Christmas &amp; a Happy New Year</p>
+          <small>From everyone in Goldstone County</small>
+        </div>
+        <div className="xmas-footer-snow" aria-hidden="true" />
         <div className="relative z-20 w-full pb-8 pt-4 px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-white/10 bg-slate-950/40 backdrop-blur-xl">
           {/* Copyright: STRICTLY ALL RIGHTS RESERVED BY NIMNABRO */}
           <div className="text-slate-400 text-xs font-semibold tracking-wider uppercase order-2 md:order-1 flex items-center gap-2">
