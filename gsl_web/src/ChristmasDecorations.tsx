@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import snow from './assets/website-snow.svg';
 import { BokehSnow } from './ChristmasScene';
 
-const TRAIL_TONES = ['gold', 'ice'] as const;
+const TRAIL_TONES = ['gold', 'red', 'green', 'ice'] as const;
 
 const SWAG_TUFTS = [
   { x: 10, y: 6, scale: 1.05, rot: -6 },
@@ -22,19 +22,19 @@ export function ChristmasDecorations({ snowActive }: { snowActive: boolean }) {
   useEffect(() => {
     const layer = sparkLayerRef.current;
     const root = document.querySelector('.winter-website');
-    if (!layer || !root || !snowActive || typeof window === 'undefined') return;
+    if (!layer || !root || typeof window === 'undefined') return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
 
     root.setAttribute('data-cursor-frame', '0');
 
     const timers = new Set<number>();
     let lastTrailAt = 0;
-    let lastMoveAt = performance.now();
     let colorIndex = 0;
     let frame = 0;
 
+    // Keep the app-matched tree cursor twinkling continuously all the time (no idle stop).
     const frameInterval = window.setInterval(() => {
-      if (document.hidden || performance.now() - lastMoveAt > 4000) return;
+      if (document.hidden) return;
       frame = (frame + 1) % 3;
       root.setAttribute('data-cursor-frame', String(frame));
     }, 550);
@@ -58,9 +58,9 @@ export function ChristmasDecorations({ snowActive }: { snowActive: boolean }) {
 
     const onPointerMove = (event: PointerEvent) => {
       if (event.pointerType === 'touch') return;
-      lastMoveAt = performance.now();
-      if (lastMoveAt - lastTrailAt < 80) return;
-      lastTrailAt = lastMoveAt;
+      const now = performance.now();
+      if (now - lastTrailAt < 80) return;
+      lastTrailAt = now;
 
       const glint = document.createElement('span');
       const tone = TRAIL_TONES[colorIndex++ % TRAIL_TONES.length];
@@ -72,7 +72,6 @@ export function ChristmasDecorations({ snowActive }: { snowActive: boolean }) {
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      lastMoveAt = performance.now();
       const target =
         event.target instanceof Element ? event.target.closest('a, button, summary, [role="button"]') : null;
       if (!target || target.matches(':disabled, [aria-disabled="true"]')) return;
@@ -99,7 +98,7 @@ export function ChristmasDecorations({ snowActive }: { snowActive: boolean }) {
       window.removeEventListener('blur', clearTransient);
       clearTransient();
     };
-  }, [snowActive]);
+  }, []);
 
   return (
     <>
